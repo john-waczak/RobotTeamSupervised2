@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#SBATCH     --job-name=6_hpo-results
+#SBATCH     --output=6_hpo-results.out
+#SBATCH     --error=6_hpo-results.err
+#SBATCH     --nodes=1
+#SBATCH     --ntasks=1
+#SBATCH     --cpus-per-task=4   # number of threads for multi-threading
+#SBATCH     --time=2-00:00:00
+#SBATCH     --mem=30G
+#SBATCH     --mail-type=ALL
+#SBATCH     --mail-user=jxw190004@utdallas.edu
+#SBATCH     --partition=normal
+
+julia --threads $SLURM_CPUS_PER_TASK --project=../../ 6__explore_hpo_results.jl
+
