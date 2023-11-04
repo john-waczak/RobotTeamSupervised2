@@ -1,0 +1,7 @@
+[deps]
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
+MintsMakieRecipes = "6ebddb0b-cb6d-4cb8-921a-b084ea45d677"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
