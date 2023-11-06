@@ -50,7 +50,6 @@ df = hcat(df...)
 # remove any rows with missing
 dropmissing!(df)
 
-
 # identify missing columns
 nan_cols = String[]
 for i ∈ 1:ncol(df)
@@ -63,6 +62,19 @@ for i ∈ 1:ncol(df)
         println("\t $(names(df)[i]) not numeric")
     end
 end
+
+inf_cols = String[]
+for i ∈ 1:ncol(df)
+    try
+        if any(isinf.(df[:,i]))
+            println("Inf in $(names(df)[i])")
+            push!(inf_cols, names(df)[i])
+        end
+    catch
+        println("\t $(names(df)[i]) not numeric")
+    end
+end
+
 
 
 # make sure we only keep the pre-dye data
@@ -82,7 +94,7 @@ ignorecols = [
     "category",
     "predye_postdye",
 ]
-ignorecols = vcat(ignorecols, nan_cols)
+ignorecols = vcat(ignorecols, nan_cols, inf_cols)
 
 
 data = data[:, Not(ignorecols)]
