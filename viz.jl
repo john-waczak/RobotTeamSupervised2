@@ -1,4 +1,4 @@
-using Metrics: r2_score
+using MLJ: rsq
 
 
 function scatter_results(
@@ -32,23 +32,23 @@ function scatter_results(
     δ_edge = 0.1*(maxval-minval)
 
     l1 = lines!(axmain, [minval-δ_edge, maxval+δ_edge], [minval-δ_edge, maxval+δ_edge], color=:gray, linewidth=3)
-    s1 = scatter!(axmain, y, ŷ, alpha=0.25)
-    s2 = scatter!(axmain, ytest, ŷtest, marker=:cross, alpha=0.25)
+    s1 = scatter!(axmain, y, ŷ, alpha=0.75)
+    s2 = scatter!(axmain, ytest, ŷtest, marker=:rect, alpha=0.75)
 
     labels=[
-        "Training R²=$(round(r2_score(y, ŷ), digits=3)) (n=$(length(y)))",
-        "Testing   R²=$(round(r2_score(ytest, ŷtest), digits=3)) (n=$(length(ytest)))",
+        "Training R²=$(round(rsq(y, ŷ), digits=3)) (n=$(length(y)))",
+        "Testing   R²=$(round(rsq(ytest, ŷtest), digits=3)) (n=$(length(ytest)))",
         "1:1"
     ]
 
     # leg = Legend(ga[1, 2], [s1, s2, l1], labels)
     leg = axislegend(axmain, [s1, s2, l1], labels; position=:lt)
 
-    density!(axtop, y, color=mints_colors[1])
-    density!(axtop, ytest, color=(mints_colors[2], 0.66))
+    density!(axtop, y, color=(mints_colors[1], 0.5), strokecolor=mints_colors[1], strokewidth=2)
+    density!(axtop, ytest, color=(mints_colors[2], 0.5), strokecolor=mints_colors[2], strokewidth=2)
 
-    density!(axright, ŷ, direction = :y, color=mints_colors[1])
-    density!(axright, ŷtest, direction = :y, color=(mints_colors[2], 0.66))
+    density!(axright, ŷ, direction = :y, color=(mints_colors[1], 0.5), strokecolor=mints_colors[1], strokewidth=2)
+    density!(axright, ŷtest, direction = :y, color=(mints_colors[2], 0.5), strokecolor=mints_colors[2], strokewidth=2)
 
     hidedecorations!(axtop)
     hidedecorations!(axright)
@@ -65,6 +65,81 @@ function scatter_results(
 
     return fig
 end
+
+
+
+function scatter_results(
+    y,
+    ŷ,
+    ϵ̂,
+    ytest,
+    ŷtest,
+    ϵ̂test,
+    varname
+    )
+
+    fig = Figure();
+    ga = fig[1, 1] = GridLayout()
+    axtop = Axis(ga[1, 1];
+                leftspinevisible = false,
+                rightspinevisible = false,
+                bottomspinevisible = false,
+                topspinevisible = false,
+                )
+    axmain = Axis(ga[2, 1], xlabel = "True $(varname)", ylabel = "Predicted $(varname)")
+    axright = Axis(ga[2, 2];
+                  leftspinevisible = false,
+                  rightspinevisible = false,
+                  bottomspinevisible = false,
+                  topspinevisible = false,
+                  )
+
+    linkyaxes!(axmain, axright)
+    linkxaxes!(axmain, axtop)
+
+    minval, maxval = extrema([extrema(y)..., extrema(ytest)..., extrema(ŷ)..., extrema(ŷtest)...])
+    δ_edge = 0.1*(maxval-minval)
+
+    l1 = lines!(axmain, [minval-δ_edge, maxval+δ_edge], [minval-δ_edge, maxval+δ_edge], color=:gray, linewidth=3)
+    s1 = scatter!(axmain, y, ŷ, alpha=0.75, color=mints_colors[1])
+    e1 = errorbars!(axmain, y, ŷ, ϵ̂, alpha=0.75, color=mints_colors[1])
+
+    s2 = scatter!(axmain, ytest, ŷtest, marker=:rect, alpha=0.75, color=mints_colors[2])
+    e2 = errorbars!(axmain, ytest, ŷtest, ϵ̂test, alpha=0.75, color=mints_colors[2])
+
+    labels=[
+        "Training R²=$(round(rsq(y, ŷ), digits=3)) (n=$(length(y)))",
+        "Testing   R²=$(round(rsq(ytest, ŷtest), digits=3)) (n=$(length(ytest)))",
+        "1:1"
+    ]
+
+    # leg = Legend(ga[1, 2], [s1, s2, l1], labels)
+    leg = axislegend(axmain, [s1, s2, l1], labels; position=:lt)
+
+    density!(axtop, y, color=(mints_colors[1], 0.5), strokecolor=mints_colors[1], strokewidth=2)
+    density!(axtop, ytest, color=(mints_colors[2], 0.5), strokecolor=mints_colors[2], strokewidth=2)
+
+    density!(axright, ŷ, direction = :y, color=(mints_colors[1], 0.5), strokecolor=mints_colors[1], strokewidth=2)
+    density!(axright, ŷtest, direction = :y, color=(mints_colors[2], 0.5), strokecolor=mints_colors[2], strokewidth=2)
+
+    hidedecorations!(axtop)
+    hidedecorations!(axright)
+    #leg.tellheight = true
+    rowsize!(ga, 1, Relative(0.1))
+    colsize!(ga, 2, Relative(0.1))
+
+    colgap!(ga, 0)
+    rowgap!(ga, 0)
+
+    xlims!(axmain, minval-δ_edge, maxval+δ_edge)
+    ylims!(axmain, minval-δ_edge, maxval+δ_edge)
+
+
+    return fig
+end
+
+
+
 
 
 

@@ -102,27 +102,25 @@ target_names = [t for t ∈ target_names if !(t∈ignorecols)]
 feature_names = [f for f ∈ feature_names if !(f∈ignorecols)]
 
 
-function make_datasets(data, target; split_fracs=[0.8, 0.1], feature_names=feature_names, target_names=target_names, rng=rng)
+function make_datasets(data, target; split_frac=0.9, feature_names=feature_names, target_names=target_names, rng=rng)
 
     df_use = data[:, [feature_names..., target]]
     dropmissing!(df_use)
 
-    df, df_test, df_cal = partition(df_use, split_fracs...; rng)
+    df, df_test = partition(df_use, split_frac; rng)
 
     # now split into (X,y) feature-target pairs
     y, X = unpack(df, ==(Symbol(target)), col -> !(col∈[target_names..., ignorecols...]))
     ytest, Xtest = unpack(df_test, ==(Symbol(target)), col -> !(col∈[target_names..., ignorecols...]))
-    ycal, Xcal = unpack(df_cal, ==(Symbol(target)), col -> !(col∈[target_names..., ignorecols...]))
 
     # if there's a third value in targets_dict, set everything below the min to zero
     if length(targets_dict[Symbol(target)]) == 3
         ymin = targets_dict[Symbol(target)][3]
         y[y .< ymin] .= 0.0
         ytest[ytest .< ymin] .= 0.0
-        ycal[ycal .< ymin] .= 0.0
     end
 
-    return (y, X), (ytest, Xtest), (ycal, Xcal)
+    return (y, X), (ytest, Xtest)
 end
 
 
@@ -133,7 +131,7 @@ end
         mkpath(outpath_base)
     end
 
-    (y,X), (ytest,Xtest), (ycal, Xcal) = make_datasets(data, target_name);
+    (y,X), (ytest,Xtest) = make_datasets(data, target_name);
 
     # save the data to the outpaths
     CSV.write(joinpath(outpath_base, "X.csv"), X)
@@ -141,9 +139,6 @@ end
 
     CSV.write(joinpath(outpath_base, "Xtest.csv"), Xtest)
     CSV.write(joinpath(outpath_base, "ytest.csv"), DataFrame(Dict(target => ytest)))
-
-    CSV.write(joinpath(outpath_base, "Xcal.csv"), Xcal)
-    CSV.write(joinpath(outpath_base, "ycal.csv"), DataFrame(Dict(target => ycal)))
 end
 
 

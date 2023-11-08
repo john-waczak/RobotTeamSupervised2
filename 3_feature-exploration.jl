@@ -23,7 +23,7 @@ update_theme!(
 )
 
 
-using MLJ
+using MLJ, ConformalPrediction
 
 # seed reproducible pseudo-random number generator
 rng = Xoshiro(42)
@@ -59,9 +59,6 @@ y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
 Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
 ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)[:,1]
 
-Xcal = CSV.read(joinpath(data_path, "Xcal.csv"), DataFrame)
-ycal = CSV.read(joinpath(data_path, "ycal.csv"), DataFrame)[:,1]
-
 
 scitype(y) <: target_scitype(mdl)
 scitype(X) <: input_scitype(mdl)
@@ -73,10 +70,9 @@ fit!(mach)
 
 ŷtrain = predict(mach, X)
 ŷtest = predict(mach, Xtest)
-ŷcal = predict(mach, Xtest)
 
 
-scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+fig_vanilla = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
 
 fi_pairs = feature_importances(mach)
 fi_df = DataFrame()
@@ -113,3 +109,54 @@ ylims!(ax, 0.5, n_to_use+0.5)
 
 fig
 
+
+
+# now we can limit ourselves to a subset of only the "important" features:
+N_features = 100
+fi_n = @view fi_df[1:N_features,:]
+
+pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_df.feature_name)),
+                #stdizer = Standardizer(),
+                model=mdl
+                )
+
+mach_fi = machine(pipe, X, y)
+fit!(mach_fi)
+
+ŷtrain = predict(mach_fi, X)
+ŷtest = predict(mach_fi, Xtest)
+
+fig_fi = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+
+
+#conformal_models = available_models[:regression]
+#conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=0.91, coverage=0.68)
+conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=0.91, coverage=0.9)
+
+mach_conf = machine(conf_model, X, y)
+fit!(mach_conf)
+
+ŷtrain = predict(mach_conf, X)
+ŷtest = predict(mach_conf, Xtest)
+
+cov = emp_coverage(ŷtest, ytest)
+println("Empirical coverage on test set: $(round(cov, digits=3))")
+
+ϵtrain = [abs(f[2]-f[1])/2 for f ∈ ŷtrain]
+ŷtrain = mean.(ŷtrain)
+
+ϵtest = [abs(f[2]-f[1])/2 for f ∈ ŷtest]
+ŷtest = mean.(ŷtest)
+
+
+fig_cp = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+
+fig_cp = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
+
+
+
+ŷtest[1][2] - ŷtest[1][1]
+
+fh, ax, h = hist(y, bins=100)
+xlims!(ax, 16, nothing)
+fh

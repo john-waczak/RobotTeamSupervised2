@@ -53,11 +53,9 @@ targets = String.(keys(targets_dict))
 
     X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
     Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
-    Xcal = CSV.read(joinpath(data_path, "Xcal.csv"), DataFrame)
 
     y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)
     ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)
-    ycal = CSV.read(joinpath(data_path, "ycal.csv"), DataFrame)
 
 
     # compute correlation matrix between reflectances
@@ -98,15 +96,13 @@ targets = String.(keys(targets_dict))
     # generate target histogram/distribution visualization
     ytrain_vals = @view y[:,1]
     ytest_vals = @view ytest[:,1]
-    ycal_vals = @view ycal[:,1]
 
     fig = Figure();
     ax = Axis(fig[1,1], xlabel="$(pretty_name) ($(units))", ylabel="Counts")
-    h_train = hist!(ax, ytrain_vals; bins=round(Int, sqrt(length(ytrain_vals))), color=(mints_colors[1], 0.66))
-    h_test = hist!(ax, ytest_vals; bins=round(Int, sqrt(length(ytest_vals))), color=(mints_colors[2], 0.66))
-    h_cal = hist!(ax, ycal_vals; bins=round(Int, sqrt(length(ycal_vals))), color=(mints_colors[3], 0.66))
+    h_train = hist!(ax, ytrain_vals; bins=round(Int, sqrt(length(ytrain_vals))), color=(mints_colors[1], 0.75))
+    h_test = hist!(ax, ytest_vals; bins=round(Int, sqrt(length(ytest_vals))), color=(mints_colors[2], 0.75))
 
-    axislegend(ax, [h_train, h_test, h_cal], ["Training", "Testing", "Calibration"]; position=:lt)
+    axislegend(ax, [h_train, h_test], ["Training", "Testing"]; position=:lt)
 
     try
         ylims!(ax, 0, nothing)
