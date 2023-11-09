@@ -23,7 +23,7 @@ update_theme!(
 )
 
 
-using MLJ, ConformalPrediction
+using MLJ, Flux, ConformalPrediction
 
 # seed reproducible pseudo-random number generator
 rng = Xoshiro(42)
@@ -32,131 +32,108 @@ rng = Xoshiro(42)
 # pull in targets info
 include("./config.jl")
 include("./viz.jl")
-
+include("./training-functions.jl")
 
 datapath = "/media/teamlary/LabData/RobotTeam/supervised"
 
 
+RFR = @load RandomForestRegressor pkg=DecisionTree
 XGBR = @load XGBoostRegressor pkg=XGBoost
+NNR = @load NeuralNetworkRegressor pkg=MLJFlux
+Standardizer = @load Standardizer pkg=MLJModels
 
 
 
-# 4. Add Random Forest using sk-learn defaults
-mdl = XGBR()
-mdl.rng = rng
-
-target = :CDOM
-
-target_name = String(target)
-target_long = targets_dict[target][2]
-units = targets_dict[target][1]
-
-data_path = joinpath(datapath, target_name, "data")
-
-X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
-y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
-
-Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
-ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)[:,1]
+# 1. Construct dictionary of models
+MODELS = Dict()
 
 
-scitype(y) <: target_scitype(mdl)
-scitype(X) <: input_scitype(mdl)
-
-
-mach = machine(mdl, X, y)
-fit!(mach)
-
-
-ŷtrain = predict(mach, X)
-ŷtest = predict(mach, Xtest)
-
-
-fig_vanilla = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
-
-fi_pairs = feature_importances(mach)
-fi_df = DataFrame()
-fi_df.feature_name = [x[1] for x ∈ fi_pairs]
-fi_df.rel_importance = [x[2] for x ∈ fi_pairs]
-fi_df.rel_importance .= fi_df.rel_importance ./ maximum(fi_df.rel_importance)
-
-String.(fi_df.feature_name)
-
-n_to_use = 25
-rel_importance = fi_df.rel_importance[1:n_to_use]
-var_names = [name_replacements[s] for s ∈ String.(fi_df.feature_name[1:n_to_use])]
-
-var_colors = cgrad([mints_colors[2], mints_colors[1]], n_to_use)[1:n_to_use]
-
-
-fig = Figure(;resolution=(1000,1000));
-ax = Axis(fig[1,1],
-          yticks=(1:n_to_use, var_names[end:-1:1]),
-          xlabel="Normalized Feature Importance",
-          title="Feature Importance Ranking for $(target_long)",
-          yminorgridvisible=false,
+# the neural network needs features to be standardized
+nnr = NNR(builder=MLJFlux.MLP(hidden=(1000,), σ=NNlib.relu),
+          batch_size = 200,
+          optimiser=Flux.Optimise.ADAM(0.001),
+          lambda = 0.0001,  # default regularization strength (I'm a bit confused by this as sk-learn only has alpha but that seems different here)
+          rng=42,
+          epochs=200,
           )
 
-b = barplot!(ax,
-             1:n_to_use,
-             rel_importance[end:-1:1],
-             direction=:x,
-             color=var_colors
-             )
-
-xlims!(ax, -0.01, 1.025)
-ylims!(ax, 0.5, n_to_use+0.5)
-
-fig
-
-
-
-# now we can limit ourselves to a subset of only the "important" features:
-N_features = 100
-fi_n = @view fi_df[1:N_features,:]
-
-pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_df.feature_name)),
-                #stdizer = Standardizer(),
-                model=mdl
+MODELS[:nnr] = (;
+                :longname=>"Neural Network Regressor",
+                :savename => "NeuralNetworkRegressor",
+                :mdl => Standardizer() |> nnr
                 )
 
-mach_fi = machine(pipe, X, y)
-fit!(mach_fi)
+# 3. Add XGBoostRegressor. Defaults seem fine...
+MODELS[:xgbr] = (;
+                 :longname=>"XGBoost Regressor",
+                 :savename=>"XGBoostRegressor",
+                 :mdl => XGBR()
+                 )
 
-ŷtrain = predict(mach_fi, X)
-ŷtest = predict(mach_fi, Xtest)
-
-fig_fi = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
-
-
-#conformal_models = available_models[:regression]
-#conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=0.91, coverage=0.68)
-conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=0.91, coverage=0.9)
-
-mach_conf = machine(conf_model, X, y)
-fit!(mach_conf)
-
-ŷtrain = predict(mach_conf, X)
-ŷtest = predict(mach_conf, Xtest)
-
-cov = emp_coverage(ŷtest, ytest)
-println("Empirical coverage on test set: $(round(cov, digits=3))")
-
-ϵtrain = [abs(f[2]-f[1])/2 for f ∈ ŷtrain]
-ŷtrain = mean.(ŷtrain)
-
-ϵtest = [abs(f[2]-f[1])/2 for f ∈ ŷtest]
-ŷtest = mean.(ŷtest)
-
-
-fig_cp = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
-
-fig_cp = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
+# 4. Add Random Forest using sk-learn defaults
+rfr = RFR(;
+          n_trees = 100,
+          max_depth = -1,
+          min_samples_split=2,
+          min_samples_leaf=1,
+          min_purity_increase=0,
+          n_subfeatures=0,
+          sampling_fraction=1.0,
+          )
+MODELS[:rfr] = (;
+                :longname=>"Random Forest Regressor",
+                :savename=>"RandomForestRegressor",
+                :mdl=>rfr
+                )
 
 
 
-ŷtest[1][2] - ŷtest[1][1]
+# 5. Fit each of the models to different subsets of features.
+targets_to_try = [:CDOM, :CO, :Na, :Cl]
 
-fh, ax, h = hist(y, bins=100)
-xlims!(ax, 16, nothing)
-fh
+
+for target ∈ targets_to_try
+    target_name = String(target)
+    target_long = targets_dict[target][2]
+    units = targets_dict[target][1]
+
+
+    @info "Working on $(target_name)"
+
+
+    data_path = joinpath(datapath, target_name, "data")
+    outpath = joinpath(datapath, target_name, "models")
+    if !ispath(outpath)
+        mkpath(outpath)
+    en
+
+    X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
+    y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
+
+    Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
+    ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)[:,1]
+
+
+    results_summary = []
+
+    for (shortname, model) ∈ MODELS
+        try
+            res = train_basic(X, y,
+                              Xtest, ytest,
+                              model.longname, model.savename, model.mdl,
+                              target_name, units, target_long,
+                              outpath;
+                              )
+
+            push!(results_summary, res)
+        catch e
+            println("\t$(e)")
+        end
+    end
+
+    println("\tsaving results")
+
+    res_df = DataFrame(results_summary, [:rsq_train, :rsq_test, :rmse_train, :rmse_test, :emp_cov])
+    CSV.write(joinpath(outpath, "$(target_name)_model_comparison.csv"), res_df)
+end
+
