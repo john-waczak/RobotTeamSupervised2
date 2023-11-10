@@ -18,6 +18,9 @@ function train_basic(
     N_features=100,
     )
 
+
+    println("\tSetting up save paths")
+
     outpathdefault = joinpath(outpath, savename, "default")
     outpath_featuresreduced = joinpath(outpath, savename, "important_only")
 
@@ -43,9 +46,11 @@ function train_basic(
     scitype(X) <: input_scitype(mdl)
 
 
+
     conf_model = conformal_model(mdl; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
 
     # fit the machine
+    println("\tTraining model")
     mach = machine(conf_model, X, y)
     fit!(mach)
 
@@ -53,20 +58,20 @@ function train_basic(
 
     # generate predictions
     println("\tGenerating predictions")
-    ŷtrain = ConformalPrediction.predict(mach, X)
-    ŷtest = ConformalPrediction.predict(mach, Xtest)
+    ŷtrain = ConformalPrediction.predict(mach, X);
+    ŷtest = ConformalPrediction.predict(mach, Xtest);
 
     # compute coverage on test set
-    cov = emp_coverage(ŷtest, ytest)
+    cov = emp_coverage(ŷtest, ytest);
     println("\tEmpirical coverage on test set: $(round(cov, digits=3))")
 
 
     # convert to predictions + uncertainties
-    ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain]
-    ŷtrain = mean.(ŷtrain)
+    ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
+    ŷtrain = mean.(ŷtrain);
 
-    ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest]
-    ŷtest = mean.(ŷtest)
+    ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest];
+    ŷtest = mean.(ŷtest);
 
 
     # generate scatterplot
@@ -81,8 +86,7 @@ function train_basic(
     save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
 
 
-    # save the model
-    println("\tSaving the model")
+    # save the model println("\tSaving the model")
     MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
 
 
@@ -93,7 +97,7 @@ function train_basic(
 
         println("\tComputing feature importances")
 
-        rpt = report(mach)
+        rpt = report(mach);
         fi_pairs = feature_importances(mach.model.model, mach.fitresult, rpt);
         fi_df = DataFrame()
         fi_df.feature_name = [x[1] for x ∈ fi_pairs]
@@ -149,21 +153,20 @@ function train_basic(
 
 
         println("\tGenerating predictions")
-        ŷtrain = ConformalPrediction.predict(mach_fi, X)
-        ŷtest = ConformalPrediction.predict(mach_fi, Xtest)
+        ŷtrain = ConformalPrediction.predict(mach_fi, X);
+        ŷtest = ConformalPrediction.predict(mach_fi, Xtest);
 
         # compute coverage on test set
-        cov = emp_coverage(ŷtest, ytest)
+        cov = emp_coverage(ŷtest, ytest);
         println("\tEmpirical coverage on test set: $(round(cov, digits=3))")
         # convert to predictions + uncertainties
-        ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain]
-        ŷtrain = mean.(ŷtrain)
+        ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
+        ŷtrain = mean.(ŷtrain);
 
         ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest]
         ŷtest = mean.(ŷtest)
 
-
-        fig = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+        fig = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
 
         save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).png"), fig)
         save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).pdf"), fig)
