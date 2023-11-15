@@ -23,7 +23,13 @@ update_theme!(
 )
 
 
-using MLJ, Flux, ConformalPrediction
+#using MLJ, Flux, ConformalPrediction
+using MLJ, Flux
+
+# add in ConformalPrediction via GitHub until my fix ships
+using Pkg
+Pkg.add(url="https://github.com/JuliaTrustworthyAI/ConformalPrediction.jl.git")
+using ConformalPrediction
 
 
 # for base model prediction:
@@ -44,43 +50,10 @@ include("./training-functions.jl")
 datapath = "/media/teamlary/LabData/RobotTeam/supervised"
 
 # DecisionTreeRegressor and RandomForestRegressor don't seem to work.
-# RFR = @load RandomForestRegressor pkg=DecisionTree
-# DTR = @load DecisionTreeRegressor pkg=DecisionTree
-
-# julia> fit!(mach)
-# [ Info: Training machine(SimpleInductiveRegressor(model = DecisionTreeRegressor(max_depth = -1, …), …), …).
-# ┌ Error: Problem fitting the machine machine(SimpleInductiveRegressor(model = DecisionTreeRegressor(max_depth = -1, …), …), …). 
-# └ @ MLJBase ~/.julia/packages/MLJBase/ByFwA/src/machines.jl:682
-# [ Info: Running type checks... 
-# [ Info: Type checks okay. 
-# ERROR: MethodError: no method matching fit(::MLJDecisionTreeInterface.DecisionTreeRegressor, ::Int64, ::Matrix{Float64}, ::Vector{Float64})
-
-# Closest candidates are:
-#   fit(::MLJDecisionTreeInterface.DecisionTreeRegressor, ::Int64, ::Any, ::Any, ::Any)                                                                          
-#    @ MLJDecisionTreeInterface ~/.julia/packages/MLJDecisionTreeInterface/cIWGa/src/MLJDecisionTreeInterface.jl:284
-#   fit(::Supervised, ::Any, ::Any, ::Any, ::Any)
-#    @ MLJModelInterface ~/.julia/packages/MLJModelInterface/io0Lg/src/model_api.jl:16                                                                 
-#   fit(::NetworkComposite, ::Any, ::Any...)
-#    @ MLJBase ~/.julia/packages/MLJBase/ByFwA/src/composition/models/network_composite.jl:23                                                         
-#   ...
-
-# Stacktrace:
-#  [1] fit(conf_model::ConformalPrediction.SimpleInductiveRegressor{MLJDecisionTreeInterface.DecisionTreeRegressor}, verbosity::Int64, X::DataFrame, y::Vector{Float64})                                                                      
-#    @ ConformalPrediction ~/.julia/packages/ConformalPrediction/z9UQ8/src/conformal_models/inductive_regression.jl:42
-#  [2] fit_only!(mach::Machine{ConformalPrediction.SimpleInductiveRegressor{MLJDecisionTreeInterface.DecisionTreeRegressor}, true}; rows::Nothing, verbosity::Int64, force::Bool, composite::Nothing)                                         
-#    @ MLJBase ~/.julia/packages/MLJBase/ByFwA/src/machines.jl:680
-#  [3] fit_only!
-#    @ ~/.julia/packages/MLJBase/ByFwA/src/machines.jl:606 [inlined]
-#  [4] #fit!#63
-#    @ ~/.julia/packages/MLJBase/ByFwA/src/machines.jl:778 [inlined]
-#  [5] fit!(mach::Machine{ConformalPrediction.SimpleInductiveRegressor{MLJDecisionTreeInterface.DecisionTreeRegressor}, true})
-#    @ MLJBase ~/.julia/packages/MLJBase/ByFwA/src/machines.jl:775
-#  [6] top-level scope
-#    @ REPL[55]:1
 
 
-
-
+RFR = @load RandomForestRegressor pkg=DecisionTree
+DTR = @load DecisionTreeRegressor pkg=DecisionTree
 XGBR = @load XGBoostRegressor pkg=XGBoost
 NNR = @load NeuralNetworkRegressor pkg=MLJFlux
 Standardizer = @load Standardizer pkg=MLJModels
@@ -93,8 +66,11 @@ MODELS = Dict()
 ref_cols = Symbol.(["R_" * lpad(i, 3, "0") for i ∈ 1:length(wavelengths)])
 
 
+
+rbf(x) = exp.(-(x.^2))
+
 # the neural network needs features to be standardized
-nnr = NNR(builder=MLJFlux.MLP(hidden=(1000,), σ=Flux.relu),
+nnr = NNR(builder=MLJFlux.MLP(hidden=(1000,), σ=rbf),
           batch_size = 200,
           optimiser=Flux.Optimise.ADAM(0.001),
           lambda = 0.0001,  # default regularization strength (I'm a bit confused by this as sk-learn only has alpha but that seems different here)
@@ -119,12 +95,23 @@ MODELS[:xgbr] = (;
 
 
 MODELS[:etr] = (;
-                :longname=>"EvoTree Regressor",
+                :longname=>"Evo Tree Regressor",
                 :savename=>"EvoTreeRegressor",
                 :mdl => ETR()
                 )
 
+MODELS[:dtr] = (;
+                :longname => "Decision Tree Regressor",
+                :savename => "DecisionTreeRegressor",
+                :mdl => DTR()
+                )
 
+
+MODELS[:rfr] = (;
+                :longname => "Random Forest Regressor",
+                :savename => "RandomForestRegressor",
+                :mdl => RFR()
+                )
 
 # 4. Add Random Forest using sk-learn defaults
 # rfr = RFR(;

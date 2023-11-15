@@ -117,7 +117,7 @@ function train_basic(
         ax = Axis(fig[1, 1],
             yticks=(1:n_features, var_names[end:-1:1]),
             xlabel="Normalized Feature Importance",
-            title="Feature Importance Ranking for $(target_long)",
+            title="$(target_long)",
             yminorgridvisible=false,
         )
 
