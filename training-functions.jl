@@ -1,4 +1,65 @@
-import MLJModelInterface as MMI
+#import MLJModelInterface as MMI
+
+
+# define dictionary with default hyperparameter values used for tuning for each model
+# use a dict of dicts structure
+
+# https://www.kaggle.com/code/prashant111/a-guide-on-xgboost-hyperparameters-tuning/notebook
+
+hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:min_samples_leaf, lower=2, upper=100),
+                                                                   #   (hpname=:n_subfeatures, values=[-1,0]),
+                                                                      (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
+                                                                      (hpname=:post_prune, values=[false, true])
+                                                                      ],
+                                         "RandomForestRegressor" => [
+                                                                      (hpname=:min_samples_leaf, lower=2, upper=100),
+                                                                      (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
+                                                                      (hpname=:n_subfeatures, values=[-1,0]),
+                                                                   #  (hpname=:n_trees, lower=10, upper=100),
+                                                                      (hpname=:n_trees, values=[10, 25, 50, 75, 100, 125, 150]),
+                                                                      (hpname=:sampling_fraction, lower=0.65, upper=0.9)
+                                                                      ],
+                                          ),
+                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:eta, lower=0.01, upper=0.2),
+                                                           (hpname=:gamma, lower=0, upper=100),  # not sure about this one
+                                                           (hpname=:max_depth, lower=3, upper=10),
+                                                           (hpname=:min_child_weight, lower=0.0, upper=5.0),
+                                                           (hpname=:max_delta_step, lower=1.0, upper=10.0),
+                                                           (hpname=:subsample, lower=0.5, upper=1.0),
+                                                           (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
+                                                           (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
+                                                           ],
+                                    ),
+                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds, lower=10, upper=100),
+                                                            (hpname=:eta, lower=0.01, upper=0.2),
+                                                            (hpname=:gamma, lower=0, upper=100),  # not sure about this one
+                                                            (hpname=:max_depth, lower=3, upper=10),
+                                                            (hpname=:min_weight, lower=0.0, upper=5.0),
+                                                            (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
+                                                            (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
+                                                            ],
+                                     ),
+                  "NearestNeighborModels" => Dict("KNNRegressor" => [(hpname=:K, lower=1, upper=50),
+                                                                     (hpname=:leafsize, lower=1, upper=50),
+                                                                     ],
+                                                  ),
+                  "MLJFlux" => Dict("NeuralNetworkRegressor" =>[],
+                                    ),
+                  "LightGBM" => Dict("LGBMRegressor" => [(hpname=:num_iterations, lower=5, upper=100),
+                                                         (hpname=:learning_rate, lower=0.01, upper=0.3),
+                                                         (hpname=:max_depth, lower=3, upper=12),
+                                                         (hpname=:bagging_fraction, lower=0.65, upper=1.0),
+                                                         (hpname=:bagging_freq, values=[1]),
+                                                         ]),
+                  "CatBoost" => Dict("CatBoostRegressor" => [(hpname=:iterations, lower=500, upper=1500),
+                                                         (hpname=:learning_rate, lower=0.01, upper=0.1),
+                                                         (hpname=:max_depth, lower=3, upper=12),
+                                                         ])
+
+                  )
+
+
+
 
 
 
@@ -180,3 +241,137 @@ function train_basic(
 
     return rsq(ŷtrain, y), rsq(ŷtest, ytest), rmse(ŷtrain, y), rmse(ŷtest, ytest), cov
 end
+
+
+
+
+
+
+function train_hpo(
+    X, y,
+    Xtest, ytest,
+    longname, savename, packagename,
+    target_name, units, target_long,
+    mdl,
+    outpath;
+    nmodels=20,
+    accelerate=true,
+    rng=Xoshiro(42),
+    )
+
+    suffix = "hpo"
+
+    @info "\tSetting up save paths"
+
+    outpathdefault = joinpath(outpath, savename, "default")
+    outpath_featuresreduced = joinpath(outpath, savename, "important_only")
+    outpath_hpo = joinpath(outpath, savename, "hyperparameter_optimized")
+
+    for path ∈ [outpathdefault, outpath_featuresreduced, outpath_hpo]
+        if !isdir(path)
+            mkpath(path)
+        end
+    end
+
+    path_to_use = outpath_hpo
+
+    # 1. Train model
+    @info "\tSetting model random seed"
+
+
+    if :rng in fieldnames(typeof(mdl))
+        mdl.rng = rng
+    end
+
+
+    @info "\tVerifying scitype is satisfied"
+    # verify scitype is satisfied
+    scitype(y) <: target_scitype(mdl)
+    scitype(X) <: input_scitype(mdl)
+
+
+
+    # set up hyperparameter rangese
+    rs = []
+
+    # Either add allowed values or ranges for hyperparameters
+    for item in hpo_ranges[packagename][savename]
+        if :values ∈ keys(item)
+            push!(rs, range(mdl, item.hpname, values=item.values))
+        else
+            push!(rs, range(mdl, item.hpname, lower=item.lower, upper=item.upper))
+        end
+    end
+
+
+    @info "\tPerforming hyperparameter optimization..."
+
+
+    # search for hyperparameters without doing conformal prediction
+    tuning = RandomSearch(rng=rng)
+    if accelerate
+        tuning_pipe = TunedModel(
+            model=mdl,
+            range=rs,
+            tuning=tuning,
+            measures=[mae, rsq, rms],
+            resampling=CV(nfolds=10, rng=rng),
+            acceleration=CPUThreads(),
+            n=nmodels,
+            cache=false,
+        )
+    else
+        tuning_pipe = TunedModel(
+            model=mdl,
+            range=rs,
+            tuning=tuning,
+            measures=[mae, rsq, rms],
+            resampling=CV(nfolds=10, rng=rng),
+            n=nmodels,
+            cache=false,
+        )
+    end
+
+
+    mach = machine(tuning_pipe, X, y; cache=false)
+
+    @info "\tStarting training..."
+    fit!(mach) #, verbosity=0)
+
+    @info "\t...\tFinished training"
+
+
+    @info "\tGenerating plots..."
+    ŷ = MLJ.predict(mach, X)
+    ŷtest = MLJ.predict(mach, Xtest)
+
+
+    # generate scatterplot
+    fig = scatter_results(y, ŷ, ytest, ŷtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
+
+    # generate quantile-quantile plot
+    fig = quantile_results(y, ŷ, ytest, ŷtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
+
+
+    @info "\tSaving hpo model..."
+
+    MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
+
+    open(joinpath(path_to_use, "$(savename)__hpo.txt"), "w") do f
+        show(f,"text/plain", fitted_params(mach).best_model)
+        println(f, "\n")
+        println(f,"---------------------")
+        show(f,"text/plain", fitted_params(mach).best_fitted_params)
+        println(f,"\n")
+        println(f,"---------------------")
+        show(f,"text/plain", report(mach).best_history_entry)
+        println(f,"\n")
+        println(f,"---------------------")
+        println(f, "r² train: $(rsq(ŷ, y))\tr² test:$(rsq(ŷtest, ytest))\tRMSE test: $(rmse(ŷtest, ytest))\tMAE test: $(mae(ŷtest, ytest))")
+    end
+end
+

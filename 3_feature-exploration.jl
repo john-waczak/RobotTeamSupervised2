@@ -36,7 +36,8 @@ using ConformalPrediction
 # using MLJModelInterface: reformat
 # predict(conf_model.model, mach.fitresult, reformat(conf_model.model, Xtest)...)
 
-# we may want to convert all the data to Float32 first for faster use in the Neural Network.
+
+
 
 # seed reproducible pseudo-random number generator
 rng = Xoshiro(42)
