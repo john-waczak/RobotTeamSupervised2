@@ -3,8 +3,8 @@ ENV["GKSwstype"] = "100"
 
 
 using Pkg
+Pkg.activate(".")
 Pkg.instantiate()
-Pkg.build()
 
 
 
