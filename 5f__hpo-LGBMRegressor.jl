@@ -1,3 +1,11 @@
+# https://discourse.julialang.org/t/generation-of-documentation-fails-qt-qpa-xcb-could-not-connect-to-display/60988
+ENV["GKSwstype"] = "100"
+
+
+using Pkg
+Pkg.instantiate()
+
+
 using CSV, DataFrames
 using ProgressMeter
 using Statistics
