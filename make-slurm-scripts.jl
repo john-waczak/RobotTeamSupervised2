@@ -40,52 +40,52 @@ make_slurm_jobs(;
                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5b__hpo-RandomForestRegressor.jl",
-                basename="5b-",
-                n_tasks=4,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5b__hpo-RandomForestRegressor.jl",
+#                 basename="5b-",
+#                 n_tasks=4,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5c__hpo-XGBoostRegressor.jl",
-                basename="5c-",
-                n_tasks=4,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5c__hpo-XGBoostRegressor.jl",
+#                 basename="5c-",
+#                 n_tasks=4,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5d__hpo-KNNRegressor.jl",
-                basename="5d-",
-                n_tasks=4,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5d__hpo-KNNRegressor.jl",
+#                 basename="5d-",
+#                 n_tasks=4,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5e__hpo-EvoTreeRegressor.jl",
-                basename="5e-",
-                n_tasks=2,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5e__hpo-EvoTreeRegressor.jl",
+#                 basename="5e-",
+#                 n_tasks=2,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5f__hpo-LGBMRegressor.jl",
-                basename="5f-",
-                n_tasks=4,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5f__hpo-LGBMRegressor.jl",
+#                 basename="5f-",
+#                 n_tasks=4,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
-make_slurm_jobs(;
-                script_to_run="5g__hpo-CatBoostRegressor.jl",
-                basename="5g-",
-                n_tasks=4,
-		            datapath="/scratch/jwaczak/robot-team/supervised",
-                )
+# make_slurm_jobs(;
+#                 script_to_run="5g__hpo-CatBoostRegressor.jl",
+#                 basename="5g-",
+#                 n_tasks=4,
+# 		            datapath="/scratch/jwaczak/robot-team/supervised",
+#                 )
 
 
 # make_slurm_jobs(;
