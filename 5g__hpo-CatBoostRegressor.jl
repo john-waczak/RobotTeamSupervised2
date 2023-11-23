@@ -4,6 +4,7 @@ ENV["GKSwstype"] = "100"
 
 using Pkg
 Pkg.instantiate()
+Pkg.build()
 
 
 using CSV, DataFrames
