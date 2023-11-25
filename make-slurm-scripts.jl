@@ -13,8 +13,8 @@ function make_slurm_jobs(;script_to_run="5a__hpo_DecisionTreeRegressor.jl", base
 
     #SBATCH     --job-name=$(job_name[1:end-1])
     #SBATCH     --array=1-29
-    #SBATCH     --output=$(job_name)%a.out
-    #SBATCH     --error=$(job_name)%a.err
+    #SBATCH     --output=$(job_name)%A_%a.out
+    #SBATCH     --error=$(job_name)%A_%a.err
     #SBATCH     --nodes=1
     #SBATCH     --ntasks=1
     #SBATCH     --cpus-per-task=$(n_tasks)   # number of threads for multi-threading
