@@ -116,6 +116,6 @@ end
 
 
 
-model = @load XGBoostRegressor pkg=DecisionTree
+model = @load XGBoostRegressor pkg=XGBoost
 mdl = model()
 main(mdl)

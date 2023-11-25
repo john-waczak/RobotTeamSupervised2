@@ -53,7 +53,7 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                          ]),
                   "CatBoost" => Dict("CatBoostRegressor" => [(hpname=:iterations, lower=500, upper=1500),
                                                          (hpname=:learning_rate, lower=0.01, upper=0.1),
-                                                         (hpname=:max_depth, lower=3, upper=12),
+                                                         (hpname=:max_depth, lower=3, upper=9),
                                                          ])
 
                   )
