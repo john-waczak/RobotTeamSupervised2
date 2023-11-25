@@ -48,10 +48,10 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table! s begin
-        "--target","-T"
-            help = "Target variable for training. See targetsDict in config.jl for full list."
-            arg_type = Symbol
-            default = :CDOM
+        "--target_index","-i"
+            help = "Index of target variable for training. See targets_dict in config.jl for full list."
+            arg_type = Int
+            default = 1
         "--datapath", "-d"
             help = "Path to directory with data to be used in training"
             arg_type = String
@@ -61,7 +61,8 @@ function parse_commandline()
 
     parsed_args = parse_args(ARGS, s; as_symbols=true)
 
-    @assert (parsed_args[:target] ∈ keys(targets_dict)) "Supplied target does not exist"
+    idx_target = parsed_args[:target_index]
+    @assert idx_target  > 0 && idx_target <= length(keys(targets_dict))
     @assert ispath(parsed_args[:datapath]) "datapath does not exist"
 
     return parsed_args
@@ -77,9 +78,12 @@ function main(mdl)
 
     # parse args making sure that supplied target does exist
     parsed_args = parse_commandline()
-    target = parsed_args[:target]
-    datapath = parsed_args[:datapath]
 
+    idx_target = parsed_args[:target_index]
+    target_keys = [k for k in keys(targets_dict)]
+    target = target_keys[idx_target]
+
+    datapath = parsed_args[:datapath]
 
     target_name = String(target)
     target_long = targets_dict[target][2]

@@ -4,32 +4,34 @@ targets = keys(targets_dict)
 
 
 function make_slurm_jobs(;script_to_run="5a__hpo_DecisionTreeRegressor.jl", basename="5a-", n_tasks=8, datapath="/media/john/HSDATA/datasets/Full", outpath="/media/john/HSDATA/analysis_full")
-    for target ∈ targets
-        job_name = basename*"$(target)"
 
-        file_text = """
-        #!/bin/bash
+    #job_name = basename*"$(target)"
+    job_name = basename
 
-        #SBATCH     --job-name=$(job_name)
-        #SBATCH     --output=$(job_name).out
-        #SBATCH     --error=$(job_name).err
-        #SBATCH     --nodes=1
-        #SBATCH     --ntasks=1
-        #SBATCH     --cpus-per-task=$(n_tasks)   # number of threads for multi-threading
-        #SBATCH     --time=2-00:00:00
-        #SBATCH     --mem=30G
-        #SBATCH     --mail-type=ALL
-        #SBATCH     --mail-user=jxw190004@utdallas.edu
-        #SBATCH     --partition=normal
+    file_text = """
+    #!/bin/bash
 
-        julia --threads \$SLURM_CPUS_PER_TASK --project=../../ $(script_to_run) -T $(target) -d $(datapath)
-        """
+    #SBATCH     --job-name=$(job_name)
+    #SBATCH     --array=1-29
+    #SBATCH     --output=$(job_name)%a.out
+    #SBATCH     --error=$(job_name)%a.err
+    #SBATCH     --nodes=1
+    #SBATCH     --ntasks=1
+    #SBATCH     --cpus-per-task=$(n_tasks)   # number of threads for multi-threading
+    #SBATCH     --time=2-00:00:00
+    #SBATCH     --mem=30G
+    #SBATCH     --mail-type=ALL
+    #SBATCH     --mail-user=jxw190004@utdallas.edu
+    #SBATCH     --partition=normal
 
-        open(basename*String(target)*".slurm", "w") do f
-            println(f, file_text)
-        end
+    julia --threads \$SLURM_CPUS_PER_TASK --project=../../ $(script_to_run) -i \$SLURM_ARRAY_TASK_ID -d $(datapath)
+    """
+
+    open(basename[1:end-1]*".slurm", "w") do f
+        println(f, file_text)
     end
 end
+
 
 
 make_slurm_jobs(;
