@@ -11,7 +11,7 @@ function make_slurm_jobs(;script_to_run="5a__hpo_DecisionTreeRegressor.jl", base
     file_text = """
     #!/bin/bash
 
-    #SBATCH     --job-name=$(job_name)
+    #SBATCH     --job-name=$(job_name)%a
     #SBATCH     --array=1-29
     #SBATCH     --output=$(job_name)%a.out
     #SBATCH     --error=$(job_name)%a.err
