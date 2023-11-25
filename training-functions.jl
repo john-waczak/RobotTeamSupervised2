@@ -1,5 +1,5 @@
 #import MLJModelInterface as MMI
-
+using JSON
 
 # define dictionary with default hyperparameter values used for tuning for each model
 # use a dict of dicts structure
@@ -373,5 +373,23 @@ function train_hpo(
         println(f,"---------------------")
         println(f, "r² train: $(rsq(ŷ, y))\tr² test:$(rsq(ŷtest, ytest))\tRMSE test: $(rmse(ŷtest, ytest))\tMAE test: $(mae(ŷtest, ytest))")
     end
+
+
+    @info "\tSaving params to json file"
+    fitted_ps = fitted_params(mach).best_model
+    params_dict = Dict()
+    for hp in hpo_ranges[packagename][savename]
+        val = getproperty(fitted_ps, hp.hpname)
+        name = hp.hpname
+        params_dict[name] = val
+    end
+
+    println(params_dict)
+    println(joinpath(path_to_use, "hp_defaults.json"))
+
+    open(joinpath(path_to_use, "hp_defaults.json"), "w") do f
+        JSON.print(f, params_dict)
+    end
+
 end
 
