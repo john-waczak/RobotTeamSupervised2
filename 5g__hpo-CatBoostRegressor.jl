@@ -47,10 +47,10 @@ function parse_commandline()
     s = ArgParseSettings()
 
     @add_arg_table! s begin
-        "--target","-T"
-            help = "Target variable for training. See targetsDict in config.jl for full list."
-            arg_type = Symbol
-            default = :CDOM
+        "--target_index","-i"
+            help = "Index of target variable for training. See targets_dict in config.jl for full list."
+            arg_type = Int
+            default = 1
         "--datapath", "-d"
             help = "Path to directory with data to be used in training"
             arg_type = String

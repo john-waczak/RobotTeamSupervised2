@@ -7,7 +7,6 @@ using JSON
 # https://www.kaggle.com/code/prashant111/a-guide-on-xgboost-hyperparameters-tuning/notebook
 
 hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:min_samples_leaf, lower=2, upper=100),
-                                                                   #   (hpname=:n_subfeatures, values=[-1,0]),
                                                                       (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
                                                                       (hpname=:post_prune, values=[false, true])
                                                                       ],
@@ -15,26 +14,20 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:min_samples_leaf, lower=2, upper=100),
                                                                       (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
                                                                       (hpname=:n_subfeatures, values=[-1,0]),
-                                                                   #  (hpname=:n_trees, lower=10, upper=100),
                                                                       (hpname=:n_trees, values=[10, 25, 50, 75, 100, 125, 150]),
                                                                       (hpname=:sampling_fraction, lower=0.65, upper=0.9)
                                                                       ],
                                           ),
-                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:eta, lower=0.01, upper=0.2),
-                                                           (hpname=:gamma, lower=0, upper=100),  # not sure about this one
-                                                           (hpname=:max_depth, lower=3, upper=10),
-                                                           (hpname=:min_child_weight, lower=0.0, upper=5.0),
-                                                           (hpname=:max_delta_step, lower=1.0, upper=10.0),
-                                                           (hpname=:subsample, lower=0.5, upper=1.0),
+                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, values=[50,75,100,125,150]),
+                                                           (hpname=:eta, lower=0.01, upper=0.5),
+                                                           (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
                                                            (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
                                                            (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
                                                            ],
                                     ),
-                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds, lower=10, upper=100),
+                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds, lower=2, upper=100),
                                                             (hpname=:eta, lower=0.01, upper=0.2),
-                                                            (hpname=:gamma, lower=0, upper=100),  # not sure about this one
-                                                            (hpname=:max_depth, lower=3, upper=10),
-                                                            (hpname=:min_weight, lower=0.0, upper=5.0),
+                                                            (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
                                                             (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
                                                             (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
                                                             ],
@@ -45,22 +38,16 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                   ),
                   "MLJFlux" => Dict("NeuralNetworkRegressor" =>[],
                                     ),
-                  "LightGBM" => Dict("LGBMRegressor" => [(hpname=:num_iterations, lower=5, upper=100),
+                  "LightGBM" => Dict("LGBMRegressor" => [(hpname=:num_iterations, lower=2, upper=100),
                                                          (hpname=:learning_rate, lower=0.01, upper=0.3),
-                                                         (hpname=:max_depth, lower=3, upper=12),
+                                                         (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
                                                          (hpname=:bagging_fraction, lower=0.65, upper=1.0),
-                                                         (hpname=:bagging_freq, values=[1]),
                                                          ]),
-                  "CatBoost" => Dict("CatBoostRegressor" => [(hpname=:iterations, lower=500, upper=1500),
+                  "CatBoost" => Dict("CatBoostRegressor" => [(hpname=:iterations, lower=100, upper=1500),
                                                          (hpname=:learning_rate, lower=0.01, upper=0.1),
                                                          (hpname=:max_depth, lower=3, upper=9),
                                                          ])
-
                   )
-
-
-
-
 
 
 
