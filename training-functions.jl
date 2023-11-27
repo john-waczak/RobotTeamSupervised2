@@ -380,3 +380,255 @@ function train_hpo(
 
 end
 
+
+
+
+
+cols_to_use = ["R_" * lpad(i, 3, "0") for i in 1:462]
+cols_to_standardize = ["roll", "pitch", "heading", "view_angle", "solar_azimuth", "solar_elevation", "solar_zenith"]
+cols_to_use = vcat(cols_to_use, cols_to_standardize)
+
+
+function train_stack(
+    X, y,
+    Xtest, ytest,
+    target_name, units, target_long,
+    outpath;
+    accelerate=false,
+    unc_method=:simple_inductive,
+    train_ratio=0.91,
+    unc_coverage=0.9,
+    rng=Xoshiro(42),
+    )
+
+    longname = "Model Stack"
+    savename = "superlearner"
+    suffix = "stack"
+
+    @info "\tSetting up save paths"
+
+    outpathdefault = joinpath(outpath, savename, "default")
+    outpath_featuresreduced = joinpath(outpath, savename, "important_only")
+    outpath_hpo = joinpath(outpath, savename, "hyperparameter_optimized")
+    outpath_stack = joinpath(outpath, savename, "superlearner_stack")
+
+    for path ∈ [outpathdefault, outpath_featuresreduced, outpath_hpo, outpath_stack]
+        if !isdir(path)
+            mkpath(path)
+        end
+    end
+
+    path_to_use = outpath_stack
+
+
+    # 1. Train model
+    @info "\tSetting model random seed"
+
+    # go through each model and load the hpo optimized version where possible
+
+
+    # ------------ NNR ----------------------
+    nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50), σ=Flux.relu),
+                  batch_size=256,
+                  optimiser=Flux.Optimise.ADAM(),
+                  lambda = 0.0001,
+                  rng=42,
+                  epochs=300,
+                  )
+
+
+    nnr  = Pipeline(
+        selector=FeatureSelector(features=Symbol.(cols_to_use)),
+        stand=Standardizer(features=Symbol.(cols_to_standardize)),
+        mdl=nnr_mod
+    )
+
+
+    # -----------Bag of Trees --------------
+
+    dtr = DTR()
+    try
+        hp_path = joinpath(outpath, "DecisionTreeRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(dtr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for DTR"
+    end
+
+    bf = 0.8
+    bdtr = EnsembleModel(model=dtr, n=100, bagging_fraction=bf)
+
+
+    # --------- RFR -----------------------
+    rfr = RFR()
+    try
+        hp_path = joinpath(outpath, "RandomForestRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(rfr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for RFR"
+    end
+
+
+    # -------- XGBR -----------
+    xgbr = XGBR()
+    try
+        hp_path = joinpath(outpath, "XGBoostRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(xgbr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for XGBR"
+    end
+
+
+    # -------- KNNR -----------
+    knnr = KNNR()
+    try
+        hp_path = joinpath(outpath, "KNNRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(knnr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for KNNR"
+    end
+
+
+    # -------- ETR -----------
+    etr = ETR()
+    try
+        hp_path = joinpath(outpath, "EvoTreeRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(etr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for ETR"
+    end
+
+
+    # -------- LGBR -----------
+    lgbr = LGBR()
+    try
+        hp_path = joinpath(outpath, "LGBMRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(lgbr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for KNNR"
+    end
+
+    # -------- CatR -----------
+    catr = CatR()
+    try
+        hp_path = joinpath(outpath, "CatBoostRegressor", "hyperparameter_optimized", "hp_defaults.json")
+        hp_defaults = JSON.parsefile(hp_path)
+        for (key, val) in hp_defaults
+            setproperty!(catr, Symbol(key), val)
+        end
+    catch e
+        @info "\tCouldnt set hp values for KNNR"
+    end
+
+
+    if accelerate
+        stack = Stack(;
+                      #                      metalearner=LR(),
+                      metalearner=RR(),
+                      bdtr=bdtr,
+                      rfr=rfr,
+                      xgbr=xgbr,
+                      knnr=knnr,
+                      etr=etr,
+                      lgbr=lgbr,
+                      nnr=nnr,
+                      catr=catr,
+                      resampling=CV(nfolds=10, rng=rng),
+                      acceleration=CPUThreads(),
+                      cache=false,
+                      )
+    else
+        stack = Stack(;
+                      #                      metalearner=LR(),
+                      metalearner=DTR(),
+                      bdtr=bdtr,
+                      rfr=rfr,
+                      xgbr=xgbr,
+                      knnr=knnr,
+                      etr=etr,
+                      lgbr=lgbr,
+                      nnr=nnr,
+                      catr=catr,
+                      resampling=CV(nfolds=10, rng=rng),
+                      cache=false,
+                      )
+    end
+
+
+
+    conf_model = conformal_model(stack; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
+
+    # fit the machine
+    mach = machine(conf_model, X, y; cache=false)
+
+
+    @info "\tStarting training..."
+    fit!(mach) #, verbosity=0)
+
+    @info "\t...\tFinished training"
+
+    ŷtrain = ConformalPrediction.predict(mach, X);
+    ŷtest = ConformalPrediction.predict(mach, Xtest);
+
+    # compute coverage on test set
+    cov = emp_coverage(ŷtest, ytest);
+    println("\tEmpirical coverage on test set: $(round(cov, digits=3))")
+
+
+    # convert to predictions + uncertainties
+    ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
+    ŷtrain = mean.(ŷtrain);
+
+    ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest];
+    ŷtest = mean.(ŷtest);
+
+
+
+
+    @info "\tGenerating plots..."
+
+    # generate scatterplot
+    fig = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
+
+    # generate quantile-quantile plot
+    fig = quantile_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
+
+
+    @info "\tSaving hpo model..."
+
+    MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
+
+
+    res_dict = Dict()
+    res_dict["rsq_train"] = rsq(ŷtrain, y)
+    res_dict["rsq_test"] = rsq(ŷtest, ytest)
+    res_dict["rmse_train"] = rmse(ŷtrain, y)
+    res_dict["rmse_test"] = rmse(ŷtest, ytest)
+    res_dict["cov"] = cov
+    open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
+        JSON.print(f, res_dict)
+    end
+    nothing
+end
+

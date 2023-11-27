@@ -64,20 +64,31 @@ ETR = @load EvoTreeRegressor pkg=EvoTrees
 # 1. Construct dictionary of models
 MODELS = Dict()
 
-ref_cols = Symbol.(["R_" * lpad(i, 3, "0") for i ∈ 1:length(wavelengths)])
+
+cols_to_use = ["R_" * lpad(i, 3, "0") for i in 1:462]
+cols_to_standardize = ["roll", "pitch", "heading", "view_angle", "solar_azimuth", "solar_elevation", "solar_zenith"]
+cols_to_use = vcat(cols_to_use, cols_to_standardize)
 
 
 
-rbf(x) = exp.(-(x.^2))
 
-# the neural network needs features to be standardized
-nnr = NNR(builder=MLJFlux.MLP(hidden=(1000,), σ=rbf),
-          batch_size = 200,
-          optimiser=Flux.Optimise.ADAM(0.001),
-          lambda = 0.0001,  # default regularization strength (I'm a bit confused by this as sk-learn only has alpha but that seems different here)
+#nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50,50), σ=Flux.relu),
+nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50), σ=Flux.relu),
+          batch_size=256,
+          optimiser=Flux.Optimise.ADAM(),
+          lambda = 0.0001,
           rng=42,
-          epochs=200,
+          epochs=500,
           )
+
+
+nnr  = Pipeline(
+    selector=FeatureSelector(features=Symbol.(cols_to_use)),
+    stand=Standardizer(features=Symbol.(cols_to_standardize)),
+    mdl=nnr_mod
+)
+
+
 
 MODELS[:nnr] = (;
                 :longname=>"Neural Network Regressor",
@@ -87,58 +98,44 @@ MODELS[:nnr] = (;
                 )
 
 
+
 # 3. Add XGBoostRegressor. Defaults seem fine...
-MODELS[:xgbr] = (;
-                 :longname=>"XGBoost Regressor",
-                 :savename=>"XGBoostRegressor",
-                 :mdl => XGBR()
-                 )
+# MODELS[:xgbr] = (;
+#                  :longname=>"XGBoost Regressor",
+#                  :savename=>"XGBoostRegressor",
+#                  :mdl => XGBR()
+#                  )
 
 
-MODELS[:etr] = (;
-                :longname=>"Evo Tree Regressor",
-                :savename=>"EvoTreeRegressor",
-                :mdl => ETR()
-                )
+# MODELS[:etr] = (;
+#                 :longname=>"Evo Tree Regressor",
+#                 :savename=>"EvoTreeRegressor",
+#                 :mdl => ETR()
+#                 )
 
-MODELS[:dtr] = (;
-                :longname => "Decision Tree Regressor",
-                :savename => "DecisionTreeRegressor",
-                :mdl => DTR()
-                )
-
-
-MODELS[:rfr] = (;
-                :longname => "Random Forest Regressor",
-                :savename => "RandomForestRegressor",
-                :mdl => RFR()
-                )
-
-# 4. Add Random Forest using sk-learn defaults
-# rfr = RFR(;
-#           n_trees = 100,
-#           max_depth = -1,
-#           min_samples_split=2,
-#           min_samples_leaf=1,
-#           min_purity_increase=0,
-#           n_subfeatures=0,
-#           sampling_fraction=1.0,
-#           )
+# MODELS[:dtr] = (;
+#                 :longname => "Decision Tree Regressor",
+#                 :savename => "DecisionTreeRegressor",
+#                 :mdl => DTR()
+#                 )
 
 
 # MODELS[:rfr] = (;
-#                 :longname=>"Random Forest Regressor",
-#                 :savename=>"RandomForestRegressor",
-#                 :mdl=>rfr
+#                 :longname => "Random Forest Regressor",
+#                 :savename => "RandomForestRegressor",
+#                 :mdl => RFR()
 #                 )
 
 
 
+
 # 5. Fit each of the models to different subsets of features.
-targets_to_try = [:CDOM, :CO, :Na, :Cl]
+# targets_to_try = [:CDOM, :CO, :Na, :Cl]
+targets_to_try = [:CDOM]
 
 
 for target ∈ targets_to_try
+    target = :CDOM
     target_name = String(target)
     target_long = targets_dict[target][2]
     units = targets_dict[target][1]
@@ -153,9 +150,9 @@ for target ∈ targets_to_try
         mkpath(outpath)
     end
 
-    #X = CSV.read(joinpath(data_path, "X.csv"), DataFrame; types=Float32)
     X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
     y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
+
 
 
     Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
