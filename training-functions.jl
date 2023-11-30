@@ -5,7 +5,6 @@ using JSON
 # use a dict of dicts structure
 
 # https://www.kaggle.com/code/prashant111/a-guide-on-xgboost-hyperparameters-tuning/notebook
-
 hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:min_samples_leaf, lower=2, upper=100),
                                                                       (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
                                                                       (hpname=:post_prune, values=[false, true])
@@ -18,18 +17,26 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:sampling_fraction, lower=0.65, upper=0.9)
                                                                       ],
                                           ),
-                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, values=[50,75,100,125,150]),
-                                                           (hpname=:eta, lower=0.01, upper=0.5),
-                                                           (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
-                                                           (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
-                                                           (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
+                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:booster, values=["gbtree", "gblinear", "dart"]),
+                                                           (hpname=:num_round, values=[50,75,100,125,150, 175, 200]),
+                                                           (hpname=:eta, lower=0.001, upper=0.5),
+                                                           #(hpname=:gamma, lower=0, upper=100),
+                                                           (hpname=:max_depth, values=[3,4,5,6,7,8,9,10]),
+                                                           #(hpname=:max_delta_step, lower=0, upper=10),
+                                                           #(hpname=:min_child_weight, lower=0, upper=10),
+                                                           (hpname=:subsample, lower=0.5, upper=1.0),
+                                                           #(hpname=:lambda, lower=0.1, upper=5.0),
+                                                           #(hpname=:alpha, lower=0.0, upper=10.0),
                                                            ],
                                     ),
-                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds, lower=2, upper=100),
-                                                            (hpname=:eta, lower=0.01, upper=0.2),
-                                                            (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
-                                                            (hpname=:lambda, lower=0.1, upper=5.0),  # L2 regularization. Higher makes model more conservative
-                                                            (hpname=:alpha, lower=0.0, upper=1.0), # L1 regularization. Higher makes model more sparse
+                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds,values=[50,75,100,125,150, 175, 200]),
+                                                            (hpname=:nbins, lower=2, upper=255),
+                                                            (hpname=:eta, lower=0.001, upper=0.5),
+                                                            (hpname=:max_depth, values=[3,4,5,6,7,8,9,10]),
+                                                            (hpname=:rowsample, lower=0.5, upper=1.0),
+                                                            #(hpname=:L2, lower=0.0, upper=100.0),
+                                                            #(hpname=:lambda, lower=0.1, upper=5.0), 
+                                                            #(hpname=:alpha, lower=0.0, upper=1.0),
                                                             ],
                                      ),
                   "NearestNeighborModels" => Dict("KNNRegressor" => [(hpname=:K, lower=1, upper=50),
@@ -40,12 +47,12 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                     ),
                   "LightGBM" => Dict("LGBMRegressor" => [(hpname=:num_iterations, lower=2, upper=100),
                                                          (hpname=:learning_rate, lower=0.01, upper=0.3),
-                                                         (hpname=:max_depth, values=[3,4,5,6,7,8,9]),
+                                                         (hpname=:max_depth, values=[3,4,5,6,7,8,9,10]),
                                                          (hpname=:bagging_fraction, lower=0.65, upper=1.0),
                                                          ]),
                   "CatBoost" => Dict("CatBoostRegressor" => [(hpname=:iterations, lower=100, upper=1500),
                                                          (hpname=:learning_rate, lower=0.01, upper=0.1),
-                                                         (hpname=:max_depth, lower=3, upper=9),
+                                                         (hpname=:max_depth, values=[3,4,5,6,7,8,9,10]),
                                                          ])
                   )
 
@@ -67,7 +74,7 @@ function train_basic(
     )
 
 
-    println("\tSetting up save paths")
+    @info "\tSetting up save paths"
 
     outpathdefault = joinpath(outpath, savename, "default")
     outpath_featuresreduced = joinpath(outpath, savename, "important_only")
@@ -86,7 +93,7 @@ function train_basic(
     try
         mdl.rng = rng  # if there is an rng parameter, set it for reproducability
     catch
-        println("\t$(longname) does not have parameter :rng")
+        @info "\t$(longname) does not have parameter :rng"
     end
 
     # verify scitype is satisfied
@@ -98,20 +105,20 @@ function train_basic(
     conf_model = conformal_model(mdl; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
 
     # fit the machine
-    println("\tTraining model")
+    @info "\tTraining model"
     mach = machine(conf_model, X, y)
     fit!(mach)
 
     reports_feature_importances(conf_model)
 
     # generate predictions
-    println("\tGenerating predictions")
+    @info "\tGenerating predictions"
     ŷtrain = ConformalPrediction.predict(mach, X);
     ŷtest = ConformalPrediction.predict(mach, Xtest);
 
     # compute coverage on test set
     cov = emp_coverage(ŷtest, ytest);
-    println("\tEmpirical coverage on test set: $(round(cov, digits=3))")
+    @info "\tEmpirical coverage on test set: $(round(cov, digits=3))"
 
 
     # convert to predictions + uncertainties
@@ -123,7 +130,7 @@ function train_basic(
 
 
     # generate scatterplot
-    println("\tCreating Plots")
+    @info "\tCreating Plots"
     fig = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
     save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
     save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
@@ -138,19 +145,33 @@ function train_basic(
     MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
 
 
+    res_dict = Dict()
+    res_dict["rsq_train"] = rsq(ŷtrain, y)
+    res_dict["rsq_test"] = rsq(ŷtest, ytest)
+    res_dict["rmse_train"] = rmse(ŷtrain, y)
+    res_dict["rmse_test"] = rmse(ŷtest, ytest)
+    res_dict["mae_train"] = mae(ŷtrain, y)
+    res_dict["mae_test"] = mae(ŷtest, ytest)
+    res_dict["cov"] = cov
+    open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
+        JSON.print(f, res_dict)
+    end
+
+
 
     # 2. Compute feature importances
     if reports_feature_importances(mdl)
         n_features = 25
 
-        println("\tComputing feature importances")
-
+        @info "\tComputing feature importances"
         rpt = report(mach);
+
         fi_pairs = feature_importances(mach.model.model, mach.fitresult, rpt);
         fi_df = DataFrame()
         fi_df.feature_name = [x[1] for x ∈ fi_pairs]
         fi_df.rel_importance = [x[2] for x ∈ fi_pairs]
         fi_df.rel_importance .= fi_df.rel_importance ./ maximum(fi_df.rel_importance)
+        sort!(fi_df, :rel_importance; rev=true)
 
         CSV.write(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).csv"), fi_df)
 
@@ -182,6 +203,41 @@ function train_basic(
         save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).png"), fig)
         save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).pdf"), fig)
 
+        # do the same for ONLY reflectances
+        ref_vals = Symbol.(["R_" * lpad(i, 3, "0") for i in 1:462])
+        fi_pairs_ref = [p for p in fi_pairs if (p.first in ref_vals)]
+        fi_df_ref = DataFrame()
+        fi_df_ref.feature_name = [x[1] for x ∈ fi_pairs_ref]
+        fi_df_ref.rel_importance = [x[2] for x ∈ fi_pairs_ref]
+        fi_df_ref.rel_importance .= fi_df_ref.rel_importance ./ maximum(fi_df_ref.rel_importance)
+        sort!(fi_df_ref, :rel_importance; rev=true)
+        
+        rel_importance = fi_df_ref.rel_importance[1:n_features]
+        var_names = [name_replacements[s] for s ∈ String.(fi_df_ref.feature_name[1:n_features])]
+
+
+        fig = Figure(; resolution=(1000, 1000))
+        ax = Axis(fig[1, 1],
+                  yticks=(1:n_features, var_names[end:-1:1]),
+                  xlabel="Normalized Feature Importance",
+                  title="$(target_long)",
+                  yminorgridvisible=false,
+                  )
+
+        b = barplot!(ax,
+                     1:n_features,
+                     rel_importance[end:-1:1],
+                     direction=:x,
+                     color=var_colors
+                     )
+
+        xlims!(ax, -0.01, 1.025)
+        ylims!(ax, 0.5, n_features + 0.5)
+
+        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).png"), fig)
+        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).pdf"), fig)
+
+
 
 
         # now retrain the model with a limited number of features
@@ -200,13 +256,13 @@ function train_basic(
         fit!(mach_fi)
 
 
-        println("\tGenerating predictions")
+        @info "\tGenerating predictions"
         ŷtrain = ConformalPrediction.predict(mach_fi, X);
         ŷtest = ConformalPrediction.predict(mach_fi, Xtest);
 
         # compute coverage on test set
         cov = emp_coverage(ŷtest, ytest);
-        println("\tEmpirical coverage on test set: $(round(cov, digits=3))")
+        @info "\tEmpirical coverage on test set: $(round(cov, digits=3))"
         # convert to predictions + uncertainties
         ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
         ŷtrain = mean.(ŷtrain);
@@ -224,9 +280,22 @@ function train_basic(
         fig = quantile_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
         save(joinpath(outpath_featuresreduced, "qq__$(suffix).png"), fig)
         save(joinpath(outpath_featuresreduced, "qq__$(suffix).pdf"), fig)
+
+        res_dict = Dict()
+        res_dict["rsq_train"] = rsq(ŷtrain, y)
+        res_dict["rsq_test"] = rsq(ŷtest, ytest)
+        res_dict["rmse_train"] = rmse(ŷtrain, y)
+        res_dict["rmse_test"] = rmse(ŷtest, ytest)
+        res_dict["mae_train"] = mae(ŷtrain, y)
+        res_dict["mae_test"] = mae(ŷtest, ytest)
+        res_dict["cov"] = cov
+        open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
+            JSON.print(f, res_dict)
+        end
     end
 
-    return rsq(ŷtrain, y), rsq(ŷtest, ytest), rmse(ŷtrain, y), rmse(ŷtest, ytest), cov
+    # return rsq(ŷtrain, y), rsq(ŷtest, ytest), rmse(ŷtrain, y), rmse(ŷtest, ytest), cov
+    nothing
 end
 
 
@@ -241,9 +310,12 @@ function train_hpo(
     target_name, units, target_long,
     mdl,
     outpath;
-    nmodels=20,
-    accelerate=true,
+    nmodels=200,
+    accelerate=false,
     rng=Xoshiro(42),
+    unc_method=:simple_inductive,
+    train_ratio=0.91,
+    unc_coverage=0.9,
     )
 
     suffix = "hpo"
@@ -301,7 +373,7 @@ function train_hpo(
             model=mdl,
             range=rs,
             tuning=tuning,
-            measures=[mae, rsq, rms],
+            measures=[rmse, mae, rsq],
             resampling=CV(nfolds=10, rng=rng),
             acceleration=CPUThreads(),
             n=nmodels,
@@ -312,7 +384,7 @@ function train_hpo(
             model=mdl,
             range=rs,
             tuning=tuning,
-            measures=[mae, rsq, rms],
+            measures=[rmse, mae, rsq],
             resampling=CV(nfolds=10, rng=rng),
             n=nmodels,
             cache=false,
@@ -327,27 +399,6 @@ function train_hpo(
 
     @info "\t...\tFinished training"
 
-
-    @info "\tGenerating plots..."
-    ŷ = MLJ.predict(mach, X)
-    ŷtest = MLJ.predict(mach, Xtest)
-
-
-    # generate scatterplot
-    fig = scatter_results(y, ŷ, ytest, ŷtest, "$(target_long) ($(units))")
-    save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
-    save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
-
-    # generate quantile-quantile plot
-    fig = quantile_results(y, ŷ, ytest, ŷtest, "$(target_long) ($(units))")
-    save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
-    save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
-
-
-    @info "\tSaving hpo model..."
-
-    MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
-
     open(joinpath(path_to_use, "$(savename)__hpo.txt"), "w") do f
         show(f,"text/plain", fitted_params(mach).best_model)
         println(f, "\n")
@@ -357,8 +408,6 @@ function train_hpo(
         println(f,"---------------------")
         show(f,"text/plain", report(mach).best_history_entry)
         println(f,"\n")
-        println(f,"---------------------")
-        println(f, "r² train: $(rsq(ŷ, y))\tr² test:$(rsq(ŷtest, ytest))\tRMSE test: $(rmse(ŷtest, ytest))\tMAE test: $(mae(ŷtest, ytest))")
     end
 
 
@@ -371,11 +420,69 @@ function train_hpo(
         params_dict[name] = val
     end
 
-    println(params_dict)
-    println(joinpath(path_to_use, "hp_defaults.json"))
-
     open(joinpath(path_to_use, "hp_defaults.json"), "w") do f
         JSON.print(f, params_dict)
+    end
+
+
+
+    # now we want to train and evaluate a final model w/ conformal prediction
+    mdl_final = mdl
+    for (key, val) in params_dict
+        setproperty!(mdl_final, Symbol(key), val)
+    end
+
+    conf_model = conformal_model(mdl_final; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
+
+    # fit the machine
+    @info "\tTraining final hpo model"
+    mach = machine(conf_model, X, y)
+    fit!(mach)
+
+    # generate predictions
+    @info "\tGenerating predictions"
+    ŷtrain = ConformalPrediction.predict(mach, X);
+    ŷtest = ConformalPrediction.predict(mach, Xtest);
+
+    # compute coverage on test set
+    cov = emp_coverage(ŷtest, ytest);
+    @info "\tEmpirical coverage on test set: $(round(cov, digits=3))"
+
+
+    # convert to predictions + uncertainties
+    ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
+    ŷtrain = mean.(ŷtrain);
+
+    ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest];
+    ŷtest = mean.(ŷtest);
+
+
+    # generate scatterplot
+    @info "\tCreating Plots"
+    fig = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
+
+    # generate quantile-quantile plot
+    fig = quantile_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
+    save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
+
+
+    # save the model println("\tSaving the model")
+    MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
+
+
+    res_dict = Dict()
+    res_dict["rsq_train"] = rsq(ŷtrain, y)
+    res_dict["rsq_test"] = rsq(ŷtest, ytest)
+    res_dict["rmse_train"] = rmse(ŷtrain, y)
+    res_dict["rmse_test"] = rmse(ŷtest, ytest)
+    res_dict["mae_train"] = mae(ŷtrain, y)
+    res_dict["mae_test"] = mae(ŷtest, ytest)
+    res_dict["cov"] = cov
+    open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
+        JSON.print(f, res_dict)
     end
 
 end

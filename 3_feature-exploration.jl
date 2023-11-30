@@ -72,39 +72,39 @@ cols_to_use = vcat(cols_to_use, cols_to_standardize)
 
 
 
-#nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50,50), σ=Flux.relu),
-nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50), σ=Flux.relu),
-          batch_size=256,
-          optimiser=Flux.Optimise.ADAM(),
-          lambda = 0.0001,
-          rng=42,
-          epochs=500,
-          )
+# #nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50,50), σ=Flux.relu),
+# nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50), σ=Flux.relu),
+#           batch_size=256,
+#           optimiser=Flux.Optimise.ADAM(),
+#           lambda = 0.0001,
+#           rng=42,
+#           epochs=500,
+#           )
 
 
-nnr  = Pipeline(
-    selector=FeatureSelector(features=Symbol.(cols_to_use)),
-    stand=Standardizer(features=Symbol.(cols_to_standardize)),
-    mdl=nnr_mod
-)
+# nnr  = Pipeline(
+#     selector=FeatureSelector(features=Symbol.(cols_to_use)),
+#     stand=Standardizer(features=Symbol.(cols_to_standardize)),
+#     mdl=nnr_mod
+# )
 
 
 
-MODELS[:nnr] = (;
-                :longname=>"Neural Network Regressor",
-                :savename => "NeuralNetworkRegressor",
-                #:mdl => Standardizer(features = name -> !(name ∈ ref_cols) ) |> nnr
-                :mdl => nnr
-                )
+# MODELS[:nnr] = (;
+#                 :longname=>"Neural Network Regressor",
+#                 :savename => "NeuralNetworkRegressor",
+#                 #:mdl => Standardizer(features = name -> !(name ∈ ref_cols) ) |> nnr
+#                 :mdl => nnr
+#                 )
 
 
 
 # 3. Add XGBoostRegressor. Defaults seem fine...
-# MODELS[:xgbr] = (;
-#                  :longname=>"XGBoost Regressor",
-#                  :savename=>"XGBoostRegressor",
-#                  :mdl => XGBR()
-#                  )
+MODELS[:xgbr] = (;
+                 :longname=>"XGBoost Regressor",
+                 :savename=>"XGBoostRegressor",
+                 :packagename=>"XGBoost",
+                 )
 
 
 # MODELS[:etr] = (;
@@ -133,9 +133,10 @@ MODELS[:nnr] = (;
 # targets_to_try = [:CDOM, :CO, :Na, :Cl]
 targets_to_try = [:CDOM]
 
+#targets_to_try = Symbol.(keys(targets_dict))
+
 
 for target ∈ targets_to_try
-    target = :CDOM
     target_name = String(target)
     target_long = targets_dict[target][2]
     units = targets_dict[target][1]
@@ -158,29 +159,40 @@ for target ∈ targets_to_try
     Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
     ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)[:,1]
 
-    results_summary = []
+    #results_summary = []
 
 
 
     for (shortname, model) ∈ MODELS
         try
-            res = train_basic(X, y,
-                              Xtest, ytest,
-                              model.longname, model.savename, model.mdl,
-                              target_name, units, target_long,
-                              outpath;
-                              )
+            train_basic(X, y,
+                        Xtest, ytest,
+                        model.longname, model.savename, model.mdl,
+                        target_name, units, target_long,
+                        outpath;
+                        )
 
-            push!(results_summary, res)
+            # train_hpo(
+            #     X, y,
+            #     Xtest, ytest,
+            #     model.longname, model.savename, model.packagename,
+            #     target_name, units, target_long,
+            #     model.mdl,
+            #     outpath;
+            #     nmodels = 3
+            # )
+
+            #push!(results_summary, res)
         catch e
             println("\t$(e)")
         end
     end
 
-    println("\tsaving results")
+    # println("\tsaving results")
 
-    res_df = DataFrame(results_summary, [:rsq_train, :rsq_test, :rmse_train, :rmse_test, :emp_cov])
-    CSV.write(joinpath(outpath, "$(target_name)_model_comparison.csv"), res_df)
+    # res_df = DataFrame(results_summary, [:rsq_train, :rsq_test, :rmse_train, :rmse_test, :emp_cov])
+    # CSV.write(joinpath(outpath, "$(target_name)_model_comparison.csv"), res_df)
+
 end
 
 
