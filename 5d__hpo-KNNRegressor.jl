@@ -34,6 +34,10 @@ update_theme!(
 #using MLJ, Flux, ConformalPrediction
 using MLJ
 using ArgParse
+using Pkg
+Pkg.add(url="https://github.com/JuliaTrustworthyAI/ConformalPrediction.jl.git")
+using ConformalPrediction
+
 
 
 # pull in targets info
