@@ -17,16 +17,16 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:sampling_fraction, lower=0.65, upper=0.9)
                                                                       ],
                                           ),
-                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:booster, values=["gbtree", "gblinear", "dart"]),
-                                                           (hpname=:num_round, values=[50,75,100,125,150, 175, 200]),
-                                                           (hpname=:eta, lower=0.001, upper=0.5),
+                  "XGBoost" => Dict("XGBoostRegressor" => [
+                                                           (hpname=:num_round, values=[50,75,100,125,150]),
+                                                           (hpname=:eta, lower=0.01, upper=0.5),
                                                            #(hpname=:gamma, lower=0, upper=100),
-                                                           (hpname=:max_depth, values=[3,4,5,6,7,8,9,10]),
-                                                           #(hpname=:max_delta_step, lower=0, upper=10),
-                                                           #(hpname=:min_child_weight, lower=0, upper=10),
+                                                           (hpname=:max_depth, values=[3,4,5,6,7,8]),
+                                                           #(hpname=:max_delta_step, lower=0.0, upper=10.0),
+                                                           (hpname=:min_child_weight, values=[1,10,100]),
                                                            (hpname=:subsample, lower=0.5, upper=1.0),
-                                                           #(hpname=:lambda, lower=0.1, upper=5.0),
-                                                           #(hpname=:alpha, lower=0.0, upper=10.0),
+                                                           (hpname=:lambda, lower=0.1, upper=5.0),
+                                                           (hpname=:alpha, lower=0.0, upper=10.0),
                                                            ],
                                     ),
                   "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds,values=[50,75,100,125,150, 175, 200]),
@@ -238,6 +238,42 @@ function train_basic(
         save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).pdf"), fig)
 
 
+        # plot the correlation of Ref w/ target as function of wavelength
+
+        # grab most important wavelengths
+        # λ_important = Float64[]
+        # n_important_to_use = 10
+        # for name in String.(fi_df_ref.feature_name[1:n_important_to_use])
+        #     idx = parse(Int, split(name, "_")[2])
+        #     push!(λ_important, wavelengths[idx])
+        # end
+
+        # println(λ_important)
+
+        # # compute pearson correlation
+        # ref_names = ["R_" * lpad(i, 3, "0") for i in 1:462]
+        # cvals = cor(Matrix(X[:, ref_names]), y)[:,1]
+
+        # fig = Figure();
+
+        # ylabel_title = "Correlation with $(target_long)"
+        # if length(ylabel_title) > 45
+        #     ylabel_title = "Correlation with\n$(target_long)"
+        # end
+
+        # ax = Axis(fig[1,1], xlabel="λ (nm)", ylabel=ylabel_title)
+
+        # hlines!(ax, [0.0], color=(:black, 0.25), linewidth=2)
+        # l = lines!(ax, wavelengths, cvals, linewidth=3, color=:black)
+        # vl = vlines!(λ_important, color=:gray, linewidth=2, linestyle=:dashdot)
+        # axislegend(ax, [l, vl], ["Correlation", "Important Wavelengths"]; framevisible=false)
+        # xlims!(ax, wavelengths[1], wavelengths[end])
+        # fig
+
+        # save(joinpath(outpath_featuresreduced, "correlation-with-$(target_name)__$(suffix).png"), fig)
+        # save(joinpath(outpath_featuresreduced, "correlation-with-$(target_name)__$(suffix).pdf"), fig)
+
+
 
 
         # now retrain the model with a limited number of features
@@ -366,6 +402,12 @@ function train_hpo(
     @info "\tPerforming hyperparameter optimization..."
 
 
+    Xhpo = vcat(X, Xtest)
+    yhpo = vcat(y, ytest)
+
+    rows_train = 1:nrow(X)
+    rows_test = (nrow(X)+1):nrow(Xhpo)
+
     # search for hyperparameters without doing conformal prediction
     tuning = RandomSearch(rng=rng)
     if accelerate
@@ -375,6 +417,7 @@ function train_hpo(
             tuning=tuning,
             measures=[rmse, mae, rsq],
             resampling=CV(nfolds=10, rng=rng),
+            #resampling=[(rows_train, rows_test),],
             acceleration=CPUThreads(),
             n=nmodels,
             cache=false,

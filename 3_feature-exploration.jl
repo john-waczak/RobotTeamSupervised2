@@ -30,7 +30,7 @@ using MLJ, Flux
 using Pkg
 Pkg.add(url="https://github.com/JuliaTrustworthyAI/ConformalPrediction.jl.git")
 using ConformalPrediction
-
+using JSON
 
 # for base model prediction:
 # using MLJModelInterface: reformat
@@ -104,6 +104,7 @@ MODELS[:xgbr] = (;
                  :longname=>"XGBoost Regressor",
                  :savename=>"XGBoostRegressor",
                  :packagename=>"XGBoost",
+                 :mdl=>XGBR(max_depth=10, min_child_weight=10),
                  )
 
 
@@ -131,9 +132,10 @@ MODELS[:xgbr] = (;
 
 # 5. Fit each of the models to different subsets of features.
 # targets_to_try = [:CDOM, :CO, :Na, :Cl]
-targets_to_try = [:CDOM]
 
-#targets_to_try = Symbol.(keys(targets_dict))
+# targets_to_try = Symbol.(keys(targets_dict))
+
+targets_to_try = [:CDOM]
 
 
 for target ∈ targets_to_try
@@ -154,14 +156,8 @@ for target ∈ targets_to_try
     X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
     y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
 
-
-
     Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
     ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)[:,1]
-
-    #results_summary = []
-
-
 
     for (shortname, model) ∈ MODELS
         try
@@ -170,7 +166,10 @@ for target ∈ targets_to_try
                         model.longname, model.savename, model.mdl,
                         target_name, units, target_long,
                         outpath;
+                        suffix="vanilla",
                         )
+
+            GC.gc()
 
             # train_hpo(
             #     X, y,
@@ -179,21 +178,57 @@ for target ∈ targets_to_try
             #     target_name, units, target_long,
             #     model.mdl,
             #     outpath;
-            #     nmodels = 3
+            #     nmodels=24
             # )
 
-            #push!(results_summary, res)
         catch e
             println("\t$(e)")
         end
     end
 
-    # println("\tsaving results")
-
-    # res_df = DataFrame(results_summary, [:rsq_train, :rsq_test, :rmse_train, :rmse_test, :emp_cov])
-    # CSV.write(joinpath(outpath, "$(target_name)_model_comparison.csv"), res_df)
-
 end
 
+GC.gc()
 
 
+
+# create summary table
+res_dicts = Dict[]
+
+for target in targets_to_try
+    target_name = String(target)
+    target_long = targets_dict[target][2]
+    units = targets_dict[target][1]
+
+    res_path = joinpath(datapath, target_name, "models", "XGBoostRegressor", "default", "XGBoostRegressor__vanilla.json")
+
+    res_string = read(res_path, String)
+    res_dict = JSON.parse(res_string)
+    try
+        for (key, val) in res_dict
+            res_dict[key] = Float64(val)
+        end
+
+        res_dict["target"] = target_name
+        push!(res_dicts, res_dict)
+    catch e
+        println(target_name)
+    end
+end
+
+df_res = DataFrame(res_dicts)
+
+sort!(df_res, :rsq_test; rev=true)
+select!(df_res, [:target, :rsq_test, :rsq_train, :rmse_test, :rmse_train, :mae_test, :mae_train, :cov])
+rename!(df_res,
+        "target" => "Target",
+        "rsq_test" => "R² test",
+        "rsq_train" => "R² train",
+        "rmse_test" => "RMSE test",
+        "rmse_train" => "RMSE train",
+        "mae_test" => "MAE test",
+        "mae_train" => "MAE train",
+        "cov" => "Empirical Coverage"
+        )
+
+CSV.write(joinpath(datapath, "vanilla_results.csv"), df_res)
