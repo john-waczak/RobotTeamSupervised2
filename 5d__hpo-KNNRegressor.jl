@@ -35,7 +35,7 @@ update_theme!(
 using MLJ
 using ArgParse
 
-Pkg.add(url="https://github.com/JuliaTrustworthyAI/ConformalPrediction.jl.git")
+# Pkg.add(url="https://github.com/JuliaTrustworthyAI/ConformalPrediction.jl.git")
 using ConformalPrediction
 
 
