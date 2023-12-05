@@ -117,6 +117,7 @@ function main(mdl)
         target_name, units, target_long,
         mdl,
         outpath;
+        accelerate=true
     )
 end
 

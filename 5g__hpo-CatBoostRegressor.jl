@@ -80,7 +80,11 @@ function main(mdl)
 
     # parse args making sure that supplied target does exist
     parsed_args = parse_commandline()
-    target = parsed_args[:target]
+
+    idx_target = parsed_args[:target_index]
+    target_keys = [k for k in keys(targets_dict)]
+    target = target_keys[idx_target]
+
     datapath = parsed_args[:datapath]
 
 
@@ -113,6 +117,7 @@ function main(mdl)
         target_name, units, target_long,
         mdl,
         outpath;
+        accelerate=true
     )
 end
 
