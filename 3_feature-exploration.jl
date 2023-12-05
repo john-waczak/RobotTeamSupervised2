@@ -104,7 +104,7 @@ MODELS[:xgbr] = (;
                  :longname=>"XGBoost Regressor",
                  :savename=>"XGBoostRegressor",
                  :packagename=>"XGBoost",
-                 :mdl=>XGBR(max_depth=10, min_child_weight=10),
+                 :mdl=>XGBR(),
                  )
 
 
