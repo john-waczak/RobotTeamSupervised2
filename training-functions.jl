@@ -371,7 +371,6 @@ function train_hpo(
     mdl,
     outpath;
     nmodels=200,
-    accelerate=false,
     rng=Xoshiro(42),
     unc_method=:simple_inductive,
     train_ratio=0.91,
@@ -434,29 +433,15 @@ function train_hpo(
 
     # search for hyperparameters without doing conformal prediction
     tuning = RandomSearch(rng=rng)
-    if accelerate
-        tuning_pipe = TunedModel(
-            model=mdl,
-            range=rs,
-            tuning=tuning,
-            measures=[rmse, mae, rsq],
-            resampling=CV(nfolds=10, rng=rng),
-            #resampling=[(rows_train, rows_test),],
-            acceleration=CPUThreads(),
-            n=nmodels,
-            cache=false,
-        )
-    else
-        tuning_pipe = TunedModel(
-            model=mdl,
-            range=rs,
-            tuning=tuning,
-            measures=[rmse, mae, rsq],
-            resampling=CV(nfolds=10, rng=rng),
-            n=nmodels,
-            cache=false,
-        )
-    end
+    tuning_pipe = TunedModel(
+        model=mdl,
+        range=rs,
+        tuning=tuning,
+        measures=[rmse, mae, rsq],
+        resampling=CV(nfolds=10, rng=rng),
+        n=nmodels,
+        cache=false,
+    )
 
 
     mach = machine(tuning_pipe, X, y; cache=false)
@@ -568,7 +553,6 @@ function train_stack(
     Xtest, ytest,
     target_name, units, target_long,
     outpath;
-    accelerate=false,
     unc_method=:simple_inductive,
     train_ratio=0.91,
     unc_coverage=0.9,
@@ -712,38 +696,20 @@ function train_stack(
     end
 
 
-    if accelerate
-        stack = Stack(;
-                      #                      metalearner=LR(),
-                      metalearner=RR(),
-                      bdtr=bdtr,
-                      rfr=rfr,
-                      xgbr=xgbr,
-                      knnr=knnr,
-                      etr=etr,
-                      lgbr=lgbr,
-                      nnr=nnr,
-                      catr=catr,
-                      resampling=CV(nfolds=10, rng=rng),
-                      acceleration=CPUThreads(),
-                      cache=false,
-                      )
-    else
-        stack = Stack(;
-                      #                      metalearner=LR(),
-                      metalearner=DTR(),
-                      bdtr=bdtr,
-                      rfr=rfr,
-                      xgbr=xgbr,
-                      knnr=knnr,
-                      etr=etr,
-                      lgbr=lgbr,
-                      nnr=nnr,
-                      catr=catr,
-                      resampling=CV(nfolds=10, rng=rng),
-                      cache=false,
-                      )
-    end
+    stack = Stack(;
+                  #                      metalearner=LR(),
+                  metalearner=DTR(),
+                  bdtr=bdtr,
+                  rfr=rfr,
+                  xgbr=xgbr,
+                  knnr=knnr,
+                  etr=etr,
+                  lgbr=lgbr,
+                  nnr=nnr,
+                  catr=catr,
+                  resampling=CV(nfolds=10, rng=rng),
+                  cache=false,
+                  )
 
 
 

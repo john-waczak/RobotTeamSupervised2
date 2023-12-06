@@ -81,8 +81,12 @@ function main(mdl)
     @info "Setting random number seed"
     rng = Xoshiro(42)
 
+    # julia only
+    MLJ.default_resource(CPUThreads())
+
     # parse args making sure that supplied target does exist
     parsed_args = parse_commandline()
+
 
     idx_target = parsed_args[:target_index]
     target_keys = [k for k in keys(targets_dict)]
@@ -119,7 +123,6 @@ function main(mdl)
         target_name, units, target_long,
         mdl,
         outpath;
-        accelerate=true
     )
 end
 

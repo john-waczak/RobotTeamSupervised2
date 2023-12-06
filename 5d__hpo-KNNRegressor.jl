@@ -79,6 +79,9 @@ function main(mdl)
     @info "Setting random number seed"
     rng = Xoshiro(42)
 
+
+    MLJ.default_resource(CPUThreads())
+
     # parse args making sure that supplied target does exist
     parsed_args = parse_commandline()
 
@@ -118,7 +121,6 @@ function main(mdl)
         target_name, units, target_long,
         mdl,
         outpath;
-        accelerate=true
     )
 end
 

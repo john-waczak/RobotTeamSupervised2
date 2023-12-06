@@ -79,7 +79,7 @@ function main(mdl)
     rng = Xoshiro(42)
 
 
-    MLJ.default_resource(CPUThreads())
+    # MLJ.default_resource(CPUThreads())
 
     # parse args making sure that supplied target does exist
     parsed_args = parse_commandline()
@@ -120,13 +120,12 @@ function main(mdl)
         target_name, units, target_long,
         mdl,
         outpath;
-        accelerate=true
     )
 end
 
 
-
-
 model = @load XGBoostRegressor pkg=XGBoost
-mdl = model()
+mdl = model(nthread=1)
+
+
 main(mdl)
