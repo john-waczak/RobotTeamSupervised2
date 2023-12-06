@@ -17,16 +17,15 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:sampling_fraction, lower=0.65, upper=0.9)
                                                                       ],
                                           ),
-                 "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:eta, lower=0.01, upper=0.2),
-                                                           (hpname=:gamma, lower=0, upper=100),  # not sure about this one
-                                                           (hpname=:max_depth, lower=3, upper=6),
-                                                           (hpname=:min_child_weight, lower=0.0, upper=5.0),
-                                                           (hpname=:max_delta_step, lower=1.0, upper=10.0),
-                                                           (hpname=:subsample, lower=0.5, upper=1.0),
-                                                           (hpname=:lambda, lower=0.1, upper=100.0),  # L2 regularization. Higher makes model more conservative
-                                                           (hpname=:alpha, lower=0.0, upper=100.0), # L1 regularization. Higher makes model more sparse
-                                                           ],
-                                    ),
+                 "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, lower=50, upper=100),
+                                                          (hpname=:eta, lower=0.01, upper=0.5),
+                                                          (hpname=:max_depth, lower=3, upper=7),
+                                                          (hpname=:subsample, lower=0.65, upper=1.0),
+                                                          (hpname=:colsample_bytree, lower=0.65, upper=1.0),
+                                                          (hpname=:lambda, lower=0.0, upper=100.0),  # L2 regularization. Higher makes model more conservative
+                                                          (hpname=:alpha, lower=0.0, upper=100.0), # L1 regularization. Higher makes model more sparse
+                                                          ],
+                                   ),
                   "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds,lower=50, upper=100),
                                                             (hpname=:nbins, lower=64, upper=255),
                                                             (hpname=:eta, lower=0.01, upper=0.5),
