@@ -32,7 +32,7 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                             (hpname=:eta, lower=0.01, upper=0.5),
                                                             (hpname=:max_depth, lower=3, upper=7),
                                                             (hpname=:rowsample, lower=0.65, upper=1.0),
-                                                            (hpname=:colsample, lower=0.65, upper=1.0)
+                                                            (hpname=:colsample, lower=0.65, upper=1.0),
                                                             (hpname=:lambda, lower=0.0, upper=100.0),
                                                             (hpname=:alpha, lower=0.0, upper=100.0),
                                                             ],
