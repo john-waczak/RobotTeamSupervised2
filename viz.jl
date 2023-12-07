@@ -108,8 +108,8 @@ function scatter_results(
     e2 = errorbars!(axmain, ytest, ŷtest, ϵ̂test, alpha=0.75, color=mints_colors[2])
 
     labels=[
-        "Training R²=$(round(rsq(y, ŷ), digits=3)) (n=$(length(y)))",
-        "Testing   R²=$(round(rsq(ytest, ŷtest), digits=3)) (n=$(length(ytest)))",
+        "Training R²=$(round(rsq(ŷ, y), digits=3)) (n=$(length(y)))",
+        "Testing   R²=$(round(rsq(ŷtest, ytest), digits=3)) (n=$(length(ytest)))",
         "1:1"
     ]
 
