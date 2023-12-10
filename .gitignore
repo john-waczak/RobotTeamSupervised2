@@ -1,2 +1,4 @@
 Manifest.toml
 .CondaPkg/
+.DS_Store
+data
