@@ -125,7 +125,7 @@ end
 
 
 model = @load XGBoostRegressor pkg=XGBoost
-mdl = model()
+mdl = model(nthread=1)
 
 
 main(mdl)
