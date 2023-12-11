@@ -1,3 +1,6 @@
+# details about the sensors:
+# https://www.waterprobes.com/sensor-parameters-water-quality-monitoring
+
 
 # dictionary of targets
 # symbol => [units, long-name, min-val]
@@ -7,7 +10,7 @@ targets_dict = Dict(
     :CO => ["ppb", "Crude Oil", 0.0],
     :Ca => ["mg/l", "Ca⁺⁺", 0.0],
     :Chl => ["μg/l", "Chlorophyll A", 0.0],
-    :ChlRed => ["μg/l", "Chlorophyll A with Red Excitation", 0.0],
+    :ChlRed => ["μg/l", "Chlorophyll A\nwith Red Excitation", 0.0],
     :Cl => ["mg/l", "Cl⁻", 0.0],
     :HDO => ["mg/l", "Dissolved Oxygen", 0.0],
     :HDO_percent => ["% Sat", "Dissolved Oxygen", 0.0],
@@ -22,14 +25,14 @@ targets_dict = Dict(
     :SpCond => ["μS/cm", "Conductivity"],
     :TDS => ["mg/l", "Total Dissolved Solids", 0.0],
     :TRYP => ["ppb", "Tryptophan", 0.0],
-    :Temp3488 => ["°C", "Temperature (3488)"],
-    :Temp3489 => ["°C", "Temperature (3489)"],
-    :Temp3490 => ["°C", "Temperature (3490)"],
-    :Turb3489 => ["FNU", "Turbidity (3489)"],
-    :Turb3488 => ["FNU", "Turbidity (3488)"],
-    :Turb3490 => ["FNU", "Turbidity (3490)"],
-    :bg => ["ppb", "Blue-Green Algae fresh water (Phycocyanin)", 0.0],
-    :bgm => ["ppb", "Blue-Green Algae salt water (Phycoerythrin)", 0.0],
+    :Temp3488 => ["°C", "Temperature"],
+    :Temp3489 => ["°C", "Temperature"],
+    :Temp3490 => ["°C", "Temperature"],
+    :Turb3489 => ["FNU", "Turbidity"],
+    :Turb3488 => ["FNU", "Turbidity"],
+    :Turb3490 => ["FNU", "Turbidity"],
+    :bg => ["ppb", "Blue-Green Algae\nfresh water (Phycocyanin)", 0.0],
+    :bgm => ["ppb", "Blue-Green Algae\nsalt water (Phycoerythrin)", 0.0],
     :pH => ["", "pH", 0.0],
     :pH_mV => ["mV", "pH"],
 )

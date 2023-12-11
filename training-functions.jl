@@ -19,7 +19,7 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                           ),
                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, lower=50, upper=100),
                                                           (hpname=:eta, lower=0.01, upper=0.5),
-                                                          (hpname=:max_depth, lower=3, upper=6),
+                                                          (hpname=:max_depth, lower=3, upper=9),
                                                           (hpname=:subsample, lower=0.65, upper=1.0),
                                                           (hpname=:colsample_bytree, lower=0.65, upper=1.0),
                                                           (hpname=:lambda, lower=0.0, upper=100.0),  # L2 regularization. Higher makes model more conservative
@@ -29,12 +29,12 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                   "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds,lower=50, upper=100),
                                                             (hpname=:nbins, lower=64, upper=255),
                                                             (hpname=:eta, lower=0.01, upper=0.5),
-                                                            (hpname=:max_depth, lower=3, upper=6),
+                                                            (hpname=:max_depth, lower=3, upper=8),
                                                             (hpname=:rowsample, lower=0.65, upper=1.0),
                                                             (hpname=:colsample, lower=0.65, upper=1.0),
-							    (hpname=:L2, values=[0.01,0.1,0.0,1.0,10.0,100.0]),
-                                                            (hpname=:lambda, values=[0.01,0.1,0.0,1.0,10.0,100.0]),
-                                                            (hpname=:alpha, values=[0.01,0.1,0.0,1.0,10.0,100.0]),
+							                                              (hpname=:L2, lower=0.01, upper=1000.0),
+                                                            (hpname=:lambda, lower=0.0, upper=1000.0),
+                                                            (hpname=:alpha, lower=0.0, upper=1000.0),
                                                             ],
                                      ),
                  "NearestNeighborModels" => Dict("KNNRegressor" => [(hpname=:K, lower=1, upper=50),
@@ -65,7 +65,7 @@ function train_basic(
     outpath;
     suffix="",
     unc_method=:simple_inductive,
-    train_ratio=0.91,
+    train_ratio=(8/9),
     unc_coverage=0.9,
     rng=Xoshiro(42),
     N_features=100,
@@ -105,7 +105,7 @@ function train_basic(
     # fit the machine
     @info "\tTraining model"
     mach = machine(conf_model, X, y)
-    fit!(mach)
+    fit!(mach, verbosity=0)
 
     reports_feature_importances(conf_model)
 
@@ -164,7 +164,9 @@ function train_basic(
         @info "\tComputing feature importances"
         rpt = report(mach);
 
+
         fi_pairs = feature_importances(mach.model.model, mach.fitresult, rpt);
+
         fi_df = DataFrame()
         fi_df.feature_name = [x[1] for x ∈ fi_pairs]
         fi_df.rel_importance = [x[2] for x ∈ fi_pairs]
@@ -201,15 +203,17 @@ function train_basic(
         save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).png"), fig)
         save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).pdf"), fig)
 
+
         # do the same for ONLY reflectances
         ref_vals = Symbol.(["R_" * lpad(i, 3, "0") for i in 1:462])
-        fi_pairs_ref = [p for p in fi_pairs if (p.first in ref_vals)]
+        fi_pairs_ref = [p for p in fi_pairs if (Symbol(p.first) in ref_vals)]
+
         fi_df_ref = DataFrame()
         fi_df_ref.feature_name = [x[1] for x ∈ fi_pairs_ref]
         fi_df_ref.rel_importance = [x[2] for x ∈ fi_pairs_ref]
         fi_df_ref.rel_importance .= fi_df_ref.rel_importance ./ maximum(fi_df_ref.rel_importance)
         sort!(fi_df_ref, :rel_importance; rev=true)
-        
+
         rel_importance = fi_df_ref.rel_importance[1:n_features]
         var_names = [name_replacements[s] for s ∈ String.(fi_df_ref.feature_name[1:n_features])]
 
@@ -236,44 +240,6 @@ function train_basic(
         save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).pdf"), fig)
 
 
-        # plot the correlation of Ref w/ target as function of wavelength
-
-        # grab most important wavelengths
-        # λ_important = Float64[]
-        # n_important_to_use = 10
-        # for name in String.(fi_df_ref.feature_name[1:n_important_to_use])
-        #     idx = parse(Int, split(name, "_")[2])
-        #     push!(λ_important, wavelengths[idx])
-        # end
-
-        # println(λ_important)
-
-        # # compute pearson correlation
-        # ref_names = ["R_" * lpad(i, 3, "0") for i in 1:462]
-        # cvals = cor(Matrix(X[:, ref_names]), y)[:,1]
-
-        # fig = Figure();
-
-        # ylabel_title = "Correlation with $(target_long)"
-        # if length(ylabel_title) > 45
-        #     ylabel_title = "Correlation with\n$(target_long)"
-        # end
-
-        # ax = Axis(fig[1,1], xlabel="λ (nm)", ylabel=ylabel_title)
-
-        # hlines!(ax, [0.0], color=(:black, 0.25), linewidth=2)
-        # l = lines!(ax, wavelengths, cvals, linewidth=3, color=:black)
-        # vl = vlines!(λ_important, color=:gray, linewidth=2, linestyle=:dashdot)
-        # axislegend(ax, [l, vl], ["Correlation", "Important Wavelengths"]; framevisible=false)
-        # xlims!(ax, wavelengths[1], wavelengths[end])
-        # fig
-
-        # save(joinpath(outpath_featuresreduced, "correlation-with-$(target_name)__$(suffix).png"), fig)
-        # save(joinpath(outpath_featuresreduced, "correlation-with-$(target_name)__$(suffix).pdf"), fig)
-
-
-
-
         # now retrain the model with a limited number of features
         N_features = 100
 
@@ -287,7 +253,7 @@ function train_basic(
         conf_model = conformal_model(pipe; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
 
         mach_fi = machine(conf_model, X, y)
-        fit!(mach_fi)
+        fit!(mach_fi, verbosity=0)
 
 
         @info "\tGenerating predictions"
@@ -347,7 +313,7 @@ function train_hpo(
     nmodels=200,
     rng=Xoshiro(42),
     unc_method=:simple_inductive,
-    train_ratio=0.91,
+    train_ratio=(8/9),
     unc_coverage=0.9,
     )
 
@@ -421,7 +387,7 @@ function train_hpo(
     mach = machine(tuning_pipe, X, y; cache=false)
 
     @info "\tStarting training..."
-    fit!(mach) #, verbosity=0)
+    fit!(mach, verbosity=0)
 
     @info "\t...\tFinished training"
 
@@ -463,7 +429,7 @@ function train_hpo(
     # fit the machine
     @info "\tTraining final hpo model"
     mach = machine(conf_model, X, y)
-    fit!(mach)
+    fit!(mach, verbosity=0)
 
     # generate predictions
     @info "\tGenerating predictions"
@@ -694,7 +660,7 @@ function train_stack(
 
 
     @info "\tStarting training..."
-    fit!(mach) #, verbosity=0)
+    fit!(mach, verbosity=0)
 
     @info "\t...\tFinished training"
 
