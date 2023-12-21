@@ -1,4 +1,110 @@
 using MLJ: rsq
+using StatsBase: iqr
+
+
+
+function scatter_folds(
+    y,
+    ŷ,
+    folds,
+    rsq_folds,
+    varname,
+    )
+
+    rsq_mean = round(mean(rsq_folds), digits=3)
+    rsq_std = round(std(rsq_folds), digits=3)
+    title="$(length(folds))-Fold Cross Validation, R² = $(rsq_mean) ± $(rsq_std)"
+
+    fig = Figure();
+    ga = fig[1, 1] = GridLayout()
+    axtop = Axis(
+        ga[1, 1];
+        leftspinevisible = false,
+        rightspinevisible = false,
+        bottomspinevisible = false,
+        topspinevisible = false,
+        title = title
+    )
+    axmain = Axis(ga[2, 1], xlabel = "True $(varname)", ylabel = "Predicted $(varname)")
+    axright = Axis(ga[2, 2];
+                  leftspinevisible = false,
+                  rightspinevisible = false,
+                  bottomspinevisible = false,
+                  topspinevisible = false,
+                  )
+
+    linkyaxes!(axmain, axright)
+    linkxaxes!(axmain, axtop)
+
+    minval, maxval = extrema([extrema(y)..., extrema(ŷ)...])
+    δ_edge = 0.1*(maxval-minval)
+
+    # plot 1:1 line
+    l1 = lines!(axmain, [minval-δ_edge, maxval+δ_edge], [minval-δ_edge, maxval+δ_edge], color=:gray, linewidth=3)
+
+    s_plots = []
+    s_labels = []
+    for i in 1:length(folds)
+        idx_train, idx_test = folds[i]
+        s = scatter!(axmain, y[idx_test], ŷ[idx_test], alpha=0.75)
+        push!(s_plots, s)
+        push!(s_labels, "Fold $(i)")
+    end
+
+    leg = axislegend(axmain, [s_plots..., l1], [s_labels..., "1:1"]; position=:lt) #, framevisible=false)
+
+
+    density!(axtop, y, color=(:gray, 0.5), strokecolor=:gray, strokewidth=2)
+    density!(axright, ŷ, direction = :y, color=(:gray, 0.5), strokecolor=:gray, strokewidth=2)
+
+    hidedecorations!(axtop)
+    hidedecorations!(axright)
+    #leg.tellheight = true
+    rowsize!(ga, 1, Relative(0.1))
+    colsize!(ga, 2, Relative(0.1))
+
+    colgap!(ga, 0)
+    rowgap!(ga, 0)
+
+    xlims!(axmain, minval-δ_edge, maxval+δ_edge)
+    ylims!(axmain, minval-δ_edge, maxval+δ_edge)
+
+    fig
+    return fig
+end
+
+
+function quantile_folds(
+    y,
+    ŷ,
+    folds,
+    rsq_folds,
+    varname
+    )
+
+    fig = Figure();
+    ax = Axis(fig[1,1], xlabel="True $(varname)", ylabel="Predicted $(varname)")
+
+    minval, maxval = extrema([extrema(y)..., extrema(ŷ)...,])
+    δ_edge = 0.1*(maxval-minval)
+
+    l1 = lines!(ax, [minval-δ_edge, maxval+δ_edge], [minval-δ_edge, maxval+δ_edge], color=:gray, linewidth=3)
+
+    q_plots = []
+    q_labels = []
+    for i in 1:length(folds)
+        idx_train, idx_test = folds[i]
+        q = qqplot!(ax, y[idx_test], ŷ[idx_test], alpha=0.75)
+        push!(q_plots, q)
+        push!(q_labels, "Fold $(i)")
+    end
+
+    leg = axislegend(ax, [q_plots..., l1], [q_labels..., "1:1"]; position=:lt) #, framevisible=false)
+
+    return fig
+end
+
+
 
 
 function scatter_results(
@@ -165,3 +271,18 @@ function quantile_results(
 
     return fig
 end
+
+
+
+
+
+function get_n_bins(x::T) where T<:AbstractVector
+    # bin_width = 2*iqr(x)/(length(x)^(1/3))  # Freedman-Diaconis rule
+    bin_width = 3.49*std(x)/(length(y)^(1/3)) # Scott's rule
+    xmin, xmax = extrema(x)
+    nbins = round(Int, (xmax-xmin)/bin_width)
+
+    return nbins, bin_width
+end
+
+
