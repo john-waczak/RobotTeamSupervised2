@@ -23,17 +23,17 @@ cmk.update_theme!(
 )
 
 
-
+Δx = 0.5
 
 include("./config.jl")
 include("./viz.jl")
 include("./sat-viz.jl")
 
 
-datapath = "/media/teamlary/LabData/RobotTeam/supervised"
-hsipath = "/media/teamlary/LabData/RobotTeam/processed/hsi"
+datapath = "/Users/johnwaczak/data/robot-team/supervised"
+hsipath = "/Users/johnwaczak/data/robot-team/processed/hsi"
 
-mapspath = "/media/teamlary/LabData/RobotTeam/maps"
+mapspath = "/Users/johnwaczak/data/robot-team/maps"
 if !ispath(mapspath)
     mkpath(mapspath)
 end
@@ -52,7 +52,7 @@ satmap = get_background_satmap(w,e,s,n)
 # set up relevant paths
 collection = "11-23"
 hsi_11_23 = joinpath(hsipath, collection)
-flight = "Scotty_1"
+flight = "Scotty_2"
 scotty_2 = joinpath(hsi_11_23, flight)
 
 h5_files = [joinpath(scotty_2, f) for f in readdir(scotty_2) if endswith(f, ".h5")]
@@ -78,13 +78,13 @@ end
 
 function get_data_for_pred(h5path, col_names)
     h5 = h5open(h5path, "r")
-    varnames = read(h5["data-Δx_0.1/varnames"])
+    varnames = read(h5["data-Δx_$(Δx)/varnames"])
     # get indices of relevant varnames
     idx_varnames = findall([v in col_names for v in varnames])
-    Data = read(h5["data-Δx_0.1/Data"])[idx_varnames, :, :]
-    IsInbounds = read(h5["data-Δx_0.1/IsInbounds"])
-    Longitudes = read(h5["data-Δx_0.1/Longitudes"])
-    Latitudes = read(h5["data-Δx_0.1/Latitudes"])
+    Data = read(h5["data-Δx_$(Δx)/Data"])[idx_varnames, :, :]
+    IsInbounds = read(h5["data-Δx_$(Δx)/IsInbounds"])
+    Longitudes = read(h5["data-Δx_$(Δx)/Longitudes"])
+    Latitudes = read(h5["data-Δx_$(Δx)/Latitudes"])
     close(h5)
 
     # allocate target prediction array
@@ -104,7 +104,8 @@ end
 # model_collection = "11-23"
 model_collection = "Full"
 ETR = @load EvoTreeRegressor pkg=EvoTrees
-model = "EvoTreeRegressor"
+# model = "EvoTreeRegressor"
+model = "RandomForestRegressor"
 
 targets_to_map = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490])]
 targets_to_map = [:CDOM]
@@ -168,21 +169,30 @@ end
 
 
 
-fig_tot = cmk.Figure();
+fig_tot = cmk.Figure(px_per_unit=5);
 ax_tot = cmk.Axis(fig_tot[1,1], xlabel="longitude", ylabel="latitude");
 bg_tot = cmk.heatmap!(ax_tot, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
 Δy = 0.25 # ppb
 #Δy = 0.15 # ppb
-clims = (20.0, 22.0)
-n_colors = length(clims[1]:Δy:clims[2])
-cm = cmk.cgrad(:vik, n_colors-1; categorical=true)
+
+q_low = quantile(y, 0.01)
+q_mid = quantile(y, 0.5)
+q_high = quantile(y, 0.99)
+
+#clims = (20.0, 22.0)
+clims = (q_low, q_high)
+#n_colors = length(clims[1]:Δy:clims[2])
+#cm = cmk.cgrad(:vik, n_colors-1; categorical=true)
+cm = cmk.cgrad(:vik, [0.0, (q_mid-q_low)/(q_high-q_low), 1.0])
 
 nskip=1
 h5_files_final = h5_files
 
 #h5_files_final = [f for f in h5_files if !any(occursin.(["2-16", "2-20", "2-21", "2-22", "2-23", "2-28", "2-29"], split(f, "/")[end]))]
 #h5_files_final = [f for f in h5_files if !any(occursin.(["2-16", "2-20", "2-21", "2-22", "2-23"], split(f, "/")[end]))]
+
+h5_files_final = [f for f in h5_files if !any(occursin.(["2-16",], split(f, "/")[end]))]
 
 @showprogress for h5path in h5_files_final
     # h5path = h5_files[1]
@@ -200,16 +210,18 @@ h5_files_final = h5_files
     # h = cmk.heatmap!(ax, Longitudes, Latitudes, Y, colormap=cm, colorrange=clims)
     # cmk.heatmap!(ax_tot, Longitudes, Latitudes, Y, colormap=cm, colorrange=clims)
 
-    sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=2, alpha=0.8)
-    cmk.scatter!(ax_tot, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=2, alpha=0.8)
+    sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=3)
+    cmk.scatter!(ax_tot, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=3)
 
 
-    sc = cmk.scatter!(ax, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=.51, strokecolor=(:gray, 0.5));
+    sc = cmk.scatter!(ax, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=.4, strokecolor=:black);
 
     cmk.xlims!(ax, -97.7168, -97.7125)
     cmk.ylims!(ax, 33.70075, 33.7035)
 
     cb = cmk.Colorbar(fig[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm)
+
+    fig
 
     save(joinpath(savepath, map_name * ".png"), fig)
 end
@@ -224,7 +236,7 @@ fig_tot
 save(joinpath(outpath, flight*".png"), fig_tot)
 
 
-sc = cmk.scatter!(ax_tot, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=0.5, strokecolor=(:gray, 0.5));
+sc = cmk.scatter!(ax_tot, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=0.2, strokecolor=:black);
 
 save(joinpath(outpath, flight*"-w-boat.png"), fig_tot)
 

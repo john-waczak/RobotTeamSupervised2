@@ -40,25 +40,23 @@ include("./viz.jl")
 include("./sat-viz.jl")
 
 
-outpath = "/media/teamlary/LabData/RobotTeam/supervised"
+outpath = "/Users/johnwaczak/data/robot-team/supervised"
 if !ispath(outpath)
     mkpath(outpath)
 end
 
-mapspath = "/media/teamlary/LabData/RobotTeam/maps"
+mapspath = "/Users/johnwaczak/data/robot-team/maps"
 if !ispath(mapspath)
     mkpath(mapspath)
 end
 
 
 inpaths = Dict(
-    "11-23" => "/media/teamlary/LabData/RobotTeam/finalized/11-23",
-    # "12-09" => "/media/teamlary/LabData/RobotTeam/finalized/12-09",
-    # "12-10" => "/media/teamlary/LabData/RobotTeam/finalized/12-10",
-    "Full" => "/media/teamlary/LabData/RobotTeam/finalized/Full"
+    "11-23" => "/Users/johnwaczak/data/robot-team/finalized/11-23",
+    "Full" => "/Users/johnwaczak/data/robot-team/finalized/Full"
 )
 
-# inpath = "/media/teamlary/LabData/RobotTeam/finalized/Full"
+# inpath = "/Volumes/LabData/RobotTeam/finalized/Full"
 for (collection, path) in inpaths
     @assert ispath(path)
 end
@@ -72,7 +70,7 @@ e= -97.712413
 satmap = get_background_satmap(w,e,s,n)
 
 
-df = CSV.read("/media/teamlary/LabData/RobotTeam/prepared/12-10/Targets.csv", DataFrame)
+# df = CSV.read("/Users/johnwaczak/data/robot-team/prepared/12-10/Targets.csv", DataFrame)
 
 # gdf = groupby(df, :category)
 

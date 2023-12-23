@@ -85,7 +85,7 @@ name_replacements["MCRI"] = "Modified Chlorophyll Absorption Reflectance Index"
 name_replacements["TCARI"] = "Transformed Chlorophyll Absorption Reflectance Index"
 name_replacements["Σrad"] = "Total Pixel Intensity"
 name_replacements["Σdownwelling"] = "Total Downwelling Intensity"
-
+name_replacements["yaw_minus_azimuth"] = "Heading - Solar Azimuth"
 
 
 

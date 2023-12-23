@@ -55,7 +55,7 @@ include("./training-functions.jl")
 
 
 
-datapath = "/media/teamlary/LabData/RobotTeam/supervised"
+datapath = "/Users/johnwaczak/data/robot-team/supervised"
 
 # DecisionTreeRegressor and RandomForestRegressor don't seem to work.
 
@@ -105,11 +105,11 @@ nnr_mod = NNR(
 # # )
 
 
-nnr  = Pipeline(
-    selector=FeatureSelector(features=Symbol.(cols_to_use)),
-    stand=Standardizer(features=Symbol.(cols_to_standardize)),
-    mdl=nnr_mod
-)
+# nnr  = Pipeline(
+#     selector=FeatureSelector(features=Symbol.(cols_to_use)),
+#     stand=Standardizer(features=Symbol.(cols_to_standardize)),
+#     mdl=nnr_mod
+# )
 
 
 # MODELS[:nnr] = (;
@@ -128,12 +128,12 @@ nnr  = Pipeline(
 #                  :mdl=>XGBR(),
 #                  )
 
-MODELS[:etr] = (;
-                :longname=>"Evo Tree Regressor",
-                :savename=>"EvoTreeRegressor",
-                :packagename => "EvoTrees",
-                :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
-                )
+# MODELS[:etr] = (;
+#                 :longname=>"Evo Tree Regressor",
+#                 :savename=>"EvoTreeRegressor",
+#                 :packagename => "EvoTrees",
+#                 :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
+#                 )
 
 
 # MODELS[:dtr] = (;
@@ -143,12 +143,11 @@ MODELS[:etr] = (;
 #                 )
 
 
-# MODELS[:rfr] = (;
-#                 :longname => "Random Forest Regressor",
-#                 :savename => "RandomForestRegressor",
-#                 :mdl => RFR()
-#                 )
-
+MODELS[:rfr] = (;
+                :longname => "Random Forest Regressor",
+                :savename => "RandomForestRegressor",
+                :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=150),
+                )
 
 
 # 5. Fit each of the models to different subsets of features.
@@ -157,8 +156,9 @@ MODELS[:etr] = (;
 
 # collections = ["11-23", "Full"]
 
+# targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490])]
 collections = ["11-23", "Full"]
-targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490])]
+targets_to_try = [:CDOM]
 
 
 for collection ∈ collections

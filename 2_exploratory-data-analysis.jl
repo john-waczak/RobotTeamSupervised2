@@ -31,7 +31,7 @@ include("./config.jl")
 include("./viz.jl")
 
 
-outpath = "/media/teamlary/LabData/RobotTeam/supervised"
+outpath = "/Volumes/LabData/RobotTeam/supervised"
 
 # collections = ["11-23", "12-09", "12-10", "Full"]
 collections = ["11-23", "Full"]
@@ -62,10 +62,18 @@ for collection in collections
 
         @info "\t\tloading data..."
         X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
-        # Xtest = CSV.read(joinpath(data_path, "Xtest.csv"), DataFrame)
-
         y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
-        # ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)
+
+        nbins = 1
+        bin_width = maximum(y) - minimum(y)
+        try
+            nbins, bin_width = get_n_bins(y)
+        catch e
+            println("Failed to find n_bins")
+            nbins = 30
+            bin_width = (maximum(y) - minimum(y))/nbins
+        end
+
 
 
 
@@ -107,18 +115,6 @@ for collection in collections
         @info "\t\tgenerating histogram..."
 
         fig = Figure();
-
-        nbins = 1
-        bin_width = maximum(y) - minimum(y)
-
-        try
-            nbins, bin_width = get_n_bins(y)
-        catch e
-            println("Failed to find n_bins")
-            nbins = 30
-            bin_width = (maximum(y) - minimum(y))/nbins
-        end
-
 
         ax = Axis(fig[1,1], xlabel="$(pretty_name) ($(units))", ylabel="Counts", title="N bins = $(nbins), bin width=$(round(bin_width, digits=3))")
         ax2 = Axis(fig[1,1], yaxisposition=:right)

@@ -170,6 +170,7 @@ function train_folds(
         yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
         cov = emp_coverage(yhat_conf, ytest);
         @info "\tEmpirical coverage: $(cov)"
+        res_dict["emp_cov"] = cov
 
         Δy = (yhat_conf[1][2] - yhat_conf[1][1])/2
         res_dict["uncertainty"] = Δy
