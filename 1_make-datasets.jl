@@ -114,8 +114,16 @@ function get_data(fpath; threshold=0.25)
     feature_names = []
     target_names = []
     let
-        df_features = CSV.read(joinpath(fpath, "Features.csv"), DataFrame)
-        df_targets = CSV.read(joinpath(fpath, "Targets.csv"), DataFrame)
+        # df_features = vcat(CSV.read(joinpath(fpath, "Features_1.csv"), DataFrame), CSV.read(joinpath(fpath, "Features_2.csv"), DataFrame))
+        # df_targets = vcat(CSV.read(joinpath(fpath, "Targets_1.csv"), DataFrame), CSV.read(joinpath(fpath, "Targets_2.csv"), DataFrame))
+
+        df_features = CSV.read(joinpath(fpath, "Features_2.csv"), DataFrame)
+        df_targets = CSV.read(joinpath(fpath, "Targets_2.csv"), DataFrame)
+
+        # df_features = CSV.read(joinpath(fpath, "Features_1.csv"), DataFrame)
+        # df_targets = CSV.read(joinpath(fpath, "Targets_1.csv"), DataFrame)
+
+
 
         feature_names = names(df_features)
         target_names = names(df_targets)
@@ -245,7 +253,7 @@ for (collection, fpath) in inpaths
         save(joinpath(mapspath_final, "data-map.png"), fig)
         save(joinpath(mapspath_final, "data-map.pdf"), fig)
 
-        (y,X) = make_datasets(data, target_name, feature_names, target_names, ignorecols; rng=rng)
+        (y,X) = make_datasets(data, target_name, feature_names, target_names, ignorecols)
         idx_train, idx_test = partition(eachindex(y), 0.9, shuffle=true, rng=rng)
 
 
@@ -257,5 +265,3 @@ for (collection, fpath) in inpaths
         CSV.write(joinpath(outpath_final, "lat_lon.csv"), df_latlon)
     end
 end
-
-

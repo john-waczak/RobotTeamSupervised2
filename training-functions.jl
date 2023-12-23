@@ -99,7 +99,7 @@ function train_folds(
 
 
     # fit the machine
-    @info "\tEvaluating model for $(nfolds) folds"
+    # @info "\tEvaluating model for $(nfolds) folds"
     mach = machine(mdl, Xtrain, ytrain)
 
     cv = CV(nfolds=nfolds, rng=rng)
@@ -126,6 +126,12 @@ function train_folds(
 
     yhat_train = MLJ.predict(mach, Xtrain)
     yhat_test = MLJ.predict(mach, Xtest)
+
+    # res_dict["rsq"] = rsq(yhat_test, ytest)
+    # res_dict["rmse"] = rmse(yhat_test, ytest)
+    # res_dict["mae"] = mae(yhat_test, ytest)
+    # res_dict["r"] = cor_coef(yhat_test, ytest)
+
 
 
     # generate plots:
@@ -184,6 +190,7 @@ function train_folds(
         rpt = report(mach);
 
         fi_pairs = feature_importances(mach) #.model, mach.fitresult, rpt);
+
 
         fi_df = DataFrame()
         fi_df.feature_name = [x[1] for x ∈ fi_pairs]

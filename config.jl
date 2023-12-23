@@ -83,6 +83,8 @@ name_replacements["ARI2"] = "Anthocyanin Reflectance Index 2"
 name_replacements["WBI"] = "Water Band Index"
 name_replacements["MCRI"] = "Modified Chlorophyll Absorption Reflectance Index"
 name_replacements["TCARI"] = "Transformed Chlorophyll Absorption Reflectance Index"
+name_replacements["Σrad"] = "Total Pixel Intensity"
+name_replacements["Σdownwelling"] = "Total Downwelling Intensity"
 
 
 

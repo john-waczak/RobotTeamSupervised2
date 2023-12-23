@@ -6,8 +6,8 @@ using ProgressMeter
 import CairoMakie as cmk
 using MintsMakieRecipes
 
-set_theme!(mints_theme)
-update_theme!(
+cmk.set_theme!(mints_theme)
+cmk.update_theme!(
     figure_padding=30,
     Axis=(
         xticklabelsize=20,
@@ -52,7 +52,8 @@ satmap = get_background_satmap(w,e,s,n)
 # set up relevant paths
 collection = "11-23"
 hsi_11_23 = joinpath(hsipath, collection)
-scotty_2 = joinpath(hsi_11_23, "Scotty_2")
+flight = "Scotty_1"
+scotty_2 = joinpath(hsi_11_23, flight)
 
 h5_files = [joinpath(scotty_2, f) for f in readdir(scotty_2) if endswith(f, ".h5")]
 
@@ -68,7 +69,7 @@ sort_files_numerical!(h5_files)
 
 # let's open one and extract the data
 # create function to tell if the pixel is on land or not
-function in_water(Datacube, varnames; threshold=0.1)
+function in_water(Datacube, varnames; threshold=0.25)
     idx_mndwi = findfirst(varnames .== "mNDWI")
     return findall(Datacube[idx_mndwi,:,:] .> threshold)
 end
@@ -99,9 +100,9 @@ function get_data_for_pred(h5path, col_names)
 end
 
 
-
 # load model
-model_collection = "11-23"
+# model_collection = "11-23"
+model_collection = "Full"
 ETR = @load EvoTreeRegressor pkg=EvoTrees
 model = "EvoTreeRegressor"
 
@@ -157,95 +158,80 @@ outpath = joinpath(mapspath, model_collection, target_name, "11-23")
 if !ispath(outpath)
     mkpath(outpath)
 end
+savepath = joinpath(outpath, flight)
+if !ispath(savepath)
+    mkpath(savepath)
+end
 
 
-fig = cmk.Figure();
-ax = cmk.Axis(fig[1,1], xlabel="longitude", ylabel="latitude");
-bg = cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
-clims = (20.0, 21.5)
 
-@showprogress for h5path in h5_files
-#    h5path = h5_files[1]
+
+
+
+fig_tot = cmk.Figure();
+ax_tot = cmk.Axis(fig_tot[1,1], xlabel="longitude", ylabel="latitude");
+bg_tot = cmk.heatmap!(ax_tot, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
+
+Δy = 0.25 # ppb
+#Δy = 0.15 # ppb
+clims = (20.0, 22.0)
+n_colors = length(clims[1]:Δy:clims[2])
+cm = cmk.cgrad(:vik, n_colors-1; categorical=true)
+
+nskip=1
+h5_files_final = h5_files
+
+#h5_files_final = [f for f in h5_files if !any(occursin.(["2-16", "2-20", "2-21", "2-22", "2-23", "2-28", "2-29"], split(f, "/")[end]))]
+#h5_files_final = [f for f in h5_files if !any(occursin.(["2-16", "2-20", "2-21", "2-22", "2-23"], split(f, "/")[end]))]
+
+@showprogress for h5path in h5_files_final
+    # h5path = h5_files[1]
+    map_name = split(split(h5path, "/")[end], ".")[1]
 
     fig = cmk.Figure();
     ax = cmk.Axis(fig[1,1], xlabel="longitude", ylabel="latitude");
     bg = cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
-    clims = (20.0, 21.5)
 
     X_hsi, Y, ij_water, Latitudes, Longitudes = get_data_for_pred(h5path, names(X))
+
     Y_pred = predict(mach, X_hsi)
     Y[ij_water] .= Y_pred
-    #h = cmk.heatmap!(ax, Longitudes, Latitudes, Y, colorrange=clims)
 
-    sc = cmk.scatter!(ax, Longitudes[ij_water], Latitudes[ij_water], color=Y_pred, colormap=:jet, colorrange=clims, markersize=1)
+    # h = cmk.heatmap!(ax, Longitudes, Latitudes, Y, colormap=cm, colorrange=clims)
+    # cmk.heatmap!(ax_tot, Longitudes, Latitudes, Y, colormap=cm, colorrange=clims)
 
-    sc = cmk.scatter!(ax, longitudes, latitudes, color=y, colormap=:jet, colorrange=clims, markersize=4, marker=:rect, markerstrokewidth=1, strokecolor=(:black, 0.5));
+    sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=2, alpha=0.8)
+    cmk.scatter!(ax_tot, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=2, alpha=0.8)
+
+
+    sc = cmk.scatter!(ax, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=.51, strokecolor=(:gray, 0.5));
 
     cmk.xlims!(ax, -97.7168, -97.7125)
     cmk.ylims!(ax, 33.70075, 33.7035)
 
-    cb = cmk.Colorbar(fig[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=:jet)
+    cb = cmk.Colorbar(fig[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm)
 
-    #cmk.heatmap(Y, colorrange=clims)
-    # fig
-    #map_name = "map" * lpad(, 3, "0")
-    map_name = split(split(h5path, "/")[end], ".")[1]
-    save(joinpath(outpath, map_name * ".png"), fig)
+    save(joinpath(savepath, map_name * ".png"), fig)
 end
 
-cmk.xlims!(ax, -97.7168, -97.7125)
-cmk.ylims!(ax, 33.70075, 33.7035)
-cb = cmk.Colorbar(fig[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=:jet)
 
-fig
+cmk.xlims!(ax_tot, -97.7168, -97.7125)
+cmk.ylims!(ax_tot, 33.70075, 33.7035)
+cb = cmk.Colorbar(fig_tot[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm)
 
-save(joinpath(outpath, "flight-1-map.png"), fig)
+fig_tot
 
-sc = cmk.scatter!(ax, longitudes, latitudes, color=y, colormap=:jet, colorrange=clims, markersize=4, marker=:rect, markerstrokewidth=1, strokecolor=(:black, 0.5));
-
-fig
-
-save(joinpath(outpath, "flight-1-map_w.png"), fig)
+save(joinpath(outpath, flight*".png"), fig_tot)
 
 
+sc = cmk.scatter!(ax_tot, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=0.5, strokecolor=(:gray, 0.5));
 
+save(joinpath(outpath, flight*"-w-boat.png"), fig_tot)
 
-save("cdom-map.png", fig)
-
-
-# define color limits in advance
-
-xs_1 = 0:0.1:1
-ys_1 = 0:0.1:1
-
-xs_2 = 2:0.1:3
-ys_2 = 2:0.1:3
-
-zs_1 = [x^2+y for x in xs_1, y in xs_1]
-zs_2 = [x^2+y for x in xs_2, y in xs_2]
-
-clims = (min(minimum(zs_1), minimum(zs_2)), max(maximum(zs_1), maximum(zs_2)))
-
-fig = cmk.Figure();
-ax = cmk.Axis(fig[1,1], xlabel="x", ylabel="y");
-h1 = cmk.heatmap!(ax, xs_1, ys_1, zs_1, colorrange=clims)
-h2 = cmk.heatmap!(ax, xs_2, ys_2, zs_2, colorrange=clims)
-cb = cmk.Colorbar(fig[1,2], colorrange=clims, label="values")
-fig
-
-
-
-# for maps output we can have a folder structure like
-# /media/teamlary/LabData/RobotTeam/maps/target/model/map.png, etc...
-
-
-
-# for base model prediction:
-# using MLJModelInterface: reformat
-# predict(conf_model.model, mach.fitresult, reformat(conf_model.model, Xtest)...)
+fig_tot
 
 
 
 
-# seed reproducible pseudo-random number generator
-rng = Xoshiro(42)
+
+

@@ -47,7 +47,8 @@ for collection in collections
         @info "\t$(target)"
 
         # collection = "11-23"
-        # target = "NH4"
+        # target = "CDOM"
+
         # load in data
 
         pretty_name = targets_dict[Symbol(target)][2]
@@ -65,6 +66,7 @@ for collection in collections
 
         y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
         # ytest = CSV.read(joinpath(data_path, "ytest.csv"), DataFrame)
+
 
 
         # compute correlation matrix between reflectances
@@ -102,28 +104,26 @@ for collection in collections
         save(joinpath(fig_path, "correlation-width-$(target).pdf"), fig)
 
         # generate target histogram/distribution visualization
-        # ytrain_vals = @view y[:,1]
-        # ytest_vals = @view ytest[:,1]
-
-        # compute number of bins for histogram
-
-
-
         @info "\t\tgenerating histogram..."
+
         fig = Figure();
 
         nbins = 1
         bin_width = maximum(y) - minimum(y)
+
         try
             nbins, bin_width = get_n_bins(y)
         catch e
-            nothing
+            println("Failed to find n_bins")
+            nbins = 30
+            bin_width = (maximum(y) - minimum(y))/nbins
         end
+
 
         ax = Axis(fig[1,1], xlabel="$(pretty_name) ($(units))", ylabel="Counts", title="N bins = $(nbins), bin width=$(round(bin_width, digits=3))")
         ax2 = Axis(fig[1,1], yaxisposition=:right)
         linkxaxes!(ax, ax2)
-        y_hist = fit(Histogram, y; nbins=nbins)
+
         h = hist!(ax, y; bins=nbins, color=(mints_colors[1], 0.75), normalization=:none)
         d = density!(ax2, y[:,1], color=(mints_colors[2], 0.25), strokecolor=(mints_colors[2],0.75), strokewidth=3)
 

@@ -73,7 +73,7 @@ MODELS = Dict()
 
 
 cols_to_use = ["R_" * lpad(i, 3, "0") for i in 1:462]
-cols_to_standardize = ["roll", "pitch", "heading", "view_angle", "solar_azimuth", "solar_elevation", "solar_zenith"]
+cols_to_standardize = ["roll", "pitch", "heading", "view_angle", "solar_azimuth", "solar_elevation", "solar_zenith", "Σrad", "Σdownwelling"]
 cols_to_use = vcat(cols_to_use, cols_to_standardize)
 
 use_metrics = false
@@ -121,13 +121,12 @@ nnr  = Pipeline(
 
 # # # 3. Add XGBoostRegressor. Defaults seem fine...
 
-MODELS[:xgbr] = (;
-                 :longname=>"XGBoost Regressor",
-                 :savename=>"XGBoostRegressor",
-                 :packagename=>"XGBoost",
-                 :mdl=>XGBR(),
-                 )
-
+# MODELS[:xgbr] = (;
+#                  :longname=>"XGBoost Regressor",
+#                  :savename=>"XGBoostRegressor",
+#                  :packagename=>"XGBoost",
+#                  :mdl=>XGBR(),
+#                  )
 
 MODELS[:etr] = (;
                 :longname=>"Evo Tree Regressor",
@@ -137,18 +136,18 @@ MODELS[:etr] = (;
                 )
 
 
-MODELS[:dtr] = (;
-                :longname => "Decision Tree Regressor",
-                :savename => "DecisionTreeRegressor",
-                :mdl => DTR()
-                )
+# MODELS[:dtr] = (;
+#                 :longname => "Decision Tree Regressor",
+#                 :savename => "DecisionTreeRegressor",
+#                 :mdl => DTR()
+#                 )
 
 
-MODELS[:rfr] = (;
-                :longname => "Random Forest Regressor",
-                :savename => "RandomForestRegressor",
-                :mdl => RFR()
-                )
+# MODELS[:rfr] = (;
+#                 :longname => "Random Forest Regressor",
+#                 :savename => "RandomForestRegressor",
+#                 :mdl => RFR()
+#                 )
 
 
 
@@ -156,11 +155,11 @@ MODELS[:rfr] = (;
 # targets_to_try = [:CDOM, :CO, :Na, :Cl]
 
 
+# collections = ["11-23", "Full"]
+
 collections = ["11-23", "Full"]
 targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490])]
 
-# collections = ["11-23"]
-# targets_to_try = [:CDOM]
 
 for collection ∈ collections
     for target ∈ targets_to_try
@@ -209,8 +208,6 @@ for collection ∈ collections
     end
 end
 GC.gc()
-
-
 
 
 
@@ -302,5 +299,4 @@ end
 df_compare
 
 
-length(25:25:(462÷25)*25)
 
