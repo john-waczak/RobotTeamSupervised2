@@ -3,6 +3,7 @@ using ProgressMeter
 using Statistics
 using Random
 
+using Dates
 using CairoMakie
 using MintsMakieRecipes
 
@@ -146,8 +147,26 @@ nnr_mod = NNR(
 MODELS[:rfr] = (;
                 :longname => "Random Forest Regressor",
                 :savename => "RandomForestRegressor",
+                :packagename => "DecisionTree",
+                :suffix => "vanilla",
                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=150),
                 )
+
+MODELS[:rfr2] = (;
+                 :longname => "Random Forest Regressor",
+                 :savename => "RandomForestRegressor",
+                 :packagename => "DecisionTree",
+                 :suffix => "hpo1",
+                 :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=85),
+                )
+
+MODELS[:rfr3] = (;
+                 :longname => "Random Forest Regressor",
+                 :savename => "RandomForestRegressor",
+                 :packagename => "DecisionTree",
+                 :suffix => "hpo2",
+                 :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=100),
+                 )
 
 
 # 5. Fit each of the models to different subsets of features.
@@ -156,10 +175,11 @@ MODELS[:rfr] = (;
 
 # collections = ["11-23", "Full"]
 
-# targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490])]
+targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
 collections = ["11-23", "Full"]
-targets_to_try = [:CDOM]
 
+# targets_to_try = [:CDOM,]
+# collections = ["11-23",]
 
 for collection ∈ collections
     for target ∈ targets_to_try
@@ -189,14 +209,38 @@ for collection ∈ collections
 
         for (shortname, model) ∈ MODELS
             try
+                T1 = now()
+
                 train_folds(
                     Xtrain, ytrain,
                     Xtest, ytest,
                     model.longname, model.savename, model.mdl,
                     target_name, units, target_long,
                     outpath;
-                    suffix="vanilla",
+                    suffix=model.suffix,
+                    run_occam=false,
                 )
+
+                T2 = now()
+                Δtrain = round((T2 - T1).value / 1000 / 60, digits=3) # min
+                @warn "Training time: $(Δtrain) minutes"
+
+                GC.gc()
+
+                # @warn "HPO Train Start: $(now())"
+
+                # train_hpo(
+                #     Xtrain, ytrain,
+                #     Xtest, ytest,
+                #     model.longname, model.savename, model.packagename,
+                #     target_name, units, target_long,
+                #     model.mdl,
+                #     outpath;
+                #     nmodels=100
+                # )
+
+
+                # @warn "HPO Train Finish: $(now())"
 
                 GC.gc()
             catch e

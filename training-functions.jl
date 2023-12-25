@@ -10,11 +10,11 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:post_prune, values=[false, true])
                                                                       ],
                                          "RandomForestRegressor" => [
-                                                                      (hpname=:min_samples_leaf, lower=2, upper=100),
-                                                                      (hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
-                                                                      (hpname=:n_subfeatures, values=[-1,0]),
-                                                                      (hpname=:n_trees, values=[10, 25, 50, 75, 100, 125, 150]),
-                                                                      (hpname=:sampling_fraction, lower=0.65, upper=0.9)
+                                                                      #(hpname=:min_samples_leaf, lower=2, upper=100),
+                                                                      #(hpname=:max_depth, values=[-1, 2, 3, 5, 10, 20]),
+                                                                      (hpname=:n_subfeatures, lower=50, upper=450,),
+                                                                      (hpname=:n_trees, lower=50, upper=250),
+                                                                      (hpname=:sampling_fraction, lower=0.75, upper=0.95)
                                                                       ],
                                           ),
                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, lower=50, upper=100),
@@ -70,6 +70,7 @@ function train_folds(
     suffix="",
     rng=Xoshiro(42),
     nfolds=10,
+    run_occam=true,
     )
 
     @info "\tSetting up save paths"
@@ -271,78 +272,92 @@ function train_folds(
 
         # now retrain the model with a limited number of features
         # N_features_to_use = [1,2, 3, 4, 5,10,15,20,(25:25:(ncol(X)÷25)*25)...]
-        N_features_to_use = [10,25,50,100,150,300, nrow(fi_df)]
-        r2_vals = Float64[]
+        #N_features_to_use = [10,25,50,100,150,300, nrow(fi_df)]
 
-        for N_features in N_features_to_use
-            @info "\tEvaluating models for $(N_features) features..."
-            fi_n = @view fi_df[1:N_features, :]
+        if run_occam
 
-            pipe = Pipeline(
-                selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
+            # for tree models with n_subfeatures, we can't select
+            # fewer than the specified number of features...
+            # so we will need to be careful if we've done any
+            # hyperaprameter optimization
+            N_features_to_use = [50, 100, 150, 200, 250, 300, 350]
+            r2_vals = Float64[]
+
+            for N_features in N_features_to_use
+                @info "\tEvaluating models for $(N_features) features..."
+                fi_n = @view fi_df[1:N_features, :]
+
+                try
+                    pipe = Pipeline(
+                        selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
+                        model=mdl,
+                    )
+
+                    # mach_fi = machine(pipe, X_train, y_train);
+                    mach_fi = machine(pipe, Xtrain, ytrain);
+                    fit!(mach_fi, verbosity=0);
+
+                    ŷtest = MLJ.predict(mach_fi, Xtest)
+
+                    #push!(r2_vals, rsq(ŷ_test, y_test))
+                    push!(r2_vals, rsq(ŷtest, ytest))
+                catch e
+                    println(e)
+                end
+            end
+
+            # now let's plot the error as a function of number of features and pick the best
+            fig = Figure();
+            ax = Axis(fig[1,1], xlabel="N features", ylabel="test R² for $(target_long)")
+            lines!(ax, N_features_to_use, r2_vals, linewidth=3)
+            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).png"), fig)
+            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).pdf"), fig)
+
+
+            # train feature reduced model
+            N_final = N_features_to_use[argmax(r2_vals)]
+            @info "\tTraining model with $(N_final) features..."
+
+            fi_n = @view fi_df[1:N_final, :]
+            pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
                 model=mdl,
             )
 
-            # mach_fi = machine(pipe, X_train, y_train);
-            mach_fi = machine(pipe, Xtrain, ytrain);
-            fit!(mach_fi, verbosity=0);
+            mach_fi = machine(pipe, Xtrain, ytrain)
+            fit!(mach_fi, verbosity=0)
 
-            ŷtest = MLJ.predict(mach_fi, Xtest)
+            yhat_train = MLJ.predict(mach_fi, Xtrain)
+            yhat_test = MLJ.predict(mach_fi, Xtest)
 
-            #push!(r2_vals, rsq(ŷ_test, y_test))
-            push!(r2_vals, rsq(ŷtest, ytest))
+            # generate plots:
+            @info "\tGenerating plots"
+            fig = scatter_results(
+                ytrain,
+                yhat_train,
+                ytest,
+                yhat_test,
+                "$(target_long) ($(units))"
+            )
+            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).png"), fig)
+            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).pdf"), fig)
+
+
+            fig = quantile_results(
+                ytrain,
+                yhat_train,
+                ytest,
+                yhat_test,
+                "$(target_long) ($(units))"
+            )
+            save(joinpath(outpath_featuresreduced, "qq__$(suffix).png"), fig)
+            save(joinpath(outpath_featuresreduced, "qq__$(suffix).pdf"), fig)
+
+
+
+            @info "\t\t...saving"
+            MLJ.save(joinpath(outpath_featuresreduced, "$(savename)__$(suffix).jls"), mach_fi)
+
         end
-
-        # now let's plot the error as a function of number of features and pick the best
-        fig = Figure();
-        ax = Axis(fig[1,1], xlabel="N features", ylabel="test R² for $(target_long)")
-        lines!(ax, N_features_to_use, r2_vals, linewidth=3)
-        save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).pdf"), fig)
-
-
-        # train feature reduced model
-        @info "\tTraining model with $(argmax(r2_vals)) features..."
-        N_final = N_features_to_use[argmax(r2_vals)]
-
-        fi_n = @view fi_df[1:N_final, :]
-        pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
-            model=mdl,
-        )
-
-        mach_fi = machine(pipe, Xtrain, ytrain)
-        fit!(mach_fi, verbosity=0)
-
-        yhat_train = MLJ.predict(mach_fi, Xtrain)
-        yhat_test = MLJ.predict(mach_fi, Xtest)
-
-        # generate plots:
-        @info "\tGenerating plots"
-        fig = scatter_results(
-            ytrain,
-            yhat_train,
-            ytest,
-            yhat_test,
-            "$(target_long) ($(units))"
-        )
-        save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).pdf"), fig)
-
-
-        fig = quantile_results(
-            ytrain,
-            yhat_train,
-            ytest,
-            yhat_test,
-            "$(target_long) ($(units))"
-        )
-        save(joinpath(outpath_featuresreduced, "qq__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "qq__$(suffix).pdf"), fig)
-
-
-
-        @info "\t\t...saving"
-        MLJ.save(joinpath(outpath_featuresreduced, "$(savename)__$(suffix).jls"), mach_fi)
     end
 end
 
@@ -401,12 +416,12 @@ function train_basic(
 
     # generate scatterplot
     @info "\tCreating Plots"
-    fig = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    fig = scatter_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
     save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
     save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
 
     # generate quantile-quantile plot
-    fig = quantile_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    fig = quantile_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
     save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
     save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
 
@@ -416,13 +431,13 @@ function train_basic(
 
 
     res_dict = Dict()
-    res_dict["rsq_train"] = rsq(ŷtrain, y)
+    res_dict["rsq_train"] = rsq(ŷtrain, ytrain)
     res_dict["rsq_test"] = rsq(ŷtest, ytest)
-    res_dict["rmse_train"] = rmse(ŷtrain, y)
+    res_dict["rmse_train"] = rmse(ŷtrain, ytrain)
     res_dict["rmse_test"] = rmse(ŷtest, ytest)
-    res_dict["mae_train"] = mae(ŷtrain, y)
+    res_dict["mae_train"] = mae(ŷtrain, ytrain)
     res_dict["mae_test"] = mae(ŷtest, ytest)
-    res_dict["r_train"] = Statistics.cor(ŷtrain, y)
+    res_dict["r_train"] = Statistics.cor(ŷtrain, ytrain)
     res_dict["r_test"] = Statistics.cor(ŷtest, ytest)
     open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
         JSON.print(f, res_dict)
@@ -918,17 +933,14 @@ end
 
 
 function train_hpo(
-    X, y,
+    Xtrain, ytrain,
     Xtest, ytest,
     longname, savename, packagename,
     target_name, units, target_long,
     mdl,
     outpath;
-    nmodels=200,
+    nmodels=100,
     rng=Xoshiro(42),
-    unc_method=:simple_inductive,
-    train_ratio=(8/9),
-    unc_coverage=0.9,
     )
 
     suffix = "hpo"
@@ -958,8 +970,8 @@ function train_hpo(
 
     @info "\tVerifying scitype is satisfied"
     # verify scitype is satisfied
-    scitype(y) <: target_scitype(mdl)
-    scitype(X) <: input_scitype(mdl)
+    scitype(ytrain) <: target_scitype(mdl)
+    scitype(Xtrain) <: input_scitype(mdl)
 
 
 
@@ -979,12 +991,6 @@ function train_hpo(
     @info "\tPerforming hyperparameter optimization..."
 
 
-    Xhpo = vcat(X, Xtest)
-    yhpo = vcat(y, ytest)
-
-    rows_train = 1:nrow(X)
-    rows_test = (nrow(X)+1):nrow(Xhpo)
-
     # search for hyperparameters without doing conformal prediction
     tuning = RandomSearch(rng=rng)
     tuning_pipe = TunedModel(
@@ -998,10 +1004,10 @@ function train_hpo(
     )
 
 
-    mach = machine(tuning_pipe, X, y; cache=false)
+    mach = machine(tuning_pipe, Xtrain, ytrain; cache=false)
 
     @info "\tStarting training..."
-    fit!(mach, verbosity=0)
+    fit!(mach) #, verbosity=0)
 
     @info "\t...\tFinished training"
 
@@ -1031,41 +1037,25 @@ function train_hpo(
     end
 
 
-
     # now we want to train and evaluate a final model w/ conformal prediction
     mdl_final = mdl
     for (key, val) in params_dict
         setproperty!(mdl_final, Symbol(key), val)
     end
 
-    conf_model = conformal_model(mdl_final; method=unc_method, train_ratio=train_ratio, coverage=unc_coverage)
-
     # fit the machine
     @info "\tTraining final hpo model"
-    mach = machine(conf_model, X, y)
+    mach = machine(mdl_final, Xtrain, ytrain)
     fit!(mach, verbosity=0)
 
     # generate predictions
     @info "\tGenerating predictions"
-    ŷtrain = ConformalPrediction.predict(mach, X);
-    ŷtest = ConformalPrediction.predict(mach, Xtest);
-
-    # compute coverage on test set
-    cov = emp_coverage(ŷtest, ytest);
-    @info "\tEmpirical coverage on test set: $(round(cov, digits=3))"
-
-
-    # convert to predictions + uncertainties
-    ϵtrain = [abs(f[2] - f[1]) / 2 for f ∈ ŷtrain];
-    ŷtrain = mean.(ŷtrain);
-
-    ϵtest = [abs(f[2] - f[1]) / 2 for f ∈ ŷtest];
-    ŷtest = mean.(ŷtest);
-
+    ŷtrain = MLJ.predict(mach, Xtrain);
+    ŷtest = MLJ.predict(mach, Xtest);
 
     # generate scatterplot
     @info "\tCreating Plots"
-    fig = scatter_results(y, ŷtrain, ϵtrain, ytest, ŷtest, ϵtest, "$(target_long) ($(units))")
+    fig = scatter_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
     save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
     save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
 
@@ -1074,10 +1064,8 @@ function train_hpo(
     save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
     save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
 
-
     # save the model println("\tSaving the model")
     MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
-
 
     res_dict = Dict()
     res_dict["rsq_train"] = rsq(ŷtrain, y)
@@ -1088,11 +1076,27 @@ function train_hpo(
     res_dict["mae_test"] = mae(ŷtest, ytest)
     res_dict["r_train"] = Statistics.cor(ŷtrain, y)
     res_dict["r_test"] = Statistics.cor(ŷtest, ytest)
+
+    let
+        @info "\tEstimating uncertainty with conformal prediction"
+        conf_model = conformal_model(mdl_final; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
+        mach_conf = machine(conf_model, Xtrain, ytrain)
+        fit!(mach_conf, verbosity=0)
+
+        yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
+        cov = emp_coverage(yhat_conf, ytest);
+        @info "\tEmpirical coverage: $(cov)"
+        res_dict["emp_cov"] = cov
+
+        Δy = (yhat_conf[1][2] - yhat_conf[1][1])/2
+        res_dict["uncertainty"] = Δy
+        @info "\tEstimated uncertainty: $(Δy ) $(units)"
+    end
+
     res_dict["cov"] = cov
     open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
         JSON.print(f, res_dict)
     end
-
 end
 
 

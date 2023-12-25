@@ -31,7 +31,7 @@ include("./config.jl")
 include("./viz.jl")
 
 
-outpath = "/Volumes/LabData/RobotTeam/supervised"
+outpath = "/Users/johnwaczak/data/robot-team/supervised"
 
 # collections = ["11-23", "12-09", "12-10", "Full"]
 collections = ["11-23", "Full"]

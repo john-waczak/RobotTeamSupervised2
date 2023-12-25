@@ -278,7 +278,7 @@ end
 
 function get_n_bins(x)
     # bin_width = 2*iqr(x)/(length(x)^(1/3))  # Freedman-Diaconis rule
-    bin_width = 3.49*std(x)/(length(y)^(1/3)) # Scott's rule
+    bin_width = 3.49*std(x)/(length(x)^(1/3)) # Scott's rule
     xmin, xmax = extrema(x)
     nbins = round(Int, (xmax-xmin)/bin_width)
 
