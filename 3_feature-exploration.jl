@@ -255,8 +255,7 @@ GC.gc()
 
 
 
-
-function make_summary_table(modelname, ending)
+function make_summary_table(collection, savename, suffix)
     res_dicts = Dict[]
 
     for target in targets_to_try
@@ -264,10 +263,11 @@ function make_summary_table(modelname, ending)
         target_long = targets_dict[target][2]
         units = targets_dict[target][1]
 
-        res_path = joinpath(datapath, target_name, "models", modelname, "default", modelname*"__vanilla"*ending*".json")
+        res_path = joinpath(datapath, collection, target_name, "models", savename, "default", savename*"__$(suffix).json")
+
+        @assert ispath(res_path)
 
         res_string = read(res_path, String)
-
         res_dict = JSON.parse(res_string)
 
         try
@@ -276,71 +276,45 @@ function make_summary_table(modelname, ending)
             end
             res_dict["target"] = target_name
             res_dict["target_long"] = targets_dict[Symbol(target_name)][2]
-            push!(res_dicts, res_dict
+            push!(res_dicts, res_dict)
         catch e
             println(target_name)
         end
+
     end
 
     df_res = DataFrame(res_dicts)
 
-    sort!(df_res, :rsq_test; rev=true)
-    select!(df_res, [:target_long, :target, :rsq_test, :rsq_train, :rmse_test, :rmse_train, :mae_test, :mae_train, :cov])
+    sort!(df_res, :rsq_mean; rev=true)
+
+    select!(df_res, [:target_long, :target, :rsq_mean, :rsq_std, :rmse_mean, :rmse_std, :mae_mean, :mae_std, :r_mean, :r_std, :uncertainty, :emp_cov])
     rename!(df_res,
             "target_long" => "Target",
             "target" => "Var Name",
-            "rsq_test" => "R² test",
-            "rsq_train" => "R² train",
-            "rmse_test" => "RMSE test",
-            "rmse_train" => "RMSE train",
-            "mae_test" => "MAE test",
-            "mae_train" => "MAE train",
-            "r_test" => "R test",
-            "r_train" => "R train",
-            "cov" => "Empirical Coverage"
+            "rsq_mean" => "R² mean",
+            "rsq_std" => "R² std",
+            "rmse_mean" => "RMSE mean",
+            "rmse_std" => "RMSE std",
+            "mae_mean" => "MAE mean",
+            "mae_std" => "MAE std",
+            "r_mean" => "R mean",
+            "r_std" => "R std",
+            "uncertainty" => "Estimated Uncertainty",
+            "emp_cov" => "Empirical Coverage"
             )
 
     return df_res
 end
 
 
-df_xgbr = make_summary_table("XGBoostRegressor", "")
-df_xgbr_no_metrics = make_summary_table("XGBoostRegressor", "-no-metrics")
-df_evtr = make_summary_table("EvoTreeRegressor", "")
-df_evtr_no_metrics = make_summary_table("EvoTreeRegressor", "-no-metrics")
-df_rfr = make_summary_table("RandomForestRegressor", "")
-df_rfr_no_metrics = make_summary_table("RandomForestRegressor", "-no-metrics")
+collections
+suffixes = [model.suffix for (key, model) in MODELS]
 
 
-
-CSV.write(joinpath(datapath, "XGBoostRegressor-vanilla_results.csv"), df_xgbr)
-CSV.write(joinpath(datapath, "XGBoostRegressor-vanilla-no-metrics_results.csv"), df_xgbr_no_metrics)
-CSV.write(joinpath(datapath, "EvoTreeRegressor-vanilla_results.csv"), df_evtr)
-CSV.write(joinpath(datapath, "EvoTreeRegressor-vanilla-no-metrics_results.csv"), df_evtr_no_metrics)
-CSV.write(joinpath(datapath, "RandomForestRegressor-vanilla_results.csv"), df_rfr)
-CSV.write(joinpath(datapath, "RandomForestRegressor-vanilla-no-metrics_results.csv"), df_rfr_no_metrics)
-
-
-
-df_compare = DataFrame()
-df_compare[:, "Var Name"] = df_xgbr[:, "Var Name"]
-df_compare[:, "R² xgbr"] = df_xgbr[:, "R² test"]
-df_compare[:, "R² xgbr no metrics"] = zeros(nrow(df_compare))
-df_compare[:, "R² evtr"] = zeros(nrow(df_compare))
-df_compare[:, "R² evtr no metrics"] = zeros(nrow(df_compare))
-df_compare[:, "R² rfr"] = zeros(nrow(df_compare))
-df_compare[:, "R² rfr no metrics"] = zeros(nrow(df_compare))
-
-
-for row in eachrow(df_compare)
-    row["R² xgbr no metrics"] = df_xgbr_no_metrics[df_xgbr_no_metrics[!,"Var Name"] .== row["Var Name"], "R² test"][1]
-    row["R² evtr"] = df_evtr[df_evtr[!,"Var Name"] .== row["Var Name"], "R² test"][1]
-    row["R² evtr no metrics"] = df_evtr_no_metrics[df_evtr_no_metrics[!,"Var Name"] .== row["Var Name"], "R² test"][1]
-    row["R² rfr"] = df_rfr[df_rfr[!,"Var Name"] .== row["Var Name"], "R² test"][1]
-    row["R² rfr no metrics"] = df_rfr_no_metrics[df_rfr_no_metrics[!,"Var Name"] .== row["Var Name"], "R² test"][1]
+for collection in collections
+    for suffix in suffixes
+        df = make_summary_table(collection, "RandomForestRegressor", suffix)
+        CSV.write(joinpath(datapath, collection, "RandomForestRegressor-results__$(suffix).csv"), df)
+    end
 end
-
-df_compare
-
-
 
