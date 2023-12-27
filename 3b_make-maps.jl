@@ -24,7 +24,6 @@ cmk.update_theme!(
 
 
 Δx = 0.1
-suffix = "hpo1"
 
 include("./config.jl")
 include("./viz.jl")
@@ -50,22 +49,11 @@ e= -97.712413
 satmap = get_background_satmap(w,e,s,n)
 
 
-# set up relevant paths
-collection = "11-23"
-hsi_11_23 = joinpath(hsipath, collection)
-flight = "Scotty_2"
-scotty_2 = joinpath(hsi_11_23, flight)
-
-h5_files = [joinpath(scotty_2, f) for f in readdir(scotty_2) if endswith(f, ".h5")]
-
 # let's add a function to sort them into numerical order
 function sort_files_numerical!(flist)
     idx_sort = sortperm([lpad(split(s[1], "-")[end], 2, "0") for s in split.(flist, ".")])
     flist .= flist[idx_sort]
 end
-
-sort_files_numerical!(h5_files)
-
 
 
 # let's open one and extract the data
@@ -74,7 +62,6 @@ function in_water(Datacube, varnames; threshold=0.25)
     idx_mndwi = findfirst(varnames .== "mNDWI")
     return findall(Datacube[idx_mndwi,:,:] .> threshold)
 end
-
 
 
 function get_data_for_pred(h5path, col_names)
@@ -95,50 +82,67 @@ function get_data_for_pred(h5path, col_names)
     ij_water = in_water(Data, varnames)
 
     Data_pred = Data[:, ij_water]
-    X_hsi = Tables.table(Data_pred', header=names(X))
+    X_hsi = Tables.table(Data_pred', header=col_names)
 
     return X_hsi, Y, ij_water, Latitudes, Longitudes
 end
 
 
 RFR = @load RandomForestRegressor pkg=DecisionTree
-model = "RandomForestRegressor"
-model_collections = ["11-23", "Full"]
-suffixes = ["vanilla", "hpo1", "hpo2"]
+ETR = @load EvoTreeRegressor pkg=EvoTrees
 
-targets_to_map = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
+model_collections = ["Full"]
+# suffixes = ["vanilla", "hpo1", "hpo2", "vanilla"]
+# ml_models = ["RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor", "EvoTreeRegressor"]
 
 
-# model_collections = ["11-23"]
-# suffixes = ["vanilla"]
+suffixes = ["vanilla",]
+ml_models = ["RandomForestRegressor",]
+
+
+
+# targets_to_map = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490, :TRYP])]
+targets_to_map = [:CDOM, :CO, :SpCond, :HDO, :bgm, :Na, :Cl]
 # targets_to_map = [:CDOM]
 
+# set up relevant paths
+hsi_11_23 = joinpath(hsipath, "11-23")
+hsi_12_09 = joinpath(hsipath, "12-09")
+hsi_12_10 = joinpath(hsipath, "12-10")
 
-# h5_files_final = h5_files
+h5_files_11_23 = sort_files_numerical!([joinpath(hsi_11_23, "Scotty_2", f) for f in readdir(joinpath(hsi_11_23, "Scotty_2")) if endswith(f, ".h5")])
+h5_files_11_23 = [f for f in h5_files_11_23 if !any(occursin.(["2-9", "2-16", "2-20", "2-21", "2-22", "2-23"], f))]
 
-h5_files_final = [f for f in h5_files if !any(occursin.(["2-16","2-9"], split(f, "/")[end]))]
+h5_files_12_09 = sort_files_numerical!([joinpath(hsi_12_09, "NoDye_2", f) for f in readdir(joinpath(hsi_12_09, "NoDye_2")) if endswith(f, ".h5")])
+
+h5_files_12_10 = sort_files_numerical!([joinpath(hsi_12_10, "NoDye_2", f) for f in readdir(joinpath(hsi_12_10, "NoDye_2")) if endswith(f, ".h5")])
+
+h5_files = [h5_files_11_23, h5_files_12_09, h5_files_12_10]
+h5_dates = ["11-23", "12-09", "12-10"]
+
+collection = "Full"
+
 
 for target ∈ targets_to_map
-    # target=:CDOM
-
     target_name = String(target)
     target_long = targets_dict[target][2]
     units = targets_dict[target][1]
 
-    @info "Loading $(target) data"
-    data_path = joinpath(datapath, collection, target_name, "data")
-    X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
-    y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
-    df_lat_long= CSV.read(joinpath(data_path, "lat_lon.csv"), DataFrame)
-    latitudes = df_lat_long.latitudes
-    longitudes = df_lat_long.longitudes
+    for i ∈ 1:length(h5_dates)
+        h5_date = h5_dates[i]
+        h5_files_to_use = h5_files[i]
 
+        @info "Loading $(target) data for $(h5_date)"
+        data_path = joinpath(datapath, h5_date, target_name, "data")
+        X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
+        y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
+        df_lat_long= CSV.read(joinpath(data_path, "lat_lon.csv"), DataFrame)
+        latitudes = df_lat_long.latitudes
+        longitudes = df_lat_long.longitudes
 
-    for collection ∈ model_collections
-        for suffix ∈ suffixes
-
-            # collection = "11-23"
-            # suffix = "vanilla"
+        for j ∈ 1:length(suffixes)
+            suffix = suffixes[j]
+            model = ml_models[j]
 
             modelpath = joinpath(datapath, collection, target_name, "models", model, "default", model*"__$(suffix).jls")
             @assert ispath(modelpath)
@@ -150,13 +154,12 @@ for target ∈ targets_to_map
             yhat_boat = predict(mach, X)
 
 
-
-            outpath = joinpath(mapspath, collection, target_name, "11-23", flight)
+            outpath = joinpath(mapspath, collection, target_name, h5_date)
             if !ispath(outpath)
                 mkpath(outpath)
             end
 
-            savepath = joinpath(outpath, suffix)
+            savepath = joinpath(outpath, model * "__" * suffix)
             ispath(savepath)
             if !ispath(savepath)
                 mkpath(savepath)
@@ -164,18 +167,27 @@ for target ∈ targets_to_map
 
 
             fig_tot = cmk.Figure(px_per_unit=5);
-            ax_tot = cmk.Axis(fig_tot[1,1], xlabel="longitude", ylabel="latitude");
+            ax_tot = cmk.Axis(fig_tot[1,1], xlabel="longitude", ylabel="latitude", title="Collection Date: $(h5_date)");
             bg_tot = cmk.heatmap!(ax_tot, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
-            q_low = quantile(y, 0.01)
-            q_mid = quantile(y, 0.5)
-            q_high = quantile(y, 0.99)
-            clims = (q_low, q_high)
-            cm = cmk.cgrad(:vik, [0.0, (q_mid-q_low)/(q_high-q_low), 1.0])
+            # q_01 = quantile(y, 0.01)
+            q_05 = quantile(y, 0.05)
+            # q_25 = quantile(y, 0.25)
+            # q_50 = quantile(y, 0.5)
+            # q_75 = quantile(y, 0.75)
+            q_95 = quantile(y, 0.95)
+            # q_99 = quantile(y, 0.99)
+
+            clims = (q_05, q_95)
+
+            # cm = cmk.cgrad(:vik, [0.0, (q_50-q_1)/(q_99-q_1), 1.0])
+            # cm = cmk.cgrad(:inferno, [0.0, (q_25-q_01)/(q_99-q_01), (q_50-q_01)/(q_99-q_01), (q_75-q_01)/(q_99-q_01), 1.0])
+            cm = cmk.cgrad(:jet)
+
 
             nskip=1
 
-            @showprogress for h5path in h5_files_final
+            @showprogress for h5path in h5_files_to_use
                 map_name = split(split(h5path, "/")[end], ".")[1]
 
                 fig = cmk.Figure();
@@ -186,6 +198,12 @@ for target ∈ targets_to_map
 
                 Y_pred = predict(mach, X_hsi)
                 Y[ij_water] .= Y_pred
+
+                # deal with this one HSI
+                if h5_date == "11-23" && occursin("2-19", h5path)
+                    ij_skip = [idx for idx in 1:length(ij_water) if Latitudes[ij_water[idx]] <= 33.7016]
+                    Y_pred[ij_skip] .= NaN
+                end
 
                 sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=3)
 
@@ -209,16 +227,12 @@ for target ∈ targets_to_map
             cmk.ylims!(ax_tot, 33.70075, 33.7035)
             cb = cmk.Colorbar(fig_tot[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm)
 
-            fig_tot
+            save(joinpath(outpath, model * "__" * suffix * ".png"), fig_tot)
 
-            save(joinpath(outpath, flight * "__" * suffix * ".png"), fig_tot)
-
-
+            # add boat data and save again
             sc = cmk.scatter!(ax_tot, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=0.2, strokecolor=:black);
 
-            save(joinpath(outpath, flight * "__" * suffix * "-w-boat.png"), fig_tot)
-
-            fig_tot
+            save(joinpath(outpath, model * "__" * suffix * "-w-boat.png"), fig_tot)
         end
     end
 end

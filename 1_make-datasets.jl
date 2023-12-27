@@ -53,7 +53,9 @@ end
 
 inpaths = Dict(
     "11-23" => "/Users/johnwaczak/data/robot-team/finalized/11-23",
-    "Full" => "/Users/johnwaczak/data/robot-team/finalized/Full"
+    "Full" => "/Users/johnwaczak/data/robot-team/finalized/Full",
+    "12-09" => "/Users/johnwaczak/data/robot-team/finalized/12-09",
+    "12-10" => "/Users/johnwaczak/data/robot-team/finalized/12-10",
 )
 
 # inpath = "/Volumes/LabData/RobotTeam/finalized/Full"
@@ -203,8 +205,8 @@ function make_datasets(data, target, feature_names, target_names, ignorecols)
 end
 
 
-data, feature_names, target_names, ignorecols = get_data(inpaths["11-23"])
-(y,X) = make_datasets(data, "CDOM", feature_names, target_names, ignorecols)
+# data, feature_names, target_names, ignorecols = get_data(inpaths["11-23"])
+# (y,X) = make_datasets(data, "CDOM", feature_names, target_names, ignorecols)
 
 
 for (collection, fpath) in inpaths

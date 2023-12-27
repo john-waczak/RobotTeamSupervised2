@@ -83,17 +83,17 @@ use_metrics = false
 #nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50,50), σ=Flux.relu)
 # nnr_mod = NNR(builder=MLJFlux.MLP(hidden=(50,50,50,50), σ=Flux.relu)
 
-opt = Flux.Optimise.ADAM()
-# match sklearn.MLPRegressor default parameters
-nnr_mod = NNR(
-    builder=MLJFlux.MLP(hidden=(100,), σ=Flux.relu),
-    batch_size=200,
-    optimiser=Flux.Optimise.ADAM(0.001),
-    lambda = 0.0,
-    alpha = 0.0001,
-    rng=rng,
-    epochs=500,
-)
+# opt = Flux.Optimise.ADAM()
+# # match sklearn.MLPRegressor default parameters
+# nnr_mod = NNR(
+#     builder=MLJFlux.MLP(hidden=(100,), σ=Flux.relu),
+#     batch_size=200,
+#     optimiser=Flux.Optimise.ADAM(0.001),
+#     lambda = 0.0,
+#     alpha = 0.0001,
+#     rng=rng,
+#     epochs=500,
+# )
 
 # nnr_mod = NNR(
 # #     builder=MLJFlux.Short(n_hidden=250, dropout=0.1, σ=Flux.relu),
@@ -129,12 +129,13 @@ nnr_mod = NNR(
 #                  :mdl=>XGBR(),
 #                  )
 
-# MODELS[:etr] = (;
-#                 :longname=>"Evo Tree Regressor",
-#                 :savename=>"EvoTreeRegressor",
-#                 :packagename => "EvoTrees",
-#                 :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
-#                 )
+MODELS[:etr] = (;
+                :longname=>"Evo Tree Regressor",
+                :savename=>"EvoTreeRegressor",
+                :packagename => "EvoTrees",
+                :suffix => "vanilla",
+                :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
+                )
 
 
 # MODELS[:dtr] = (;
@@ -307,14 +308,89 @@ function make_summary_table(collection, savename, suffix)
 end
 
 
+
+function generate_tex_table(df)
+    # target name (unit) # R^2 # RMSE # MAE # Uncertainty # Empirical Coverage #
+
+
+    out = "\\begin{table}[H]\n"
+    out = out * "  \\caption{This is a table caption.\\label{tab:fit-results}}\n"
+    out = out * "  \\begin{adjustwidth}{-\\extralength}{0cm}\n"
+    out = out * "  \\newcolumntype{C}{>{\\centering\\arraybackslash}X}\n"
+    out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCC}\n"
+    out = out * "    \\toprule\n"
+    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2\$}	& \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty (90\\% CI)} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
+    out = out * "    \\midrule\n"
+
+    for row in eachrow(df)
+        target_tex = targets_latex[Symbol(row["Var Name"])]
+
+        r2 = string(round(row["R² mean"], sigdigits=3)) * " ± " * string(round(row["R² std"], sigdigits=2))
+        RMSE = string(round(row["RMSE mean"], sigdigits=3)) * " ± " * string(round(row["RMSE std"], sigdigits=2))
+        MAE = string(round(row["MAE mean"], sigdigits=3)) * " ± " * string(round(row["MAE std"], sigdigits=2))
+        unc = string(round(row["Estimated Uncertainty"], sigdigits=2))
+        cov = string(round(row["Empirical Coverage"]*100, sigdigits=3))
+
+        out = out * "    $(target_tex) & $(r2) & $(RMSE) & $(MAE) & $(unc) & $(cov)\\\\\n"
+        out = out * "    \\midrule\n"
+    end
+
+    out = out * "    \\bottomrule\n"
+    out = out * "  \\end{tabularx}\n"
+    out = out * "  \\end{adjustwidth}\n"
+    out = out * "\\end{table}\n"
+
+    return out
+end
+
+
+
 collections
 suffixes = [model.suffix for (key, model) in MODELS]
 
 
+
 for collection in collections
-    for suffix in suffixes
-        df = make_summary_table(collection, "RandomForestRegressor", suffix)
-        CSV.write(joinpath(datapath, collection, "RandomForestRegressor-results__$(suffix).csv"), df)
+    for (mdl_name, mdl_dict) in MODELS
+        suffix = mdl_dict[:suffix]
+        mdl_name = mdl_dict[:savename]
+
+        df = make_summary_table(collection, mdl_name, suffix)
+        CSV.write(joinpath(datapath, collection, "$(mdl_name)-results__$(suffix).csv"), df)
+
+
+        open(joinpath(datapath, collection, "$(mdl_name)-results__$(suffix).tex"), "w") do f
+            println(f, generate_tex_table(df))
+        end
     end
 end
 
+
+
+# generate summary df with best of all models
+models = ["RFR $(s)" for s in unique(suffixes)]
+push!(models, "ETR vanilla")
+
+dfs = [CSV.read(joinpath(datapath, "Full", "RandomForestRegressor-results__$(suffix).csv"), DataFrame) for suffix in unique(suffixes)]
+push!(dfs, CSV.read(joinpath(datapath, collection, "EvoTreeRegressor-results__vanilla.csv"), DataFrame))
+
+
+df_out = []
+
+for target in targets_to_try
+    idx_winner = argmax([df[df[:, "Var Name"] .== string(target), "R² mean"]] for df in dfs)
+    row = dfs[idx_winner][findfirst(dfs[idx_winner][:, "Var Name"] .== string(target)), :]
+
+    df_row = DataFrame(row)
+    df_row[!, "model"] = [models[idx_winner]]
+    push!(df_out, df_row)
+end
+
+df_out = vcat(df_out...)
+sort!(df_out, "R² mean"; rev=true)
+
+CSV.write(joinpath(datapath, "Full", "Summary-results.csv"), df_out)
+tex_str = generate_tex_table(df_out)
+open(joinpath(datapath, "Full", "Summary-results.tex"), "w") do f
+    println(f, tex_str)
+end
