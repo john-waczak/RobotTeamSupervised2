@@ -109,10 +109,14 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 %\conference{} % An extended version of a conference paper
 
 % Abstract (Do not insert blank lines, i.e. \\) 
-\abstract{\textcolor{red}{A single paragraph of about 200 words maximum. For research articles, abstracts should give a pertinent overview of the work. We strongly encourage authors to use the following style of structured abstracts, but without headings: (1) Background: place the question addressed in a broad context and highlight the purpose of the study; (2) Methods: describe briefly the main methods or treatments applied; (3) Results: summarize the article's main findings; (4) Conclusions: indicate the main conclusions or interpretations. The abstract should be an objective representation of the article, it must not contain results which are not presented and substantiated in the main text and should not exaggerate the main conclusions.}}
+\abstract{\textcolor{red}{Advances in hyperspectral imaging technology are enabling significant improvements in the spectral resolution of remote sensing data products with a plethora of new satellites either in development or soon to be launched. Utilizing hyperspectral data for environmental assessment requires high quality in-situ data that is both difficult to collect and difficult to align with remote sensing data products due to orbital-dependent revisit times and occlusion by weather and cloud cover. In this study, present the results of a series of surveys.}}
+
+% A robust characterization of model uncertainties is critical for any time-sensitive or dangerous application...To that end we employ a combination of model stacking together with Conformal Prediction by which we are able to blend together a variety of ML models while simultaneously estimating confidence intervals for the resulting predictions. 
+
+% A single paragraph of about 200 words maximum. For research articles, abstracts should give a pertinent overview of the work. We strongly encourage authors to use the following style of structured abstracts, but without headings: (1) Background: place the question addressed in a broad context and highlight the purpose of the study; (2) Methods: describe briefly the main methods or treatments applied; (3) Results: summarize the article's main findings; (4) Conclusions: indicate the main conclusions or interpretations. The abstract should be an objective representation of the article, it must not contain results which are not presented and substantiated in the main text and should not exaggerate the main conclusions
 
 % Keywords
-\keyword{\textcolor{red}{keyword 1; keyword 2; keyword 3 (List three to ten pertinent keywords specific to the article; yet reasonably common within the subject discipline.)}}
+\keyword{\textcolor{red}{Hyperspectral Imaging; Machine Learning; Robotic Teams; UAV;}}
 
 % The fields PACS, MSC, and JEL may be left empty or commented out if not applicable
 %\PACS{J0101}
@@ -164,6 +168,55 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+
+- First sentence about amount of remote sensing data generated per year w/ citation and a forecast for how much it will increase. 
+- Second sentence about the lack of in-situ reference data (this is the limitation we can fill) 
+- Further limitations of current remote sensing data products (spectral resolution, spatial resolution, observation frequency)
+- Discuss newly launched and and soon-to-be-launched satellites with HSI capabilities
+- Discuss use of multi-sepctral imagery for environmental studies
+    - Generation of spectral indices like the NDVI and others which have shown to be helpful for environmental characterization
+    - Cite David's previous CDOM paper that used the Atlantic shipping data.
+- Discuss use of ML in remote sensing/environmental assessment applications. Here, the possibilities are limited by the availability of high-quality reference data which is why many remote sensing ML models employ unsupervised methods to enable pixel classification (i.e. surface type, cloudiness fraction, etc...)
+- Outline need for in-situ reference data to calibrate HSI data products
+- Autonomous teams are perfect for this application due to their transportability, rapid deployment, and elastic configuration
+- Give examples of drone use for smart agriculture, etc... 
+- Give examples of autonomous boat use for water studies, cleanup, etc... 
+- Describe our work to create a robotic team which can do all of this... 
+
+
+% https://gisgeography.com/hyperspectral-imaging/
+% https://hyperspectral.azavea.com/
+% https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library/-/asset_publisher/1dO7RF5fJMbd/content/sentinel-high-level-operations-plan  <-- for amount of data produced by sentinel
+The main areas of usage for hyperspectral imagery can be categorized into 8 groups. This includes vegetation, agriculture, geology, soil, water resources, disaster, and land use.
+
+The underlying principle is that it improves any type of classification. For example, you can get more detail for geologic surface composition. The same is true for vegetation types, soil classes, and land cover too.
+
+Hyperspectral imaging helps identify pests for crop management. Water resources are about understanding bathymetry, water quality, and chemistry. And it’s been used for disaster management such as prevention and post-monitoring
+
+
+Step 1: Introduce your topic
+Step 2: Describe the background
+Step 3: Establish your research problem
+Step 4: Specify your objective(s)
+Step 5: Map out your paper
+
+
+The introduction should answer three important questions:
+1. What am I writing about?
+2. Why is it important?
+3. What do I want the reader to know about it?
+
+Step 1: Establish a Territory
+"In recent years..." or "researchers have become interested..." 
+
+Step 2: Establish a Niche
+- Identify a gap that your research fills 
+
+
+
+In (cite last robot team paper) we outlined a paradigmatic approach to the generation of remote sensing data sets for water-based environmental studies by employing a coordinated team of autonomous sensing sentinels. In this paper, we demonstrate the use of this platform across multiple observation periods...
+
+
 
 Remote sensing data products 
 
@@ -221,6 +274,50 @@ Overview of what we demonstrate here...
 \subsection{Machine Learning}
 \subsubsection{Data Pre-processing and Feature Generation}
 Add a table of the Features we used here...
+
+\begin{table}[H]
+  \caption{Dervied spectral indices used as additional model filters. \label{tab:spectral-features}}
+  \begin{adjustwidth}{-\extralength}{0cm}
+  \newcolumntype{C}{>{\centering\arraybackslash}X}
+  \begin{tabularx}{\fulllength}{CCCCCC}
+    \toprule
+    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)}\\
+    \midrule
+    Temperature (°C) & 0.999 ± 5.1e-5 & 0.0546 ± 0.0022 & 0.0316 ± 0.0015 & ± 0.084 & 89.7\\
+    \midrule
+    Conductivity ($\mu$S/cm) & 0.999 ± 0.00011 & 0.888 ± 0.067 & 0.497 ± 0.025 & ± 1.3 & 91.5\\
+    \midrule
+    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 0.00031 & 0.544 ± 0.058 & 0.267 ± 0.013 & ± 0.72 & 89.9\\
+    \midrule
+    Dissolved Oxygen (mg/l) & 0.998 ± 0.00015 & 0.0931 ± 0.004 & 0.055 ± 0.0022 & ± 0.14 & 88.5\\
+    \midrule
+    Salinity (PSS) & 0.995 ± 0.00061 & 0.00124 ± 6.2e-5 & 0.000432 ± 2.6e-5 & ± 0.0009 & 90.1\\
+    \midrule
+    Tryptophan (ppb) & 0.99 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
+    \midrule
+    pH & 0.988 ± 0.0018 & 0.0232 ± 0.0019 & 0.0119 ± 0.00045 & ± 0.032 & 92.5\\
+    \midrule
+    $\mathrm{Na^+} (mg/l)$ & 0.982 ± 0.0034 & 9.01 ± 0.88 & 4.17 ± 0.22 & ± 11.0 & 90.8\\
+    \midrule
+    $\mathrm{Cl^-}$ (mg/l) & 0.982 ± 0.0054 & 1.96 ± 0.28 & 1.0 ± 0.066 & ± 2.3 & 89.7\\
+    \midrule
+    Blue-Green Algae [Phycoerythrin] (ppb) & 0.939 ± 0.017 & 3.12 ± 0.43 & 0.84 ± 0.065 & ± 1.8 & 91.4\\
+    \midrule
+    CDOM (ppb) & 0.934 ± 0.02 & 0.58 ± 0.093 & 0.219 ± 0.013 & ± 0.46 & 90.3\\
+    \midrule
+    Optical Brighteners (ppb) & 0.92 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
+    \midrule
+    $\mathrm{NO_3^-} (mg/l-N)$ & 0.89 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
+    \midrule
+    Crude Oil (ppb) & 0.89 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
+    \bottomrule
+  \end{tabularx}
+  \end{adjustwidth}
+\end{table}
+
+
+
+
 \subsubsection{Models Employed}
 Discuss random forests
 \subsubsection{Hyperparameter Optimization}
@@ -234,18 +331,50 @@ Discuss the parameters we optimize and the evaluation strategy using 10-fold cro
 
 \subsection{Modeling Results}
 
-\begin{table}[H] 
-\caption{This is a table caption.\label{tab:fit-results}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCCCCC}
-\toprule
-\textbf{Target (units)}	& \textbf{$\text{R}^2$}	& \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty (90\% CI)} & \textbf{Empirical Coverage (\%)}\\
-\midrule
-$\mathrm{Na}^+$     & 0.964 $\pm$ 0.006 & 8.10 $\pm$ 0.68 & 5.10 $\pm$ 0.26 & 11.7 & 88.5 \\
-Dissolved Oxygen    & 0.958 $\pm$ 0.005 & 0.119 $\pm$  & 5.10 $\pm$ 0.26 & 11.7 & 88.5 \\
-\bottomrule
-\end{tabularx}
+
+
+\begin{table}[H]
+  \caption{Summary of fitting statistics for each target measurement. Values were evaluated using 10-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the validation holdout set. The empirical coverage is the percentage of predictions in the holdout testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
+  \begin{adjustwidth}{-\extralength}{0cm}
+  \newcolumntype{C}{>{\centering\arraybackslash}X}
+  \begin{tabularx}{\fulllength}{CCCCCC}
+    \toprule
+    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)}\\
+    \midrule
+    Temperature (°C) & 0.999 ± 5.1e-5 & 0.0546 ± 0.0022 & 0.0316 ± 0.0015 & ± 0.084 & 89.7\\
+    \midrule
+    Conductivity ($\mu$S/cm) & 0.999 ± 0.00011 & 0.888 ± 0.067 & 0.497 ± 0.025 & ± 1.3 & 91.5\\
+    \midrule
+    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 0.00031 & 0.544 ± 0.058 & 0.267 ± 0.013 & ± 0.72 & 89.9\\
+    \midrule
+    Dissolved Oxygen (mg/l) & 0.998 ± 0.00015 & 0.0931 ± 0.004 & 0.055 ± 0.0022 & ± 0.14 & 88.5\\
+    \midrule
+    Salinity (PSS) & 0.995 ± 0.00061 & 0.00124 ± 6.2e-5 & 0.000432 ± 2.6e-5 & ± 0.0009 & 90.1\\
+    \midrule
+    Tryptophan (ppb) & 0.99 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
+    \midrule
+    pH & 0.988 ± 0.0018 & 0.0232 ± 0.0019 & 0.0119 ± 0.00045 & ± 0.032 & 92.5\\
+    \midrule
+    $\mathrm{Na^+} (mg/l)$ & 0.982 ± 0.0034 & 9.01 ± 0.88 & 4.17 ± 0.22 & ± 11.0 & 90.8\\
+    \midrule
+    $\mathrm{Cl^-}$ (mg/l) & 0.982 ± 0.0054 & 1.96 ± 0.28 & 1.0 ± 0.066 & ± 2.3 & 89.7\\
+    \midrule
+    Blue-Green Algae [Phycoerythrin] (ppb) & 0.939 ± 0.017 & 3.12 ± 0.43 & 0.84 ± 0.065 & ± 1.8 & 91.4\\
+    \midrule
+    CDOM (ppb) & 0.934 ± 0.02 & 0.58 ± 0.093 & 0.219 ± 0.013 & ± 0.46 & 90.3\\
+    \midrule
+    Optical Brighteners (ppb) & 0.92 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
+    \midrule
+    $\mathrm{NO_3^-} (mg/l-N)$ & 0.89 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
+    \midrule
+    Crude Oil (ppb) & 0.89 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
+    \bottomrule
+  \end{tabularx}
+  \end{adjustwidth}
 \end{table}
+
+
+
 
 \subsection{Mapping}
 
@@ -306,6 +435,9 @@ The text continues here (Figure~\ref{fig2} and Table~\ref{tab2}).
 \end{adjustwidth}
 \caption{This is a wide figure.\label{fig2}}
 \end{figure}  
+
+
+
 
 \begin{table}[H]
 \caption{This is a wide table.\label{tab2}}
