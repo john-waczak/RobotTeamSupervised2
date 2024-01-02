@@ -70,7 +70,7 @@
 
 %=================================================================
 % Full title of the paper (Capitalized)
-\Title{\textcolor{red}{Robot Team II: Electric Boogaloo}}
+\Title{\textcolor{red}{Leveraging Machine Learning to Characterize Aquatic Environments with an Autonomous Team of Sensing Sentinels }}
 
 % MDPI internal command: Title for citation in the left column
 \TitleCitation{Robot Team II: Electric Boogaloo}
@@ -81,7 +81,7 @@
 %\newcommand{\orcidauthorB}{0000-0000-0000-000X} % Add \orcidB{} behind the author's name
 
 % Authors, for the paper (add full first names)
-\Author{John Waczak$^{\dagger}$\orcidA{}, Adam Aker, Lakitha O. H. Wijeratne, Shawhin Talebi, Bharana Fernando, David Schaefer, David J. Lary, $^{\dagger}$\orcidB{}*}
+\Author{John Waczak$^{\dagger}$\orcidA{}, Adam Aker, Lakitha O. H. Wijeratne, Shawhin Talebi, Bharana Fernando, Prabuddha Hathurusinghe, Mazhar Iqbal, David Schaefer, David J. Lary, $^{\dagger}$\orcidB{}*}
 
 %\longauthorlist{yes}
 
@@ -109,10 +109,14 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 %\conference{} % An extended version of a conference paper
 
 % Abstract (Do not insert blank lines, i.e. \\) 
-\abstract{\textcolor{red}{A single paragraph of about 200 words maximum. For research articles, abstracts should give a pertinent overview of the work. We strongly encourage authors to use the following style of structured abstracts, but without headings: (1) Background: place the question addressed in a broad context and highlight the purpose of the study; (2) Methods: describe briefly the main methods or treatments applied; (3) Results: summarize the article's main findings; (4) Conclusions: indicate the main conclusions or interpretations. The abstract should be an objective representation of the article, it must not contain results which are not presented and substantiated in the main text and should not exaggerate the main conclusions.}}
+\abstract{\textcolor{red}{Advances in hyperspectral imaging technology are enabling significant improvements in the spectral resolution of remote sensing data products with a plethora of new satellites either in development or soon to be launched. Utilizing hyperspectral data for environmental assessment requires high quality in-situ data that is both difficult to collect and difficult to align with remote sensing data products due to orbital-dependent revisit times and occlusion by weather and cloud cover. In this study, present the results of a series of surveys.}}
+
+% A robust characterization of model uncertainties is critical for any time-sensitive or dangerous application...To that end we employ a combination of model stacking together with Conformal Prediction by which we are able to blend together a variety of ML models while simultaneously estimating confidence intervals for the resulting predictions. 
+
+% A single paragraph of about 200 words maximum. For research articles, abstracts should give a pertinent overview of the work. We strongly encourage authors to use the following style of structured abstracts, but without headings: (1) Background: place the question addressed in a broad context and highlight the purpose of the study; (2) Methods: describe briefly the main methods or treatments applied; (3) Results: summarize the article's main findings; (4) Conclusions: indicate the main conclusions or interpretations. The abstract should be an objective representation of the article, it must not contain results which are not presented and substantiated in the main text and should not exaggerate the main conclusions
 
 % Keywords
-\keyword{\textcolor{red}{keyword 1; keyword 2; keyword 3 (List three to ten pertinent keywords specific to the article; yet reasonably common within the subject discipline.)}}
+\keyword{\textcolor{red}{Hyperspectral Imaging; Machine Learning; Robotic Teams; UAV;}}
 
 % The fields PACS, MSC, and JEL may be left empty or commented out if not applicable
 %\PACS{J0101}
@@ -165,6 +169,67 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+Each day over X terabytes of remote sensing data are collected fr
+
+
+Context
+
+Need
+
+Task 
+
+Objective
+
+
+- First sentence about amount of remote sensing data generated per year w/ citation and a forecast for how much it will increase. 
+- Second sentence about the lack of in-situ reference data (this is the limitation we can fill) 
+- Further limitations of current remote sensing data products (spectral resolution, spatial resolution, observation frequency)
+- Discuss newly launched and and soon-to-be-launched satellites with HSI capabilities
+- Discuss use of multi-sepctral imagery for environmental studies
+    - Generation of spectral indices like the NDVI and others which have shown to be helpful for environmental characterization
+    - Cite David's previous CDOM paper that used the Atlantic shipping data.
+- Discuss use of ML in remote sensing/environmental assessment applications. Here, the possibilities are limited by the availability of high-quality reference data which is why many remote sensing ML models employ unsupervised methods to enable pixel classification (i.e. surface type, cloudiness fraction, etc...)
+- Outline need for in-situ reference data to calibrate HSI data products
+- Autonomous teams are perfect for this application due to their transportability, rapid deployment, and elastic configuration
+- Give examples of drone use for smart agriculture, etc... 
+- Give examples of autonomous boat use for water studies, cleanup, etc... 
+- Describe our work to create a robotic team which can do all of this... 
+
+
+% https://gisgeography.com/hyperspectral-imaging/
+% https://hyperspectral.azavea.com/
+% https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library/-/asset_publisher/1dO7RF5fJMbd/content/sentinel-high-level-operations-plan  <-- for amount of data produced by sentinel
+The main areas of usage for hyperspectral imagery can be categorized into 8 groups. This includes vegetation, agriculture, geology, soil, water resources, disaster, and land use.
+
+The underlying principle is that it improves any type of classification. For example, you can get more detail for geologic surface composition. The same is true for vegetation types, soil classes, and land cover too.
+
+Hyperspectral imaging helps identify pests for crop management. Water resources are about understanding bathymetry, water quality, and chemistry. And it’s been used for disaster management such as prevention and post-monitoring
+
+
+Step 1: Introduce your topic
+Step 2: Describe the background
+Step 3: Establish your research problem
+Step 4: Specify your objective(s)
+Step 5: Map out your paper
+
+
+The introduction should answer three important questions:
+1. What am I writing about?
+2. Why is it important?
+3. What do I want the reader to know about it?
+
+Step 1: Establish a Territory
+"In recent years..." or "researchers have become interested..." 
+
+Step 2: Establish a Niche
+- Identify a gap that your research fills 
+
+
+
+In (cite last robot team paper) we outlined a paradigmatic approach to the generation of remote sensing data sets for water-based environmental studies by employing a coordinated team of autonomous sensing sentinels. In this paper, we demonstrate the use of this platform across multiple observation periods...
+
+
+
 Remote sensing data products 
 
 Hyper-spectral imagery
@@ -179,48 +244,69 @@ Autonomous robotic teams (cite our previous paper)
 
 Overview of what we demonstrate here...
 
+\\
+
+In-situ measurements are expensive to collect and suffer from poor spatial coverage. Remote sensing data cover much wider areas but do not directly provide parameters needed for environmental assessments. Additionally, remote sensing data, particularly satellite based imagers, also suffer from long orbit-dependent site revisit times and can be easily occluded by the presence of clouds. This makes it incredibly challenging to collocate sufficient quantities of in-situ measurements with overlapping remote sensing imagery to enable their calibration. \textcolor{red}{(add reference to David's CDOM paper here...)}. To address this gap, we have developed an autonomous team of sensing sentinels combining a mobile uncrewed surface vessel (USV) with a unmanned aerial vehicle (UAV) which together rapidly collect hyperspectral imgaery \textit{and} comprehensive in-situ measurements to enable the estimation of key environmental parameters including concentrations of key constituents like CDOM, Crude Oils, Ions,as well as physical parameters like temperature, salinity, and dissolved oxygen. In our previous work we established a methodology for calibrating the hyperspectral imagery against reference measurements during a collection window \cite{robotTeam1}. In his study, we demonstrate that such models can be reliably trained using data collected from multiple observations....  
+
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
 
-\subsection{Autonomous Robotic Team}
-\subsubsection{Autonomous Boat: In-situ Sensing}
-\subsubsection{Autonomous Drone: Rapid Hyperspectral Imaging}
+In the study we employ a team of autonomous sensing sentinels, herein referred to as \textit{the robot team}, to enable the rapid characterization of aquatic environments. This team consists of two key sensing sentinels: An uncrewed surface vessel (USV) used to collect in-situ reference measurements, and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using the open-source QGroundControl software for flight control and mission planning \cite{qgroundcontrol} and are equipped with high accuracy GPS and INS such that all collected data points are uniquely geolocated and time-stamped. Both the USV and UAV are equipped with long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network attached storage providing redundancy.
+
+\subsection{USV: In-situ Measurements}
+
+The USV employed in the robot team is the Maritime Robotics Otter which features a flexible modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements used in this study is given in Table~\ref{tab:fit-results}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not utilized in this study.
+
+\subsection{UAV: Hyperspectral remote sensing}
+
+A Freefly Alta-X autonomous professional quad-copter was used as the UAV platform for the robotic team. The Alta-X is specifically designed to carry cameras featuring a payload of up to 35 lbs. We have equipped the UAV with a Resonon Pika XC2 Visible+Near-Infrared (VNIR) hyperspectral imager. For each image pixel, this camera samples 462 wavelengths ranging from 391 to 1,011 nm.  Additionally, the UAV includes an upward facing Ocean Optics UV-Vis-NIR spectrometer with a cosine corrector to capture the incident downwelling irradiance spectrum. Data collection by the hyperspectral imager is controlled by an attached Intel NUC small-form-factor computer. A second \textit{processing} NUC is also included for onboard georectification and generation of data products. The collected hyperspectral images (HSI) are stored locally on a solid state drive which is simultaneously mounted by the processing computer. The configuration of the drone is shown in shown in Figure~\ref{fig:drone-components}.
+
 
 \begin{figure}[H]
 \includegraphics[width=\columnwidth]{paper/figures/materials-and-methods/annotated-drone.pdf}
-\caption{These are the components of the drone. \label{fig:drone-components}}
+\caption{Configuration of the UAV: (\textbf{a}) the hyperspectral imager and acquisition computer. (\textbf{b}) the assembled UAV with secondary processing computer and (upward facing) downwelling irradiance spectrometer. \label{fig:drone-components}}
 \end{figure} 
 
 
 \subsection{Data Collection}
-\subsection{Georectification of Hyperspectral Imagery}
 
+For this study data were collected using the robot team at a site in north Texas across three observation periods in November and December of 2020. For each collection period the UAV first completed a wide survey of the lake capturing raw hyperspectral data cubes, downwelling irradiance spectra, and relevant position and orientation flight data. Subsequently, the the USV sampled across the lake, collecting in-situ reference measurements. These combined data form the basis from which we seek to develop machine learning models translating the UAV captured spectra into the target quantities as measured by the USV. To enable this modality, we must establish the processing procedure by which we account for the variability of the incident light illuminating the pond and transform the raw hyperspectral data cubes from their native \textit{imaging reference frame} to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\includegraphics[width=15.5cm]{paper/figures/materials-and-methods/pipeline-figure-2.pdf}
+\includegraphics[width=16cm]{paper/figures/materials-and-methods/pipeline-figure-2.pdf}
 \end{adjustwidth}
-\caption{This is a wide figure.\label{fig:hsi-pipeline}}
+\caption{Hyperspectral Image Processing: Hyperspectral datacubes are collected one scan-line at a time (left). By utilizing downwelling irradiance spectra we convert each pixel from spectral radiance to reflectance. By using orientation and position data from the on-board GPS and INS, we georeference each pixel to assign it a latitude and longitude on the ground. The final data product is a georectified hyperspectral reflectance data cube visualized at the right. \label{fig:hsi-pipeline}}
 \end{figure}  
 
+The hyperspectral imager utilized in our robot team is in a so-called \textit{pushbroom} configuration, that is, each image captured by the drone is formed one scan-line at a time as the UAV flies. Each scan-line consists of 1600 pixels for which incoming light is diffracted into 462 wavelength bins. In the collection software a regular cutoff of 1000 lines is chosen so that each resulting \textit{image} forms a tensor of size 462$\times$1600$\times$1000 called a \textit{hyperspectral data cube}. Initially, the sampled spectra are in units of spectral radiance (measured in microflicks) however this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance by utilizing the skyward-facing downwelling irradiance spectrometer (see Figure~\ref{fig:drone-components}). When our camera is normal to this surface, then the reflectance is given by
+\begin{equation}
+    R(\lambda) = \pi L(\lambda)/E(\lambda)
+\end{equation}
+where $L$ is the spectral radiance, $E$ is the downwelling irradiance, and a factor of $\pi$ steradians assumes the surface is Lambertian (diffuse) \cite{reflectance-conversion}.
+
+Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into geographic coordinate system so that each image pixel can be assigned a latitude and longitude cooresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral datacube can be reliably georectified without the added need for a digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scanline is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized however this can be increased to reduce the processing time for real-time applications. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downweling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the datacube) to illustrate the scene.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
 \includegraphics[width=15.5cm]{paper/figures/materials-and-methods/HyperSpectralInfoGraphic.pdf}
 \end{adjustwidth}
-\caption{This is a wide figure.\label{fig:hsi-infographic}}
+\caption{A georectified reflectance data cube is visualized (center) with the $\log10$-reflectance along the z axis and a pseudo-color image on the top. In the top left we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
 \end{figure}  
 
 
+\subsection{Machine Learning Methods}
 
-\subsection{Machine Learning}
 \subsubsection{Data Pre-processing and Feature Generation}
 Add a table of the Features we used here...
+
+
+
 \subsubsection{Models Employed}
 Discuss random forests
 \subsubsection{Hyperparameter Optimization}
@@ -234,47 +320,61 @@ Discuss the parameters we optimize and the evaluation strategy using 10-fold cro
 
 \subsection{Modeling Results}
 
-\begin{table}[H] 
-\caption{This is a table caption.\label{tab:fit-results}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCCCCC}
-\toprule
-\textbf{Target (units)}	& \textbf{$\text{R}^2$}	& \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty (90\% CI)} & \textbf{Empirical Coverage (\%)}\\
-\midrule
-$\mathrm{Na}^+$     & 0.964 $\pm$ 0.006 & 8.10 $\pm$ 0.68 & 5.10 $\pm$ 0.26 & 11.7 & 88.5 \\
-Dissolved Oxygen    & 0.958 $\pm$ 0.005 & 0.119 $\pm$  & 5.10 $\pm$ 0.26 & 11.7 & 88.5 \\
-\bottomrule
-\end{tabularx}
+
+
+\begin{table}[H]
+  \caption{Summary of fitting statistics for each target measurement. Values were evaluated using 10-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the validation holdout set. The empirical coverage is the percentage of predictions in the holdout testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
+  \begin{adjustwidth}{-\extralength}{0cm}
+  \newcolumntype{C}{>{\centering\arraybackslash}X}
+  \begin{tabularx}{\fulllength}{CCCCCC}
+    \toprule
+    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)}\\
+    \midrule
+    Temperature (°C) & 0.999 ± 5.1e-5 & 0.0546 ± 0.0022 & 0.0316 ± 0.0015 & ± 0.084 & 89.7\\
+    \midrule
+    Conductivity ($\mu$S/cm) & 0.999 ± 0.00011 & 0.888 ± 0.067 & 0.497 ± 0.025 & ± 1.3 & 91.5\\
+    \midrule
+    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 0.00031 & 0.544 ± 0.058 & 0.267 ± 0.013 & ± 0.72 & 89.9\\
+    \midrule
+    Dissolved Oxygen (mg/l) & 0.998 ± 0.00015 & 0.0931 ± 0.004 & 0.055 ± 0.0022 & ± 0.14 & 88.5\\
+    \midrule
+    Salinity (PSS) & 0.995 ± 0.00061 & 0.00124 ± 6.2e-5 & 0.000432 ± 2.6e-5 & ± 0.0009 & 90.1\\
+    \midrule
+    Tryptophan (ppb) & 0.99 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
+    \midrule
+    pH & 0.988 ± 0.0018 & 0.0232 ± 0.0019 & 0.0119 ± 0.00045 & ± 0.032 & 92.5\\
+    \midrule
+    $\mathrm{Na^+} (mg/l)$ & 0.982 ± 0.0034 & 9.01 ± 0.88 & 4.17 ± 0.22 & ± 11.0 & 90.8\\
+    \midrule
+    $\mathrm{Cl^-}$ (mg/l) & 0.982 ± 0.0054 & 1.96 ± 0.28 & 1.0 ± 0.066 & ± 2.3 & 89.7\\
+    \midrule
+    Blue-Green Algae [Phycoerythrin] (ppb) & 0.939 ± 0.017 & 3.12 ± 0.43 & 0.84 ± 0.065 & ± 1.8 & 91.4\\
+    \midrule
+    CDOM (ppb) & 0.934 ± 0.02 & 0.58 ± 0.093 & 0.219 ± 0.013 & ± 0.46 & 90.3\\
+    \midrule
+    Optical Brighteners (ppb) & 0.92 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
+    \midrule
+    $\mathrm{NO_3^-} (mg/l-N)$ & 0.89 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
+    \midrule
+    Crude Oil (ppb) & 0.89 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
+    \midrule
+    Chlorophyll A with Red Excitation ($\mu$g/l) & 0.728 ± 0.11 & 94.9 ± 37.0 & 17.0 ± 2.5 &  ± 31.0 & 91.1\\
+    \midrule
+    Chlorophyll A ($\mu$g/l) & 0.672 ± 0.17 & 1.96 ± 0.25 & 0.482 ± 0.044 &  ± 0.83 & 90.6\\
+    \midrule
+    Turbidity (FNU) & 0.616 ± 0.19 & 52.6 ± 23.0 & 7.62 ± 2.2 & ± 9.2 & 87.9\\
+    \bottomrule
+  \end{tabularx}
+  \end{adjustwidth}
 \end{table}
+
+
+
 
 \subsection{Mapping}
 
 
 
-
-This section may be divided by subheadings. It should provide a concise and precise description of the experimental results, their interpretation as well as the experimental conclusions that can be drawn.
-\subsection{Subsection}
-\subsubsection{Subsubsection}
-
-Bulleted lists look like this:
-\begin{itemize}
-\item	First bullet;
-\item	Second bullet;
-\item	Third bullet.
-\end{itemize}
-
-Numbered lists can be added as follows:
-\begin{enumerate}
-\item	First item; 
-\item	Second item;
-\item	Third item.
-\end{enumerate}
-
-The text continues here. 
-
-\subsection{Figures, Tables and Schemes}
-
-All figures and tables should be cited in the main text as Figure~\ref{fig1}, Table~\ref{tab1}, etc.
 
 \begin{figure}[H]
 \includegraphics[width=10.5 cm]{Definitions/logo-mdpi}
@@ -306,6 +406,9 @@ The text continues here (Figure~\ref{fig2} and Table~\ref{tab2}).
 \end{adjustwidth}
 \caption{This is a wide figure.\label{fig2}}
 \end{figure}  
+
+
+
 
 \begin{table}[H]
 \caption{This is a wide table.\label{tab2}}
@@ -399,7 +502,11 @@ Text of the proof. Note that the phrase ``of Theorem 1'' is optional if it is cl
 The text continues here.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Discussion}
+\section{Discussion} \label{sec:discussion}
+
+\subsection{Limitations}
+
+\subsection{Data Product Streaming}
 
 Authors should discuss the results and how they can be interpreted from the perspective of previous studies and of the working hypotheses. The findings and their implications should be discussed in the broadest context possible. Future research directions may also be highlighted.
 
@@ -408,10 +515,6 @@ Authors should discuss the results and how they can be interpreted from the pers
 
 This section is not mandatory, but can be added to the manuscript if the discussion is unusually long or complex.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Patents}
-
-This section is not mandatory, but may be added if there are patents resulting from the work reported in this manuscript.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vspace{6pt} 
@@ -445,11 +548,9 @@ This section is not mandatory, but may be added if there are patents resulting f
 
 \funding{Please add: ``This research received no external funding'' or ``This research was funded by NAME OF FUNDER grant number XXX.'' and  and ``The APC was funded by XXX''. Check carefully that the details given are accurate and use the standard spelling of funding agency names at \url{https://search.crossref.org/funding}, any errors may affect your future funding.}
 
-\institutionalreview{In this section, you should add the Institutional Review Board Statement and approval number, if relevant to your study. You might choose to exclude this statement if the study did not require ethical approval. Please note that the Editorial Office might ask you for further information. Please add “The study was conducted in accordance with the Declaration of Helsinki, and approved by the Institutional Review Board (or Ethics Committee) of NAME OF INSTITUTE (protocol code XXX and date of approval).” for studies involving humans. OR “The animal study protocol was approved by the Institutional Review Board (or Ethics Committee) of NAME OF INSTITUTE (protocol code XXX and date of approval).” for studies involving animals. OR “Ethical review and approval were waived for this study due to REASON (please provide a detailed justification).” OR “Not applicable” for studies not involving humans or animals.}
+\institutionalreview{Not applicable}
 
-\informedconsent{Any research article describing a study involving humans should contain this statement. Please add ``Informed consent was obtained from all subjects involved in the study.'' OR ``Patient consent was waived due to REASON (please provide a detailed justification).'' OR ``Not applicable'' for studies not involving humans. You might also choose to exclude this statement if the study did not involve humans.
-
-Written informed consent for publication must be obtained from participating patients who can be identified (including by the patients themselves). Please state ``Written informed consent has been obtained from the patient(s) to publish this paper'' if applicable.}
+\informedconsent{Not applicable}
 
 \dataavailability{We encourage all authors of articles published in MDPI journals to share their research data. In this section, please provide details regarding where data supporting reported results can be found, including links to publicly archived datasets analyzed or generated during the study. Where no new data were created, or where data is unavailable due to privacy or ethical restrictions, a statement is still required. Suggested Data Availability Statements are available in section ``MDPI Research Data Policies'' at \url{https://www.mdpi.com/ethics}.} 
 
@@ -461,7 +562,7 @@ Written informed consent for publication must be obtained from participating pat
 
 \acknowledgments{In this section you can acknowledge any support given which is not covered by the author contribution or funding sections. This may include administrative and technical support, or donations in kind (e.g., materials used for experiments).}
 
-\conflictsofinterest{Declare conflicts of interest or state ``The authors declare no conflicts of interest.'' Authors must identify and declare any personal circumstances or interest that may be perceived as inappropriately influencing the representation or interpretation of reported research results. Any role of the funders in the design of the study; in the collection, analyses or interpretation of data; in the writing of the manuscript; or in the decision to publish the results must be declared in this section. If there is no role, please state ``The funders had no role in the design of the study; in the collection, analyses, or interpretation of data; in the writing of the manuscript; or in the decision to publish the results''.} 
+\conflictsofinterest{The authors declare no conflicts of interest.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Optional
@@ -518,37 +619,9 @@ All appendix sections must be cited in the main text. In the appendices, Figures
 %=====================================
 % References, variant A: external bibliography
 %=====================================
-%\bibliography{your_external_BibTeX_file}
 
-%=====================================
-% References, variant B: internal bibliography
-%=====================================
-\begin{thebibliography}{999}
-% Reference 1
-\bibitem[Author1(year)]{ref-journal}
-Author~1, T. The title of the cited article. {\em Journal Abbreviation} {\bf 2008}, {\em 10}, 142--149.
-% Reference 2
-\bibitem[Author2(year)]{ref-book1}
-Author~2, L. The title of the cited contribution. In {\em The Book Title}; Editor 1, F., Editor 2, A., Eds.; Publishing House: City, Country, 2007; pp. 32--58.
-% Reference 3
-\bibitem[Author3(year)]{ref-book2}
-Author 1, A.; Author 2, B. \textit{Book Title}, 3rd ed.; Publisher: Publisher Location, Country, 2008; pp. 154--196.
-% Reference 4
-\bibitem[Author4(year)]{ref-unpublish}
-Author 1, A.B.; Author 2, C. Title of Unpublished Work. \textit{Abbreviated Journal Name} year, \textit{phrase indicating stage of publication (submitted; accepted; in press)}.
-% Reference 5
-\bibitem[Author5(year)]{ref-communication}
-Author 1, A.B. (University, City, State, Country); Author 2, C. (Institute, City, State, Country). Personal communication, 2012.
-% Reference 6
-\bibitem[Author6(year)]{ref-proceeding}
-Author 1, A.B.; Author 2, C.D.; Author 3, E.F. Title of presentation. In Proceedings of the Name of the Conference, Location of Conference, Country, Date of Conference (Day Month Year); Abstract Number (optional), Pagination (optional).
-% Reference 7
-\bibitem[Author7(year)]{ref-thesis}
-Author 1, A.B. Title of Thesis. Level of Thesis, Degree-Granting University, Location of University, Date of Completion.
-% Reference 8
-\bibitem[Author8(year)]{ref-url}
-Title of Site. Available online: URL (accessed on Day Month Year).
-\end{thebibliography}
+\bibliography{references.bib}
+
 
 % If authors have biography, please use the format below
 %\section*{Short Biography of Authors}
