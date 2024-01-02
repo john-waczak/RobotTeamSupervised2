@@ -145,29 +145,46 @@ MODELS[:etr] = (;
 #                 )
 
 
-MODELS[:rfr] = (;
-                :longname => "Random Forest Regressor",
-                :savename => "RandomForestRegressor",
-                :packagename => "DecisionTree",
-                :suffix => "vanilla",
-                :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=150),
-                )
+# MODELS[:rfr] = (;
+#                  :longname => "Random Forest Regressor",
+#                  :savename => "RandomForestRegressor",
+#                  :packagename => "DecisionTree",
+#                  :suffix => "vanilla",
+#                  :mdl => RFR(n_subfeatures=-1, sampling_fraction=1.0, n_trees=150),
+#                  )
 
-MODELS[:rfr2] = (;
-                 :longname => "Random Forest Regressor",
-                 :savename => "RandomForestRegressor",
-                 :packagename => "DecisionTree",
-                 :suffix => "hpo1",
-                 :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=85),
-                )
+# MODELS[:rfr0] = (;
+#                 :longname => "Random Forest Regressor",
+#                 :savename => "RandomForestRegressor",
+#                 :packagename => "DecisionTree",
+#                 :suffix => "vanilla",
+#                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=150),
+#                 )
 
-MODELS[:rfr3] = (;
-                 :longname => "Random Forest Regressor",
-                 :savename => "RandomForestRegressor",
-                 :packagename => "DecisionTree",
-                 :suffix => "hpo2",
-                 :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=100),
-                 )
+# MODELS[:rfr1] = (;
+#                 :longname => "Random Forest Regressor",
+#                 :savename => "RandomForestRegressor",
+#                 :packagename => "DecisionTree",
+#                 :suffix => "vanilla_200",
+#                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=200),
+#                 )
+
+
+# MODELS[:rfr2] = (;
+#                  :longname => "Random Forest Regressor",
+#                  :savename => "RandomForestRegressor",
+#                  :packagename => "DecisionTree",
+#                  :suffix => "hpo1",
+#                  :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=85),
+#                 )
+
+# MODELS[:rfr3] = (;
+#                  :longname => "Random Forest Regressor",
+#                  :savename => "RandomForestRegressor",
+#                  :packagename => "DecisionTree",
+#                  :suffix => "hpo2",
+#                  :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=100),
+#                  )
 
 
 # 5. Fit each of the models to different subsets of features.
@@ -177,9 +194,11 @@ MODELS[:rfr3] = (;
 # collections = ["11-23", "Full"]
 
 targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
-collections = ["11-23", "Full"]
+#collections = ["11-23", "Full"]
+collections = ["Full"]
 
 # targets_to_try = [:CDOM,]
+
 # collections = ["11-23",]
 
 for collection ∈ collections
@@ -202,19 +221,30 @@ for collection ∈ collections
         idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1]
         idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1]
 
-        Xtrain = X[idx_train, :]
-        ytrain = y[idx_train]
+        # Xtrain = X[idx_train, :]
+        # ytrain = y[idx_train]
 
-        Xtest = X[idx_test, :]
-        ytest = y[idx_test]
+        # Xtest = X[idx_test, :]
+        # ytest = y[idx_test]
 
         for (shortname, model) ∈ MODELS
             try
                 T1 = now()
 
-                train_folds(
-                    Xtrain, ytrain,
-                    Xtest, ytest,
+                # train_folds(
+                #     Xtrain, ytrain,
+                #     Xtest, ytest,
+                #     model.longname, model.savename, model.mdl,
+                #     target_name, units, target_long,
+                #     outpath;
+                #     suffix=model.suffix,
+                #     run_occam=false,
+                # )
+
+
+                train_basic(
+                    X, y,
+                    idx_train, idx_test,
                     model.longname, model.savename, model.mdl,
                     target_name, units, target_long,
                     outpath;
@@ -222,26 +252,30 @@ for collection ∈ collections
                     run_occam=false,
                 )
 
+
+
                 T2 = now()
                 Δtrain = round((T2 - T1).value / 1000 / 60, digits=3) # min
                 @warn "Training time: $(Δtrain) minutes"
 
                 GC.gc()
 
-                # @warn "HPO Train Start: $(now())"
 
-                # train_hpo(
-                #     Xtrain, ytrain,
-                #     Xtest, ytest,
-                #     model.longname, model.savename, model.packagename,
-                #     target_name, units, target_long,
-                #     model.mdl,
-                #     outpath;
-                #     nmodels=100
-                # )
+                T1 = now()
 
+                train_hpo(
+                    X, y,
+                    idx_train, idx_test,
+                    model.longname, model.savename, model.packagename,
+                    target_name, units, target_long,
+                    model.mdl,
+                    outpath;
+                    nmodels=100
+                )
 
-                # @warn "HPO Train Finish: $(now())"
+                T2 = now()
+                Δtrain = round((T2 - T1).value / 1000 / 60, digits=3) # min
+                @warn "HPO Training time: $(Δtrain) minutes"
 
                 GC.gc()
             catch e
@@ -319,7 +353,7 @@ function generate_tex_table(df)
     out = out * "  \\newcolumntype{C}{>{\\centering\\arraybackslash}X}\n"
     out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCC}\n"
     out = out * "    \\toprule\n"
-    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2\$}	& \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty (90\\% CI)} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
+    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2\$}	& \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
     out = out * "    \\midrule\n"
 
     for row in eachrow(df)
@@ -328,7 +362,7 @@ function generate_tex_table(df)
         r2 = string(round(row["R² mean"], sigdigits=3)) * " ± " * string(round(row["R² std"], sigdigits=2))
         RMSE = string(round(row["RMSE mean"], sigdigits=3)) * " ± " * string(round(row["RMSE std"], sigdigits=2))
         MAE = string(round(row["MAE mean"], sigdigits=3)) * " ± " * string(round(row["MAE std"], sigdigits=2))
-        unc = string(round(row["Estimated Uncertainty"], sigdigits=2))
+        unc = " ± " * string(round(row["Estimated Uncertainty"], sigdigits=2))
         cov = string(round(row["Empirical Coverage"]*100, sigdigits=3))
 
         out = out * "    $(target_tex) & $(r2) & $(RMSE) & $(MAE) & $(unc) & $(cov)\\\\\n"
@@ -372,8 +406,10 @@ models = ["RFR $(s)" for s in unique(suffixes)]
 push!(models, "ETR vanilla")
 
 dfs = [CSV.read(joinpath(datapath, "Full", "RandomForestRegressor-results__$(suffix).csv"), DataFrame) for suffix in unique(suffixes)]
-push!(dfs, CSV.read(joinpath(datapath, collection, "EvoTreeRegressor-results__vanilla.csv"), DataFrame))
+push!(dfs, CSV.read(joinpath(datapath, collections[1], "EvoTreeRegressor-results__vanilla.csv"), DataFrame))
 
+
+dfs[1]
 
 df_out = []
 

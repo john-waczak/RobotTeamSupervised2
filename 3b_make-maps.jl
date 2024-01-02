@@ -92,12 +92,12 @@ RFR = @load RandomForestRegressor pkg=DecisionTree
 ETR = @load EvoTreeRegressor pkg=EvoTrees
 
 model_collections = ["Full"]
-# suffixes = ["vanilla", "hpo1", "hpo2", "vanilla"]
-# ml_models = ["RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor", "EvoTreeRegressor"]
+suffixes = ["vanilla", "vanilla_200", "hpo1", "hpo2", "vanilla"]
+ml_models = ["RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor", "EvoTreeRegressor"]
 
 
-suffixes = ["vanilla",]
-ml_models = ["RandomForestRegressor",]
+# suffixes = ["hpo1",]
+# ml_models = ["RandomForestRegressor",]
 
 
 
@@ -124,11 +124,16 @@ collection = "Full"
 
 
 for target ∈ targets_to_map
+
+    # target = :CDOM
+
     target_name = String(target)
     target_long = targets_dict[target][2]
     units = targets_dict[target][1]
 
     for i ∈ 1:length(h5_dates)
+        # i = 1
+
         h5_date = h5_dates[i]
         h5_files_to_use = h5_files[i]
 
@@ -141,6 +146,9 @@ for target ∈ targets_to_map
         longitudes = df_lat_long.longitudes
 
         for j ∈ 1:length(suffixes)
+            # suffixes
+            # j = 1
+
             suffix = suffixes[j]
             model = ml_models[j]
 
