@@ -1,0 +1,88 @@
+---
+title: "Supplementary Material:"
+subtitle: "Hyperspectral Reflectance Indices"
+date: "01-03-2024"
+author: "John Waczak"
+format:
+    pdf:
+        keep-tex: true
+---
+
+For the following hyperspectral reflectance indices, we have made the following identifications:
+
+\begin{align}\label{eq:ref-bands}
+\begin{split}
+    R_b &= R(440 \text{ nm}) \\
+    R_g &= R(550 \text{ nm}) \\
+    R_b &= R(650 \text{ nm}) \\
+    R_{nir} &= R(860 \text{ nm}).
+\end{split}
+\end{align}
+We also define $R_{swir} = R(1009 \text{ nm})$ as the *almost*-SWIR band representing the infrared edge of the hyperspectral imager.
+
+
+
+| **Spectral Index** | **Acronym** | **Formula** |
+|---------|---|-----------|
+| Difference Vegetation Index | DVI | $\dfrac{2.5(R_{nir} - R_r)}{R_{nir} + 6R_r - 7.5R_b + 1}$ |
+| Global Environmental Monitoring Index | GEMI* | $\text{eta}(1 - 0.25\,\text{eta}) - \dfrac{R_r - 1.125}{1 - R_r}$ |
+| Green Atmospherically Resistant Index | GARI** | $\dfrac{R_{nir} - (R_g - \gamma(R_b - R_r))}{R_{nir} + (R_g - \gamma (R_b - R_r))}$ |
+| Green Chlorophyll Index | GCI | $\dfrac{R_{nir}}{R_g} - 1$ |
+| Green Difference Vegetation Index | GDVI | $R_{nir} - R_g$ |
+| Green Leaf Index | GLI | $\dfrac{(R_g - R_r) + (R_g - R_b)}{2 R_g + R_r + R_b}$ |
+| Green Normalized Difference Vegetation Index | GNDVI | $\dfrac{R_{nir} - R_g}{R_{nir} + R_g}$ |
+| Green Optimized Soil Adjusted Vegetation Index | GOSAVI | $\dfrac{R_{nir} - R_g}{R_{nir} + R_g + 0.16}$ |
+| Green Ratio Vegetation Index | GRVI | $\dfrac{R_{nir}}{R_g}$ |
+| Green Soil Adjusted Vegetation Index | GSAVI | $\dfrac{1.5(R_{nir} - R_g)}{R_{nir} + R_g + 0.5}$ |
+| Infrared Percentage Vegetation Index | IPVI | $\dfrac{R_{nir}}{R_{nir} + R_r}$ |
+| Leaf Area Index | LAI | $3.618 \left(\dfrac{2.5 (R_{nir} - R_r)}{R_{nir} + 6R_{R_r} - 7.5 R_b + 1}\right) - 0.118$ |
+| Modified Non-Linear Index | MNLI | $\dfrac{1.5(R_{nir}^2 - R_r)}{R_{nir}^2 + R_r + 0.5}$ |
+| Modified Soil Adjusted Vegetation Index 2 | MSAVI2 | $\dfrac{2R_{nir} + 1 - \sqrt{(2R_{nir} + 1)^2 - 8(R_{nir} - R_r)}}{2}$ |
+| Modified Simple Ratio | MSR | $\dfrac{R_{nir}/R_r - 1}{\sqrt{R_{nir} / R_r} + 1}$ |
+| Non-Linear Index | NLI | $\dfrac{R_{nir}^2 - R_r}{R_{nir}^2 + R_r}$ |
+| Normalized Difference Vegetation Index | NDVI | $\dfrac{R_{nir} - R_r}{R_{nir} + R_r}$ |
+| Normalized Pigment Chlorophyll Index | NPCI | $\dfrac{R_{680} - R_{430}}{R_{680} + R_{430}}$ |
+| Optimized Soil Adjusted Vegetation Index | OSAVI | $\dfrac{R_{nir} - R_r}{R_{nir} + R_r + 0.16}$ |
+| Renormalized Difference Vegetation Index | RDVI | $\dfrac{R_{nir} - R_r}{\sqrt{R_{nir} + R_r}}$ |
+| Soil Adjusted Vegetation Index | SAVI | $\dfrac{1.5(R_{nir} - R_r)}{R_{nir} + R_r + 0.5}$ |
+| Simple Ratio | SR | $\dfrac{R_{nir}}{R_r}$ |
+| Transformed Difference Vegetation Index | TDVI | $\dfrac{1.5R_{nir} - R_r}{\sqrt{R_{nir}^2 + R_r + 0.5}}$ |
+| Triangular Greenness Index | TGI | $\dfrac{(\lambda_r-\lambda_b)(R_r-R_g) - (\lambda_r-\lambda_g)(R_r - R_b)}{2}$ |
+| Visible Atmospherically Resistant Index | VARI | $\dfrac{R_g - R_r}{R_g + R_r - R_b}$ |
+| Wide Dynamic Range Vegetation Index | WDRVI | $\dfrac{0.2 R_{nir} - R_r}{0.2 * R_{nir} + R_r}$ |
+| Atmospherically Resistant Vegetation Index | ARVI | $\dfrac{R_{800} - (R_{800} - 1(R_{450} - R_{680}))}{R_{800} + (R_{680} - 1 (R_{450} - R_{680}))}$ |
+| Modified Chlorophyll Absorption Ratio Index | MCARI | $((R_{700} - R_{670}) - 2(R_{700} - R_{550}))\dfrac{R_{700}}{R_{670}}$ |
+| Modified Chlorophyll Absorption Ratio Index Improved | MCARI2 | $\dfrac{1.5( 2.5(R_{800} - R_{670}) - 1.3 (R_{800} - R_{550}))}{\sqrt{(2R_{800} + 1)^2 - (6R_{800} - 5 \sqrt{R_{670}}) - 0.5}}$ |
+| Modified Red Edge Normalized Difference Vegetation Index | MRENDVI | $\dfrac{R_{750} - R_{705}}{R_{750} + R_{705} - 2R_{445}}$ |
+| Modified Red Edge Simple Ratio | MRESR | $\dfrac{R_{750} - R_{445}}{R_{705} - R_{445}}$ |
+| Modified Triangular Vegetation Index | MTVI | $1.2 (1.2 (R_{800} - R_{550}) - 2.5 (R_{670} - R_{550}))$ |
+| Red Edge Normalized Difference Vegetation Index | RENDVI | $\dfrac{R_{750} - R_{705}}{R_{750} + R_{705}}$ |
+| Transformed Chlorophyll Absorption Reflectance Index | TCARI | $3\left((R_{700} - R_{670}) - 0.2(R_{700} - R_{550})\dfrac{R_{700}}{R_{670}}\right)$ |
+| Triangular Vegetation Index | TVI | $0.5(120 (R_{750} - R_{550}) - 200 (R_{670} - R_{550}))$ |
+| Vogelmann Red Edge Index 1 | VREI1 | $\dfrac{R_{740}}{R_{720}}$ |
+| Vogelmann Red Edge Index 2 | VREI2 | $\dfrac{R_{734} - R_{747}}{R_{715} + R_{726}}$ |
+| Vogelmann Red Edge Index 3 | VREI3 | $\dfrac{R_{734} - R_{747}}{R_{715} + R_{720}}$ |
+| Photochemical Reflectance Index | PRI | $\dfrac{R_{531} - R_{570}}{R_{531} + R_{570}}$ |
+| Structure Insensitive Pigment Index | SIPI | $\dfrac{R_{800} - R_{445}}{R_{800} + R_{680}}$ |
+| Structure Independent Pigment Index | SIPI1 | $\dfrac{R_{445} - R_{800}}{R_{670} - R_{800}}$ |
+| Plant Senescence Reflectance Index | PSRI | $\dfrac{R_{680} - R_{500}}{R_{750}}$ |
+| Anthocyanin Reflectance Index 1 | ARI1 | $\dfrac{1}{R_{550}} - \dfrac{1}{R_{700}}$ |
+| Anthocyanin Reflectance Index 2 | ARI2 | $\left(\dfrac{1}{R_{550}} - \dfrac{1}{R_{700}}\right)R_{800}$ |
+| Carotenoid Reflectance Index 1 | CRI1 | $\dfrac{1}{R_{510}} - \dfrac{1}{R_{550}}$ |
+| Carotenoid Reflectance Index 2 | CRI2 | $\dfrac{1}{R_{510}} - \dfrac{1}{R_{700}}$ |
+| Normalized Difference Water Index 1 | NDWI1 | $\dfrac{R_g - R_{nir}}{R_g + R_{nir}}$ |
+| Normalized Difference Water Index 2 | NDWI2 | $\dfrac{R_{nir} - R_{swir}}{R_{nir} + R_{swir}}$ |
+| Modified Normalized Difference Water Index | MNDWI | $\dfrac{R_g - R_{swir}}{R_g + R_{swir}}$ |
+| Water Band Index | WBI | $\dfrac{970}{900}$ |
+| Anthocyanin Content Index | ACI | $\dfrac{R_g}{R_{nir}}$ |
+| Chlorophyll Index Red Edge | CIre | $\dfrac{R_{nir}}{R_{705}} - 1$ |
+| Modified Anthocyanin Reflectance Index | MARI | $\left(\dfrac{1}{R_{550}} - \dfrac{1}{R_{700}} \right)R_{nir}$ |
+| Moisture Stress Index | MSI | $\dfrac{R_{swir}}{R_{nir}}$ |
+| MERIS Terrestrial Chlorophyll Index | MTCI | $\dfrac{R_{753.75} - R_{708.75}}{R_{708.75} - R_{681.25}}$ |
+| Normalzied Difference Infrared Index | NDII | $\dfrac{R_{nir} - R_{swir}}{R_{nir} + R_{swir}}$ |
+| Normalized Difference Red Edge | NDRE | $\dfrac{R_{790} - R_{720}}{R_{790} + R_{720}}$ |
+| Red Green Ratio Index | RGRI | $\dfrac{R_r}{R_g}$ |
+| Red Edge Vegetation Stress Index | RVSI | $\dfrac{R_{714} + R_{752}}{2} - R_{733}$ |
+
+: Spectral indices supplied as extra features to each ML model. For each index, $R_{\lambda}$ denotes the reflectance at wavelength $\lambda$ used to compute the index. $R_b$, $R_g$, etc are defined in Equation \ref{eq:ref-bands}.
+
