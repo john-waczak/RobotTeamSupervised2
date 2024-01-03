@@ -64,6 +64,7 @@
 % Add packages and commands here. The following packages are loaded in our class file: fontenc, inputenc, calc, indentfirst, fancyhdr, graphicx, epstopdf, lastpage, ifthen, float, amsmath, amssymb, lineno, setspace, enumitem, mathpazo, booktabs, titlesec, etoolbox, tabto, xcolor, colortbl, soul, multirow, microtype, tikz, totcount, changepage, attrib, upgreek, array, tabularx, pbox, ragged2e, tocloft, marginnote, marginfix, enotez, amsthm, natbib, hyperref, cleveref, scrextend, url, geometry, newfloat, caption, draftwatermark, seqsplit
 % cleveref: load \crefname definitions after \begin{document}
 
+
 %=================================================================
 % Please use the following mathematics environments: Theorem, Lemma, Corollary, Proposition, Characterization, Property, Problem, Example, ExamplesandDefinitions, Hypothesis, Remark, Definition, Notation, Assumption
 %% For proofs, please use the proof environment (the amsthm package is loaded by the MDPI class).
@@ -246,6 +247,9 @@ Overview of what we demonstrate here...
 
 \\
 
+
+somewhere we need to mention the limitations from \cite{robotTeam1} due to low spatial variablility in a single day's collection... We are demonstrating that by including multiple observations from different days, we can improve our modelling capabilities by representing a larger variety of incident lighting conditions and in-situ values.
+
 In-situ measurements are expensive to collect and suffer from poor spatial coverage. Remote sensing data cover much wider areas but do not directly provide parameters needed for environmental assessments. Additionally, remote sensing data, particularly satellite based imagers, also suffer from long orbit-dependent site revisit times and can be easily occluded by the presence of clouds. This makes it incredibly challenging to collocate sufficient quantities of in-situ measurements with overlapping remote sensing imagery to enable their calibration. \textcolor{red}{(add reference to David's CDOM paper here...)}. To address this gap, we have developed an autonomous team of sensing sentinels combining a mobile uncrewed surface vessel (USV) with a unmanned aerial vehicle (UAV) which together rapidly collect hyperspectral imgaery \textit{and} comprehensive in-situ measurements to enable the estimation of key environmental parameters including concentrations of key constituents like CDOM, Crude Oils, Ions,as well as physical parameters like temperature, salinity, and dissolved oxygen. In our previous work we established a methodology for calibrating the hyperspectral imagery against reference measurements during a collection window \cite{robotTeam1}. In his study, we demonstrate that such models can be reliably trained using data collected from multiple observations....  
 
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
@@ -254,26 +258,55 @@ In-situ measurements are expensive to collect and suffer from poor spatial cover
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
 
-In the study we employ a team of autonomous sensing sentinels, herein referred to as \textit{the robot team}, to enable the rapid characterization of aquatic environments. This team consists of two key sensing sentinels: An uncrewed surface vessel (USV) used to collect in-situ reference measurements, and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using the open-source QGroundControl software for flight control and mission planning \cite{qgroundcontrol} and are equipped with high accuracy GPS and INS such that all collected data points are uniquely geolocated and time-stamped. Both the USV and UAV are equipped with long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network attached storage providing redundancy.
+In the study we employ a team of autonomous sensing sentinels, hereafter referred to as \textit{the robot team}, to enable the rapid characterization of aquatic environments. This team consists of two key sensing sentinels: An uncrewed surface vessel (USV) used to collect in-situ reference measurements, and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using the open-source QGroundControl software for flight control and mission planning \cite{qgroundcontrol} and are equipped with high accuracy GPS and INS such that all collected data points are uniquely geolocated and time-stamped. Both the USV and UAV are equipped with long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network attached storage providing redundancy.
 
 \subsection{USV: In-situ Measurements}
 
-The USV employed in the robot team is the Maritime Robotics Otter which features a flexible modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements used in this study is given in Table~\ref{tab:fit-results}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not utilized in this study.
+The USV employed in the robot team is the Maritime Robotics Otter which features a flexible modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements used in this study is given in Table~\ref{tab:sensors}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not explored in this study.
 
-\subsection{UAV: Hyperspectral remote sensing}
+% add table describing sensors here: 
 
-A Freefly Alta-X autonomous professional quad-copter was used as the UAV platform for the robotic team. The Alta-X is specifically designed to carry cameras featuring a payload of up to 35 lbs. We have equipped the UAV with a Resonon Pika XC2 Visible+Near-Infrared (VNIR) hyperspectral imager. For each image pixel, this camera samples 462 wavelengths ranging from 391 to 1,011 nm.  Additionally, the UAV includes an upward facing Ocean Optics UV-Vis-NIR spectrometer with a cosine corrector to capture the incident downwelling irradiance spectrum. Data collection by the hyperspectral imager is controlled by an attached Intel NUC small-form-factor computer. A second \textit{processing} NUC is also included for onboard georectification and generation of data products. The collected hyperspectral images (HSI) are stored locally on a solid state drive which is simultaneously mounted by the processing computer. The configuration of the drone is shown in shown in Figure~\ref{fig:drone-components}.
+\begin{table}[H] 
+\caption{In-situ reference sensors modelled in this study.\label{tab:sensors}}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\begin{tabularx}{\textwidth}{CCC}
+\toprule
+\textbf{Sensor}	& \textbf{Units}	& \textbf{Sensor Type}\\
+\midrule
+Temperature		                    & $^{\circ}$C       & Thermistor \\
+Conductivity                        & $\mu$S/cm         & Four-Electrode Graphite Sensor \\
+Dissolved Oxygen                    & mg/l              & Optical Sensor\\
+Salinity                            & PSU               & Four-Electrode Graphite Sensor \\
+pH                                  & logarithmic (0-14)& Flowing-junction Reference Electrode\\
+Turbidity                           & FNU               & Ion-Selective Electrode \\
+$\mathrm{Ca^{2+}}$                  & mg/l              & Ion-Selective Electrode \\
+$\mathrm{Na^+}$                     & mg/l              & Ion-Selective Electrode \\
+$\mathrm{Cl^-}$                     & mg/l              & Ion-Selective Electrode \\
+$\mathrm{NO_3^-}$                   & mg/l as nitrogen  & Ion-Selective Electrode \\
+Tryptophan                          & ppb               & Fluorometer \\
+Blue-Green Algae (phycoerythrin)    & ppb               & Fluorometer \\
+CDOM                                & ppb               & Fluorometer \\
+Optical Brighteners                 & ppb               & Fluorometer \\
+Crude Oil                           & ppb               & Fluorometer \\
+Chlorophyll A                       & ppb               & Fluorometer \\
+Chlorophyll A (Red Excitation)      & ppb               & Fluorometer \\
+\bottomrule
+\end{tabularx}
+\noindent{\footnotesize{\textsuperscript{1} Tables may have a footer.}}
+\end{table}
 
+
+
+\subsection{UAV: Hyperspectral Data Cubes}
+
+A Freefly Alta-X autonomous quadcopter was used as the UAV platform for the robotic team. The Alta-X is specifically designed to carry cameras featuring a payload of up to 35 lbs. We have equipped the UAV with a Resonon Pika XC2 Visible+Near-Infrared (VNIR) hyperspectral imager. For each image pixel, this camera samples 462 wavelengths ranging from 391 to 1,011 nm.  Additionally, the UAV includes an upward facing Ocean Optics UV-Vis-NIR spectrometer with a cosine corrector to capture the incident downwelling irradiance spectrum. Data collection by the hyperspectral imager is controlled by an attached Intel NUC small-form-factor computer. A second \textit{processing} NUC is also included for onboard georectification and generation of data products. The collected hyperspectral images (HSI) are stored locally on a solid state drive which is simultaneously mounted by the processing computer. The configuration of the drone is shown in Figure~\ref{fig:drone-components}.
 
 \begin{figure}[H]
 \includegraphics[width=\columnwidth]{paper/figures/materials-and-methods/annotated-drone.pdf}
 \caption{Configuration of the UAV: (\textbf{a}) the hyperspectral imager and acquisition computer. (\textbf{b}) the assembled UAV with secondary processing computer and (upward facing) downwelling irradiance spectrometer. \label{fig:drone-components}}
 \end{figure} 
 
-
-\subsection{Data Collection}
-
-For this study data were collected using the robot team at a site in north Texas across three observation periods in November and December of 2020. For each collection period the UAV first completed a wide survey of the lake capturing raw hyperspectral data cubes, downwelling irradiance spectra, and relevant position and orientation flight data. Subsequently, the the USV sampled across the lake, collecting in-situ reference measurements. These combined data form the basis from which we seek to develop machine learning models translating the UAV captured spectra into the target quantities as measured by the USV. To enable this modality, we must establish the processing procedure by which we account for the variability of the incident light illuminating the pond and transform the raw hyperspectral data cubes from their native \textit{imaging reference frame} to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
+To effectively utilize the spectra collected by our UAV, we must account for the variability of the incident light illuminating the water and transform the raw hyperspectral data cubes from their native \textit{imaging reference frame} to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
@@ -287,9 +320,9 @@ The hyperspectral imager utilized in our robot team is in a so-called \textit{pu
 \begin{equation}
     R(\lambda) = \pi L(\lambda)/E(\lambda)
 \end{equation}
-where $L$ is the spectral radiance, $E$ is the downwelling irradiance, and a factor of $\pi$ steradians assumes the surface is Lambertian (diffuse) \cite{reflectance-conversion}.
+where $L$ is the spectral radiance, $E$ is the downwelling irradiance, and a factor of $\pi$ steradians resutls from assuming the water surface is Lambertian (diffuse) \cite{reflectance-conversion}. We will address the impact of this assumption in Section~\ref{sec:discussion}.
 
-Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into geographic coordinate system so that each image pixel can be assigned a latitude and longitude cooresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral datacube can be reliably georectified without the added need for a digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scanline is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized however this can be increased to reduce the processing time for real-time applications. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downweling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the datacube) to illustrate the scene.
+Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan-line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized, however this can be increased to reduce the processing time for real-time applications. Finally, the UTM coordinates are transformed to latitude and longitude for easy comparison with in-situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downwelling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
@@ -298,29 +331,33 @@ Having converted the hyperspectral data cube to units of reflectance, we must al
 \end{adjustwidth}
 \caption{A georectified reflectance data cube is visualized (center) with the $\log10$-reflectance along the z axis and a pseudo-color image on the top. In the top left we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
 \end{figure}  
+The above processing pipeline was implemented using the Julia programming language, a just-in-time compiled language with native multi-theading support \cite{julia-1}. By running this pipeline on the on-board processing computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications where we need to quickly asses if an area is safe and can not afford to wait to download and post-process collected imagery after a flight.
 
+\subsection{Data Collection and Training Set Curation}
+
+Data were collected using the robot team at a site in north Texas across three observation periods in the fall of 2020. For each collection period, the UAV first completed a wide survey of the lake capturing hyperspectral data cubes. Subsequently, the the USV sampled across the lake, collecting in-situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra where the USV track overlapped with UAV pixels. These combined data form a tabular data set on which we seek use to train regression models; pixel spectra form input features and each separate USV sensor forms a distinct target variable. Together, this combined data set contains over 11,000 records.
+
+Each collection was performed near solar noon to maximize the amount of incident sunlight illuminating the water, however, to account for any potential variation in lighting conditions between data cubes, we augment the training set with additional features including the drone viewing geometry (roll, pitch, heading) and solar illumination geometry (solar azimuth, solar elevation, solar zenith) as wall as the total at-pixel intensity (before refelctance conversion) as well as the total downwelling intensity. Additional feature engineering is performed to add a combination of spectral indices like the normalized difference vegetation index (NDVI), modified normalized difference water index (mNDWI), simple ratio (SR), photochemical reflectance index (PRI), and more (see Appendix~\ref{appendix:spec-indices} for a full list of included spectral indices). 
 
 \subsection{Machine Learning Methods}
 
-\subsubsection{Data Pre-processing and Feature Generation}
-Add a table of the Features we used here...
+For each of the 17 target variables listed in Table~\ref{tab:sensors}, data were randomly partitioned into a 90:10 training/testing split resulting 10,005 training points and 1,112 holdout testing points. Using the MLJ machine learning framework, a variety of machine learning models compatible with the regression task were identified \cite{MLJ1}. This selection of models included linear regression (and it's variations), Gaussian Process Regression, shallow Neural Networks, and decision tree based models. Out of this set, Random Forest Regression from \cite{decision-trees} and a native Julia implementation of gradient boosted trees were selected for their quick training time and high performance. Both random forests and gradient boosted trees are ensembling techniques based on individual decision tree regressors \cite{decision-trees, random-forest, gradient-boosting}. 
 
-
-
-\subsubsection{Models Employed}
-Discuss random forests
-\subsubsection{Hyperparameter Optimization}
-Discuss the parameters we optimize and the evaluation strategy using 10-fold cross validation.
-
-\subsection{Uncertainty Quantification via Conformal Prediction}
-
+Each model was trained and hyperparameter optimized using 10-fold cross validation with a random hyperparameter search.  Model performance was evaluated by computing out-of-fold values for the $R^2$ (coefficient of determination), as well as
+\begin{align}
+    \text{RMSE} &= \sqrt{\frac{\sum\limits_{i=1}^N (\hat{y}_i-y_i)^2}{N}}, \\
+    \text{MAE} &= \frac{\sum\limits_{i=1}^N \lvert \hat{y}_i - y_i \vert}{N},
+\end{align}
+where RMSE is the root-mean-square error, and MAE is the mean absolute error between true values $y_i$ and predictions $\hat{y}_i$. To assess the uncertainty of model predictions, we employ Inductive Conformal Prediction as described in \cite{conformal-prediction-1, conformal-prediction-2, conformal-prediction-3, conformal-prediction-4}. To do this, the training set is further partitioned so that we obtain an additional hold out set which we may call the \textit{calibration set}. We chose this split to achieve a 80:10:10 training, calibration, and testing ratios which results in a calibration set of ~1,000 records which \cite{conformal-prediction-2} suggest to be sufficient for most cases. First, the chosen model is trained on the training set. We then compute a set of nonconformity scores on the calibration set using an uncertainty heuristic, in this case, the absolute error
+\begin{equation}
+    s_i = s(X_i, y_i) = \lvert f(X_i) - y_i \rvert = \lvert \hat{y}_i - y_i \rvert
+\end{equation}
+where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ calibration record. These n-many scores are sorted, and the interval half width $d$ is computed as the $\frac{\lceil(\alpha)(n+1) \rceil}{n}$ quantile of this set in order to achieve a coverage of $\alpha$ on the calibration set. Predictions intervals for new data are then formed as $f(X)\pm d$. For this study, we have chosen a coverage of $\alpha=0.9$.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 
-\subsection{Modeling Results}
-
-
+The results of fitting our hyperparameter optimized models are listed in Table~\ref{tab:fit-results}. For each model, the $R^2$, RMSE, and MAE were evaluated using 10-fold cross validation. We observe considerable 
 
 \begin{table}[H]
   \caption{Summary of fitting statistics for each target measurement. Values were evaluated using 10-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the validation holdout set. The empirical coverage is the percentage of predictions in the holdout testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
@@ -340,7 +377,7 @@ Discuss the parameters we optimize and the evaluation strategy using 10-fold cro
     \midrule
     Salinity (PSS) & 0.995 ± 0.00061 & 0.00124 ± 6.2e-5 & 0.000432 ± 2.6e-5 & ± 0.0009 & 90.1\\
     \midrule
-    Tryptophan (ppb) & 0.99 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
+    Tryptophan (ppb) & 0.989 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
     \midrule
     pH & 0.988 ± 0.0018 & 0.0232 ± 0.0019 & 0.0119 ± 0.00045 & ± 0.032 & 92.5\\
     \midrule
@@ -352,11 +389,11 @@ Discuss the parameters we optimize and the evaluation strategy using 10-fold cro
     \midrule
     CDOM (ppb) & 0.934 ± 0.02 & 0.58 ± 0.093 & 0.219 ± 0.013 & ± 0.46 & 90.3\\
     \midrule
-    Optical Brighteners (ppb) & 0.92 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
+    Optical Brighteners (ppb) & 0.920 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
     \midrule
-    $\mathrm{NO_3^-} (mg/l-N)$ & 0.89 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
+    $\mathrm{NO_3^-} (mg/l-N)$ & 0.890 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
     \midrule
-    Crude Oil (ppb) & 0.89 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
+    Crude Oil (ppb) & 0.890 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
     \midrule
     Chlorophyll A with Red Excitation ($\mu$g/l) & 0.728 ± 0.11 & 94.9 ± 37.0 & 17.0 ± 2.5 &  ± 31.0 & 91.1\\
     \midrule
@@ -371,138 +408,82 @@ Discuss the parameters we optimize and the evaluation strategy using 10-fold cro
 
 
 
-\subsection{Mapping}
+\subsection{Physical Parameters}
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=16.0cm]{paper/figures/results/fits/physical-fitres.pdf}
+\end{adjustwidth}
+\caption{A visualization of the fitresults for three of the physical parameters we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:physical-fit}}
+\end{figure}  
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/fits/physical-ranking.pdf}
+\end{adjustwidth}
+\caption{Ranked feature importances for the same three physical parameter models.\label{fig:physical-fit}}
+\end{figure}  
 
 
+\subsection{Ion Measurements}
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=16.0cm]{paper/figures/results/fits/ions-fitres.pdf}
+\end{adjustwidth}
+\caption{A visualization of the fitresults for three of the ion concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:ions-fit}}
+\end{figure}  
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/fits/ions-ranking.pdf}
+\end{adjustwidth}
+\caption{Ranked feature importances for the same three ion concentration models.\label{fig:ions-fit}}
+\end{figure}  
+
+
+\subsection{Chemicals-of-Concern}
 
 
 \begin{figure}[H]
-\includegraphics[width=10.5 cm]{Definitions/logo-mdpi}
-\caption{This is a figure. Schemes follow the same formatting. If there are multiple panels, they should be listed as: (\textbf{a}) Description of what is contained in the first panel. (\textbf{b}) Description of what is contained in the second panel. Figures should be placed in the main text near to the first time they are cited. A caption on a single line should be centered.\label{fig1}}
-\end{figure}   
-\unskip
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=16.0cm]{paper/figures/results/fits/chemical-fitres.pdf}
+\end{adjustwidth}
+\caption{A visualization of the fitresults for three of the chemical concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:chemicals-fit}}
+\end{figure}  
 
-\begin{table}[H] 
-\caption{This is a table caption. Tables should be placed in the main text near to the first time they are~cited.\label{tab1}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data \textsuperscript{1}\\
-\bottomrule
-\end{tabularx}
-\noindent{\footnotesize{\textsuperscript{1} Tables may have a footer.}}
-\end{table}
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/fits/chemical-ranking.pdf}
+\end{adjustwidth}
+\caption{Ranked feature importances for the same three chemical concentration models.\label{fig:chemicals-fit}}
+\end{figure}  
 
-The text continues here (Figure~\ref{fig2} and Table~\ref{tab2}).
+
+
+\subsection{Mapping}
 
 % Example of a figure that spans the whole page width. The same concept works for tables, too.
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\includegraphics[width=15.5cm]{Definitions/logo-mdpi}
+\includegraphics[width=18.0cm]{paper/figures/results/map-combined.pdf}
 \end{adjustwidth}
-\caption{This is a wide figure.\label{fig2}}
+\caption{Maps generated by applying the ML model to hyperspectral data cubes. (\textbf{a}) The CDOM model applied to the 11-23 collection. (\textbf{b}) The CDOM model applied the the 12-09 collection. (\textbf{c}) the Crude Oil model applied to the 11-23 collection. (\textbf{d}) The Crude Oil model applied to the 12-09 collection. In each panel, boat data are overlaid as color-filled squares. We note that there is good agreement between estimated values at boat locations and the in-situ reference measurements. \label{fig:maps}}
 \end{figure}  
 
 
-
-
-\begin{table}[H]
-\caption{This is a wide table.\label{tab2}}
-	\begin{adjustwidth}{-\extralength}{0cm}
-		\newcolumntype{C}{>{\centering\arraybackslash}X}
-		\begin{tabularx}{\fulllength}{CCCC}
-			\toprule
-			\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}     & \textbf{Title 4}\\
-			\midrule
-\multirow[m]{3}{*}{Entry 1 *}	& Data			& Data			& Data\\
-			  	                   & Data			& Data			& Data\\
-			             	      & Data			& Data			& Data\\
-                   \midrule
-\multirow[m]{3}{*}{Entry 2}    & Data			& Data			& Data\\
-			  	                  & Data			& Data			& Data\\
-			             	     & Data			& Data			& Data\\
-                   \midrule
-\multirow[m]{3}{*}{Entry 3}    & Data			& Data			& Data\\
-			  	                 & Data			& Data			& Data\\
-			             	    & Data			& Data			& Data\\
-                  \midrule
-\multirow[m]{3}{*}{Entry 4}   & Data			& Data			& Data\\
-			  	                 & Data			& Data			& Data\\
-			             	    & Data			& Data			& Data\\
-			\bottomrule
-		\end{tabularx}
-	\end{adjustwidth}
-	\noindent{\footnotesize{* Tables may have a footer.}}
-\end{table}
-
-%\begin{listing}[H]
-%\caption{Title of the listing}
-%\rule{\columnwidth}{1pt}
-%\raggedright Text of the listing. In font size footnotesize, small, or normalsize. Preferred format: left aligned and single spaced. Preferred border format: top border line and bottom border line.
-%\rule{\columnwidth}{1pt}
-%\end{listing}
-
-Text.
-
-Text.
-
-\subsection{Formatting of Mathematical Components}
-
-This is the example 1 of equation:
-\begin{linenomath}
-\begin{equation}
-a = 1,
-\end{equation}
-\end{linenomath}
-the text following an equation need not be a new paragraph. Please punctuate equations as regular text.
-%% If the documentclass option "submit" is chosen, please insert a blank line before and after any math environment (equation and eqnarray environments). This ensures correct linenumbering. The blank line should be removed when the documentclass option is changed to "accept" because the text following an equation should not be a new paragraph.
-
-This is the example 2 of equation:
-\begin{adjustwidth}{-\extralength}{0cm}
-\begin{equation}
-a = b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
-\end{equation}
-\end{adjustwidth}
-
-% Example of a page in landscape format (with table and table footnote).
-%\startlandscape
-%\begin{table}[H] %% Table in wide page
-%\caption{This is a very wide table.\label{tab3}}
-%	\begin{tabularx}{\textwidth}{CCCC}
-%		\toprule
-%		\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}	& \textbf{Title 4}\\
-%		\midrule
-%		Entry 1		& Data			& Data			& This cell has some longer content that runs over two lines.\\
-%		Entry 2		& Data			& Data			& Data\textsuperscript{1}\\
-%		\bottomrule
-%	\end{tabularx}
-%	\begin{adjustwidth}{+\extralength}{0cm}
-%		\noindent\footnotesize{\textsuperscript{1} This is a table footnote.}
-%	\end{adjustwidth}
-%\end{table}
-%\finishlandscape
-
-
-Please punctuate equations as regular text. Theorem-type environments (including propositions, lemmas, corollaries etc.) can be formatted as follows:
-%% Example of a theorem:
-\begin{Theorem}
-Example text of a theorem.
-\end{Theorem}
-
-The text continues here. Proofs must be formatted as follows:
-
-%% Example of a proof:
-\begin{proof}[Proof of Theorem 1]
-Text of the proof. Note that the phrase ``of Theorem 1'' is optional if it is clear which theorem is being referred to.
-\end{proof}
-The text continues here.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion} \label{sec:discussion}
+
+However, the presence of DOM/POM (dissolved and particulate organic matter), decreases “blue” instrument sensitivity hindering the primary benefit of having a blue excitation fluorometer. The “red” chlorophyll sensor effectively eliminates interference effects from DOM/POM, by using a specific set of optics. Because these materials don’t absorb red excitation energy, but algae do, red excitation fluorometry is used to detect and estimate algal abundance free from DOM/POM interference. Note that although this optical setup is less sensitive for detecting eukaryotic algae, the errors associated with these interference materials may outweigh the increased sensitivity of blue excitation fluorometry. Also, red excitation fluorometry is significantly more sensitive to prokaryotic algae (blue-green or cyanobacteria), making it a favorable instrument for freshwater systems which are typically rich in DOM and blue-green algae.  
+
 
 \subsection{Limitations}
 
@@ -587,25 +568,81 @@ LD & Linear dichroism
 \appendixtitles{no} % Leave argument "no" if all appendix headings stay EMPTY (then no dot is printed after "Appendix A"). If the appendix sections contain a heading then change the argument to "yes".
 \appendixstart
 \appendix
-\section[\appendixname~\thesection]{}
+\section[\appendixname~\thesection]{}\label{appendix:spec-indices}
 \subsection[\appendixname~\thesubsection]{}
-The appendix is an optional section that can contain details and data supplemental to the main text---for example, explanations of experimental details that would disrupt the flow of the main text but nonetheless remain crucial to understanding and reproducing the research shown; figures of replicates for experiments of which representative data are shown in the main text can be added here if brief, or as Supplementary Data. Mathematical proofs of results not central to the paper can be added as an appendix.
 
-\begin{table}[H] 
-\caption{This is a table caption.\label{tab5}}
-\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data\\
-\bottomrule
-\end{tabularx}
+For the following hyperspectral reflectance indices, we have made the following identifications:
+\begin{align}\label{eq:ref-bands}
+    R_b &= R(440 \text{ nm}) \\
+    R_g &= R(550 \text{ nm}) \\
+    R_b &= R(650 \text{ nm}) \\
+    R_{nir} &= R(860 \text{ nm}).
+\end{align}
+We also define $R_{swir} = R(1009 \text{ nm})$ as the \textit{almost}-SWIR band representing the infrared edge of the hyperspectral imager.
+
+\begin{table}[H]
+\caption{Spectral indices used supplied as extra features to each ML model. For each index, $R_{\lambda}$ denotes the reflectance at wavelength $\lambda$ used to compute the index. $R_b$, $R_g$, etc are defined as in Eq~\ref{eq:ref-bands}. \label{tab:spec-indices}}
+\begin{adjustwidth}{-\extralength}{0cm}
+    \newcolumntype{C}{>{\centering\arraybackslash}X}
+    \begin{tabularx}{\fulllength}{CCC}
+        \toprule
+        \textbf{Spectral Index}	& \textbf{Acronym} & \textbf{Formula}\\
+        \midrule
+        Difference Vegetation Index & DVI & $\dfrac{2.5(R_{nir} - R_r)}{R_{nir} + 6R_r - 7.5R_b + 1}$ \\
+        \midrule
+        Global Environmental Monitoring Index & GEMI* & $\text{eta}(1 - 0.25\,\text{eta}) - \dfrac{R_r - 1.125}{1 - R_r}$  \\
+        \midrule
+        Green Atmospherically Resistant Index & GARI** & $\dfrac{R_{nir} - (R_g - \gamma(R_b - R_r))}{R_{nir} + (R_g - \gamma (R_b - R_r))}$ \\
+        \midrule
+        Green Chlorophyll Index & GCI & $\dfrac{R_{nir}}{R_g} - 1$ \\
+        \midrule
+        Green Difference Vegetation Index & GDVI & $R_{nir} - R_g$ \\
+        \midrule
+        Green Leaf Index & GLI & $\dfrac{(R_g - R_r) + (R_g - R_b)}{2 R_g + R_r + R_b}$ \\
+        \midrule
+        Green Normalized Difference Vegetation Index & GNDVI & $\dfrac{R_{nir} - R_g}{R_{nir} + R_g}$ \\
+        \midrule 
+        Green Optimized Soil Adjusted Vegetation Index & GOSAVI & $\dfrac{R_{nir} - R_g}{R_{nir} + R_g + 0.16}$ \\
+        \midrule
+        Green Ratio Vegetation Index & GRVI & $\dfrac{R_{nir}}{R_g}$ \\
+        \midrule 
+        Green Soil Adjusted Vegetation Index & GSAVI & $\dfrac{1.5(R_{nir} - R_g)}{R_{nir} + R_g + 0.5}$ \\
+        \midrule
+        Infrared Percentage Vegetation Index & IPVI & $\dfrac{R_{nir}}{R_{nir} + R_r}$ \\
+        \midrule
+        Leaf Area Index & LAI & $3.618 \left(\dfrac{2.5 (R_{nir} - R_r)}{R_{nir} + 6R_{R_r} - 7.5 R_b + 1}\right) - 0.118$ \\
+        \midrule
+        Modified Non-Linear Index & MNLI & $\dfrac{1.5(R_{nir}^2 - R_r)}{R_{nir}^2 + R_r + 0.5}$ \\
+        \midrule
+        Modified Soil Adjusted Vegetation Index 2 & MSAVI2 & $\dfrac{2R_{nir} + 1 - \sqrt{(2R_{nir} + 1)^2 - 8(R_{nir} - R_r)}}{2}$ \\
+        \midrule
+        Modified Simple Ratio & MSR & $\dfrac{R_{nir}/R_r - 1}{\sqrt{R_{nir} / R_r} + 1}$ \\
+        \midrule
+        Non-Linear Index & NLI & $\dfrac{R_{nir}^2 - R_r}{R_{nir}^2 + R_r}$ \\
+        \midrule
+        Normalized Difference Vegetation Index & NDVI & $\dfrac{R_{nir} - R_r}{R_{nir} + R_r}$ \\
+        \midrule
+        Normalized Pigment Chlorophyll Index & NPCI & $\dfrac{R_{680} - R_{430}}{R_{680} + R_{430}}$ \\
+        \midrule
+        Optimized Soil Adjusted Vegetation Index & OSAVI & $\dfrac{R_{nir} - R_r}{R_{nir} + R_r + 0.16}$ \\
+        \midrule
+        Renormalized Difference Vegetation Index & RDVI & $\dfrac{R_{nir} - R_r}{\sqrt{R_{nir} + R_r}}$ \\
+        \midrule
+        Soil Adjusted Vegetation Index & SAVI & $\dfrac{1.5(R_{nir} - R_r)}{R_{nir} + R_r + 0.5}$ \\
+        \midrule 
+        Simple Ratio & SR & $\dfrac{R_{nir}}{R_r}$ \\
+        \midrule
+        Transformed Difference Vegetation Index & TDVI & $\dfrac{1.5R_{nir} - R_r}{\sqrt{R_{nir}^2 + R_r + 0.5}}$ \\
+        \midrule
+        Triangular Greenness Index & TGI & $\dfrac{(\lambda_r-\lambda_b)(R_r-R_g) - (\lambda_r-\lambda_g)(R_r - R_b)}{2}$ \\
+        \midrule
+        Visible Atmospherically Resistant Index & VARI & $\dfrac{R_g - R_r}{R_g + R_r - R_b}$ \\
+        \bottomrule
+    \end{tabularx}
+\end{adjustwidth}
+\noindent{\footnotesize{* $\text{eta} = 2(R_{nir}^2 - R_g^2) + 1.5R_{nir} + 0.5R_{r} $ \tab ** $\gamma =1.7$}}
 \end{table}
 
-\section[\appendixname~\thesection]{}
-All appendix sections must be cited in the main text. In the appendices, Figures, Tables, etc. should be labeled, starting with ``A''---e.g., Figure A1, Figure A2, etc.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{adjustwidth}{-\extralength}{0cm}
