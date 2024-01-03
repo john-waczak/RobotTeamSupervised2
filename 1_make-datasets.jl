@@ -109,7 +109,7 @@ satmap = get_background_satmap(w,e,s,n)
 
 
 # read in the datasets:
-function get_data(fpath; threshold=0.25)
+function get_data(fpath; threshold=0.3)
     df = DataFrame()
     feature_names = []
     target_names = []
@@ -132,7 +132,7 @@ function get_data(fpath; threshold=0.25)
     end
 
     # first select only those points that are identifiably "in" the water and deal with any rows with missing data
-    filter!(row -> row.mNDWI > threshold, df);
+    filter!(row -> row.NDWI1 > threshold, df);
     dropmissing!(df);
 
     # identify nan/inf columns
