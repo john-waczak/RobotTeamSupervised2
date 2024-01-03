@@ -568,80 +568,8 @@ LD & Linear dichroism
 \appendixtitles{no} % Leave argument "no" if all appendix headings stay EMPTY (then no dot is printed after "Appendix A"). If the appendix sections contain a heading then change the argument to "yes".
 \appendixstart
 \appendix
-\section[\appendixname~\thesection]{}\label{appendix:spec-indices}
-\subsection[\appendixname~\thesubsection]{}
-
-For the following hyperspectral reflectance indices, we have made the following identifications:
-\begin{align}\label{eq:ref-bands}
-    R_b &= R(440 \text{ nm}) \\
-    R_g &= R(550 \text{ nm}) \\
-    R_b &= R(650 \text{ nm}) \\
-    R_{nir} &= R(860 \text{ nm}).
-\end{align}
-We also define $R_{swir} = R(1009 \text{ nm})$ as the \textit{almost}-SWIR band representing the infrared edge of the hyperspectral imager.
-
-\begin{table}[H]
-\caption{Spectral indices used supplied as extra features to each ML model. For each index, $R_{\lambda}$ denotes the reflectance at wavelength $\lambda$ used to compute the index. $R_b$, $R_g$, etc are defined as in Eq~\ref{eq:ref-bands}. \label{tab:spec-indices}}
-\begin{adjustwidth}{-\extralength}{0cm}
-    \newcolumntype{C}{>{\centering\arraybackslash}X}
-    \begin{tabularx}{\fulllength}{CCC}
-        \toprule
-        \textbf{Spectral Index}	& \textbf{Acronym} & \textbf{Formula}\\
-        \midrule
-        Difference Vegetation Index & DVI & $\dfrac{2.5(R_{nir} - R_r)}{R_{nir} + 6R_r - 7.5R_b + 1}$ \\
-        \midrule
-        Global Environmental Monitoring Index & GEMI* & $\text{eta}(1 - 0.25\,\text{eta}) - \dfrac{R_r - 1.125}{1 - R_r}$  \\
-        \midrule
-        Green Atmospherically Resistant Index & GARI** & $\dfrac{R_{nir} - (R_g - \gamma(R_b - R_r))}{R_{nir} + (R_g - \gamma (R_b - R_r))}$ \\
-        \midrule
-        Green Chlorophyll Index & GCI & $\dfrac{R_{nir}}{R_g} - 1$ \\
-        \midrule
-        Green Difference Vegetation Index & GDVI & $R_{nir} - R_g$ \\
-        \midrule
-        Green Leaf Index & GLI & $\dfrac{(R_g - R_r) + (R_g - R_b)}{2 R_g + R_r + R_b}$ \\
-        \midrule
-        Green Normalized Difference Vegetation Index & GNDVI & $\dfrac{R_{nir} - R_g}{R_{nir} + R_g}$ \\
-        \midrule 
-        Green Optimized Soil Adjusted Vegetation Index & GOSAVI & $\dfrac{R_{nir} - R_g}{R_{nir} + R_g + 0.16}$ \\
-        \midrule
-        Green Ratio Vegetation Index & GRVI & $\dfrac{R_{nir}}{R_g}$ \\
-        \midrule 
-        Green Soil Adjusted Vegetation Index & GSAVI & $\dfrac{1.5(R_{nir} - R_g)}{R_{nir} + R_g + 0.5}$ \\
-        \midrule
-        Infrared Percentage Vegetation Index & IPVI & $\dfrac{R_{nir}}{R_{nir} + R_r}$ \\
-        \midrule
-        Leaf Area Index & LAI & $3.618 \left(\dfrac{2.5 (R_{nir} - R_r)}{R_{nir} + 6R_{R_r} - 7.5 R_b + 1}\right) - 0.118$ \\
-        \midrule
-        Modified Non-Linear Index & MNLI & $\dfrac{1.5(R_{nir}^2 - R_r)}{R_{nir}^2 + R_r + 0.5}$ \\
-        \midrule
-        Modified Soil Adjusted Vegetation Index 2 & MSAVI2 & $\dfrac{2R_{nir} + 1 - \sqrt{(2R_{nir} + 1)^2 - 8(R_{nir} - R_r)}}{2}$ \\
-        \midrule
-        Modified Simple Ratio & MSR & $\dfrac{R_{nir}/R_r - 1}{\sqrt{R_{nir} / R_r} + 1}$ \\
-        \midrule
-        Non-Linear Index & NLI & $\dfrac{R_{nir}^2 - R_r}{R_{nir}^2 + R_r}$ \\
-        \midrule
-        Normalized Difference Vegetation Index & NDVI & $\dfrac{R_{nir} - R_r}{R_{nir} + R_r}$ \\
-        \midrule
-        Normalized Pigment Chlorophyll Index & NPCI & $\dfrac{R_{680} - R_{430}}{R_{680} + R_{430}}$ \\
-        \midrule
-        Optimized Soil Adjusted Vegetation Index & OSAVI & $\dfrac{R_{nir} - R_r}{R_{nir} + R_r + 0.16}$ \\
-        \midrule
-        Renormalized Difference Vegetation Index & RDVI & $\dfrac{R_{nir} - R_r}{\sqrt{R_{nir} + R_r}}$ \\
-        \midrule
-        Soil Adjusted Vegetation Index & SAVI & $\dfrac{1.5(R_{nir} - R_r)}{R_{nir} + R_r + 0.5}$ \\
-        \midrule 
-        Simple Ratio & SR & $\dfrac{R_{nir}}{R_r}$ \\
-        \midrule
-        Transformed Difference Vegetation Index & TDVI & $\dfrac{1.5R_{nir} - R_r}{\sqrt{R_{nir}^2 + R_r + 0.5}}$ \\
-        \midrule
-        Triangular Greenness Index & TGI & $\dfrac{(\lambda_r-\lambda_b)(R_r-R_g) - (\lambda_r-\lambda_g)(R_r - R_b)}{2}$ \\
-        \midrule
-        Visible Atmospherically Resistant Index & VARI & $\dfrac{R_g - R_r}{R_g + R_r - R_b}$ \\
-        \bottomrule
-    \end{tabularx}
-\end{adjustwidth}
-\noindent{\footnotesize{* $\text{eta} = 2(R_{nir}^2 - R_g^2) + 1.5R_{nir} + 0.5R_{r} $ \tab ** $\gamma =1.7$}}
-\end{table}
+%% \section[\appendixname~\thesection]{}\label{appendix:spec-indices}
+%% \subsection[\appendixname~\thesubsection]{}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
