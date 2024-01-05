@@ -123,8 +123,6 @@ function get_data(fpath; threshold=0.3)
         # df_features = CSV.read(joinpath(fpath, "Features_1.csv"), DataFrame)
         # df_targets = CSV.read(joinpath(fpath, "Targets_1.csv"), DataFrame)
 
-
-
         feature_names = names(df_features)
         target_names = names(df_targets)
 
@@ -184,6 +182,7 @@ function get_data(fpath; threshold=0.3)
 
 
     data = data[:, Not(ignorecols)]
+
     target_names = [t for t ∈ target_names if !(t∈ignorecols)]
     feature_names = [f for f ∈ feature_names if !(f∈ignorecols)]
 

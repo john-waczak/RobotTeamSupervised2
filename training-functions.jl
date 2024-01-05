@@ -10,11 +10,11 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       (hpname=:post_prune, values=[false, true])
                                                                       ],
                                          "RandomForestRegressor" => [
-                                                                      #(hpname=:min_samples_leaf, lower=2, upper=100),
-                                                                      (hpname=:max_depth, values=[-1, 3, 5, 7]),
-                                                                      (hpname=:n_subfeatures, lower=10, upper=100,),
-                                                                      (hpname=:n_trees, lower=50, upper=250),
-                                                                      #(hpname=:sampling_fraction, lower=0.75, upper=0.95)
+                                                                      (hpname=:min_samples_leaf, lower=1, upper=100),
+                                                                      #(hpname=:max_depth, values=[-1, 3, 5, 7]),
+                                                                      #(hpname=:n_subfeatures, lower=10, upper=100,),
+                                                                      #(hpname=:n_trees, lower=50, upper=200),
+                                                                      (hpname=:sampling_fraction, lower=0.8, upper=1.0)
                                                                       ],
                                           ),
                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, lower=50, upper=100),
@@ -26,16 +26,16 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                           (hpname=:alpha, lower=0.0, upper=100.0), # L1 regularization. Higher makes model more sparse
                                                           ],
                                    ),
-                  "EvoTrees" => Dict("EvoTreeRegressor" => [(hpname=:nrounds,lower=50, upper=150),
+                  "EvoTrees" => Dict("EvoTreeRegressor" => [#(hpname=:nrounds,lower=50, upper=150),
                                                             #(hpname=:nbins, lower=64, upper=255),
-                                                            (hpname=:eta, lower=0.1, upper=0.5),
+                                                            (hpname=:eta, lower=0.2, upper=0.4),
                                                             #(hpname=:max_depth, lower=3, upper=8),
                                                             #(hpname=:rowsample, lower=0.65, upper=1.0),
                                                             #(hpname=:colsample, lower=0.65, upper=1.0),
 							                                              #(hpname=:L2, lower=0.0, upper=1000.0),
                                                             #(hpname=:lambda, lower=0.0, upper=1000.0),
                                                             #(hpname=:alpha, lower=0.0, upper=1000.0),
-                                                            (hpname=:lambda, lower=0.0, upper=10.0),
+                                                            (hpname=:lambda, lower=0.1, upper=10.0),
                                                             (hpname=:alpha, lower=0.0, upper=10.0),
                                                             ],
                                      ),
@@ -64,28 +64,22 @@ cor_coef(yhat, y) = Statistics.cor(yhat, y)
 
 
 function train_folds(
-    Xtrain,ytrain,
-    Xtest, ytest,
+    X, y,
+    idx_train, idx_test,
     longname, savename, mdl,
     target_name, units, target_long,
     outpath;
     suffix="",
     rng=Xoshiro(42),
     nfolds=10,
-    run_occam=true,
     )
 
     @info "\tSetting up save paths"
 
     outpathdefault = joinpath(outpath, savename, "default")
-    outpath_featuresreduced = joinpath(outpath, savename, "important_only")
-
     path_to_use = outpathdefault
-
-    for path ∈ [outpathdefault, outpath_featuresreduced]
-        if !isdir(path)
-            mkpath(path)
-        end
+    if !ispath(path_to_use)
+        mkpath(path_to_use)
     end
 
 
@@ -96,45 +90,24 @@ function train_folds(
     end
 
     # verify scitype is satisfied
-    scitype(ytrain) <: target_scitype(mdl)
-    scitype(Xtrain) <: input_scitype(mdl)
-
+    scitype(y) <: target_scitype(mdl)
+    scitype(X) <: input_scitype(mdl)
 
 
     # fit the machine
-    # @info "\tEvaluating model for $(nfolds) folds"
+    Xtrain = @view X[idx_train,:]
+    ytrain = @view y[idx_train]
+
+    Xtest = @view X[idx_test,:]
+    ytest = @view y[idx_test]
+
     mach = machine(mdl, Xtrain, ytrain)
-
-    cv = CV(nfolds=nfolds, rng=rng)
-
-    e = evaluate!(
-        mach,
-        resampling=cv,
-        measures=[rsq, rmse, mae, cor_coef]
-    )
-
-    res_dict = Dict()
-    res_dict["rsq_mean"] = mean(e.per_fold[1])
-    res_dict["rsq_std"] = std(e.per_fold[1])
-    res_dict["rmse_mean"] = mean(e.per_fold[2])
-    res_dict["rmse_std"] = std(e.per_fold[2])
-    res_dict["mae_mean"] = mean(e.per_fold[3])
-    res_dict["mae_std"] = std(e.per_fold[3])
-    res_dict["r_mean"] = mean(e.per_fold[4])
-    res_dict["r_std"] = std(e.per_fold[4])
-
 
     @info "\tTraining model on full training set..."
     fit!(mach)
 
     yhat_train = MLJ.predict(mach, Xtrain)
     yhat_test = MLJ.predict(mach, Xtest)
-
-    # res_dict["rsq"] = rsq(yhat_test, ytest)
-    # res_dict["rmse"] = rmse(yhat_test, ytest)
-    # res_dict["mae"] = mae(yhat_test, ytest)
-    # res_dict["r"] = cor_coef(yhat_test, ytest)
-
 
 
     # generate plots:
@@ -146,9 +119,9 @@ function train_folds(
         yhat_test,
         "$(target_long) ($(units))"
     )
+
     save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
     save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
-
 
     fig = quantile_results(
         ytrain,
@@ -162,28 +135,6 @@ function train_folds(
 
     @info "\tSaving model"
     MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
-
-    # now let's fit a conformal model to estimate an uncertainty bound
-    let
-        @info "\tEstimating uncertainty with conformal prediction"
-        conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
-        mach_conf = machine(conf_model, Xtrain, ytrain)
-        fit!(mach_conf, verbosity=0)
-
-        yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
-        cov = emp_coverage(yhat_conf, ytest);
-        @info "\tEmpirical coverage: $(cov)"
-        res_dict["emp_cov"] = cov
-
-        Δy = (yhat_conf[1][2] - yhat_conf[1][1])/2
-        res_dict["uncertainty"] = Δy
-        @info "\tEstimated uncertainty: $(Δy ) $(units)"
-    end
-
-    # save dict of evaluation results...
-    open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
-        JSON.print(f, res_dict)
-    end
 
 
     # 2. Compute feature importances
@@ -202,7 +153,7 @@ function train_folds(
         fi_df.rel_importance .= fi_df.rel_importance ./ maximum(fi_df.rel_importance)
         sort!(fi_df, :rel_importance; rev=true)
 
-        CSV.write(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).csv"), fi_df)
+        CSV.write(joinpath(path_to_use, "importance_ranking__$(suffix).csv"), fi_df)
 
         rel_importance = fi_df.rel_importance[1:n_features]
         var_names = [name_replacements[s] for s ∈ String.(fi_df.feature_name[1:n_features])]
@@ -230,135 +181,145 @@ function train_folds(
         #xlims!(ax,-0.01, 1.025)
         ylims!(ax, 0.5, n_features + 0.5)
 
-        save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).pdf"), fig)
+        save(joinpath(path_to_use, "importance_ranking__$(suffix).png"), fig)
+        save(joinpath(path_to_use, "importance_ranking__$(suffix).pdf"), fig)
 
 
-        # do the same for ONLY reflectances
-        ref_vals = Symbol.(["R_" * lpad(i, 3, "0") for i in 1:462])
-        fi_pairs_ref = [p for p in fi_pairs if (Symbol(p.first) in ref_vals)]
+        # run occam
+        @info "\tRunning Occam Selection..."
+        N_features_to_use = [1,5,10,15,25,50,100]
+        r2_vals = Float64[]
+        rmse_vals = Float64[]
 
-        fi_df_ref = DataFrame()
-        fi_df_ref.feature_name = [x[1] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance = [x[2] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance .= fi_df_ref.rel_importance ./ maximum(fi_df_ref.rel_importance)
-        sort!(fi_df_ref, :rel_importance; rev=true)
+        for N_features in N_features_to_use
+            @info "\tEvaluating models for $(N_features) features..."
+            fi_n = @view fi_df[1:N_features, :]
 
-        rel_importance = fi_df_ref.rel_importance[1:n_features]
-        var_names = [name_replacements[s] for s ∈ String.(fi_df_ref.feature_name[1:n_features])]
+            try
+                pipe = Pipeline(
+                    selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
+                    model=mdl,
+                )
 
 
-        fig = Figure(; resolution=(1000, 1000))
-        ax = Axis(
-            fig[1, 1],
-            yticks=(1:n_features, var_names[end:-1:1]),
-            xlabel="Normalized Feature Importance",
-            title="$(target_long)",
-            yminorgridvisible=false,
-            xscale=log10,
+                mach = machine(pipe, Xtrain, ytrain)
+                cv = CV(nfolds=6, rng=rng)
+
+                e = evaluate!(
+                    mach,
+                    resampling=cv,
+                    measures=[rsq, rmse, mae, cor_coef]
+                )
+
+                push!(r2_vals, mean(e.per_fold[1]))
+                push!(rmse_vals, mean(e.per_fold[2]))
+
+            catch e
+                println(e)
+            end
+        end
+
+        # now let's plot the error as a function of number of features and pick the best
+        fig = Figure();
+        ax = Axis(fig[1,1], xlabel="N features", ylabel="R² for $(target_long)")
+        ax2 = Axis(fig[1,1], ylabel="RMSE for $(target_long)", yaxisposition = :right)
+        hidespines!(ax2)
+        hidexdecorations!(ax2)
+
+        l1 = lines!(ax, N_features_to_use, r2_vals, linewidth=3, color=mints_colors[1])
+        l2 = lines!(ax2, N_features_to_use, rmse_vals, linewidth=3, color=mints_colors[2], linestyle=:dash)
+
+        save(joinpath(path_to_use, "feature-dependence__$(suffix).png"), fig)
+        save(joinpath(path_to_use, "feature-dependence__$(suffix).pdf"), fig)
+
+        # train feature reduced model
+        res_dict = Dict()
+        res_dict["n_best"] = N_features_to_use[argmax(r2_vals)]
+
+        N_final = 25
+
+        @info "\tTraining model with $(N_final) features..."
+
+        fi_n = @view fi_df[1:N_final, :]
+        fi_occam = Symbol.(fi_n.feature_name)
+        Xtrain = @view X[idx_train, fi_occam]
+        Xtest = @view X[idx_test, fi_occam]
+
+        mach_occam = machine(mdl, Xtrain, ytrain)
+        cv = CV(nfolds=nfolds, rng=rng)
+
+        e = evaluate!(
+            mach_occam,
+            resampling=cv,
+            measures=[rsq, rmse, mae, cor_coef]
         )
 
-        b = barplot!(ax,
-                     1:n_features,
-                     rel_importance[end:-1:1] .+ eps(1.0),
-                     direction=:x,
-                     color=var_colors
-                     )
-
-        # xlims!(ax, -0.01, 1.025)
-        ylims!(ax, 0.5, n_features + 0.5)
-
-        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).pdf"), fig)
+        res_dict = Dict()
+        res_dict["rsq_mean"] = mean(e.per_fold[1])
+        res_dict["rsq_std"] = std(e.per_fold[1])
+        res_dict["rmse_mean"] = mean(e.per_fold[2])
+        res_dict["rmse_std"] = std(e.per_fold[2])
+        res_dict["mae_mean"] = mean(e.per_fold[3])
+        res_dict["mae_std"] = std(e.per_fold[3])
+        res_dict["r_mean"] = mean(e.per_fold[4])
+        res_dict["r_std"] = std(e.per_fold[4])
 
 
-        # now retrain the model with a limited number of features
-        # N_features_to_use = [1,2, 3, 4, 5,10,15,20,(25:25:(ncol(X)÷25)*25)...]
-        #N_features_to_use = [10,25,50,100,150,300, nrow(fi_df)]
+        @info "\tTraining model on full training set..."
+        fit!(mach_occam)
 
-        if run_occam
-
-            # for tree models with n_subfeatures, we can't select
-            # fewer than the specified number of features...
-            # so we will need to be careful if we've done any
-            # hyperaprameter optimization
-            N_features_to_use = [50, 100, 150, 200, 250, 300, 350]
-            r2_vals = Float64[]
-
-            for N_features in N_features_to_use
-                @info "\tEvaluating models for $(N_features) features..."
-                fi_n = @view fi_df[1:N_features, :]
-
-                try
-                    pipe = Pipeline(
-                        selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
-                        model=mdl,
-                    )
-
-                    # mach_fi = machine(pipe, X_train, y_train);
-                    mach_fi = machine(pipe, Xtrain, ytrain);
-                    fit!(mach_fi, verbosity=0);
-
-                    ŷtest = MLJ.predict(mach_fi, Xtest)
-
-                    #push!(r2_vals, rsq(ŷ_test, y_test))
-                    push!(r2_vals, rsq(ŷtest, ytest))
-                catch e
-                    println(e)
-                end
-            end
-
-            # now let's plot the error as a function of number of features and pick the best
-            fig = Figure();
-            ax = Axis(fig[1,1], xlabel="N features", ylabel="test R² for $(target_long)")
-            lines!(ax, N_features_to_use, r2_vals, linewidth=3)
-            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).pdf"), fig)
+        yhat_train = MLJ.predict(mach_occam, Xtrain)
+        yhat_test = MLJ.predict(mach_occam, Xtest)
 
 
-            # train feature reduced model
-            N_final = N_features_to_use[argmax(r2_vals)]
-            @info "\tTraining model with $(N_final) features..."
+        # generate plots:
+        @info "\tGenerating plots"
+        fig = scatter_results(
+            ytrain,
+            yhat_train,
+            ytest,
+            yhat_test,
+            "$(target_long) ($(units))"
+        )
 
-            fi_n = @view fi_df[1:N_final, :]
-            pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
-                model=mdl,
-            )
+        save(joinpath(path_to_use, "scatterplot-occam__$(suffix).png"), fig)
+        save(joinpath(path_to_use, "scatterplot-occam__$(suffix).pdf"), fig)
 
-            mach_fi = machine(pipe, Xtrain, ytrain)
-            fit!(mach_fi, verbosity=0)
+        fig = quantile_results(
+            ytrain,
+            yhat_train,
+            ytest,
+            yhat_test,
+            "$(target_long) ($(units))"
+        )
+        save(joinpath(path_to_use, "qq-occam__$(suffix).png"), fig)
+        save(joinpath(path_to_use, "qq-occam__$(suffix).pdf"), fig)
 
-            yhat_train = MLJ.predict(mach_fi, Xtrain)
-            yhat_test = MLJ.predict(mach_fi, Xtest)
-
-            # generate plots:
-            @info "\tGenerating plots"
-            fig = scatter_results(
-                ytrain,
-                yhat_train,
-                ytest,
-                yhat_test,
-                "$(target_long) ($(units))"
-            )
-            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).pdf"), fig)
-
-
-            fig = quantile_results(
-                ytrain,
-                yhat_train,
-                ytest,
-                yhat_test,
-                "$(target_long) ($(units))"
-            )
-            save(joinpath(outpath_featuresreduced, "qq__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "qq__$(suffix).pdf"), fig)
+        @info "\tSaving model"
+        MLJ.save(joinpath(path_to_use, "$(savename)-occam__$(suffix).jls"), mach_occam)
 
 
+        # now let's fit a conformal model to estimate an uncertainty bound
+        let
+            @info "\tEstimating uncertainty with conformal prediction"
+            conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
+            mach_conf = machine(conf_model, Xtrain, ytrain)
+            fit!(mach_conf, verbosity=0)
 
-            @info "\t\t...saving"
-            MLJ.save(joinpath(outpath_featuresreduced, "$(savename)__$(suffix).jls"), mach_fi)
+            yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
+            cov = emp_coverage(yhat_conf, ytest);
+            @info "\tEmpirical coverage: $(cov)"
+            res_dict["emp_cov"] = cov
 
+            Δy = (yhat_conf[1][2] - yhat_conf[1][1])/2
+            res_dict["uncertainty"] = Δy
+            @info "\tEstimated uncertainty: $(Δy ) $(units)"
+        end
+
+
+        # save dict of evaluation results...
+        open(joinpath(path_to_use, "$(savename)-occam__$(suffix).json"), "w") do f
+            JSON.print(f, res_dict)
         end
     end
 end
@@ -381,16 +342,11 @@ function train_basic(
     @info "\tSetting up save paths"
 
     outpathdefault = joinpath(outpath, savename, "default")
-    outpath_featuresreduced = joinpath(outpath, savename, "important_only")
 
     path_to_use = outpathdefault
-
-    for path ∈ [outpathdefault, outpath_featuresreduced]
-        if !isdir(path)
-            mkpath(path)
-        end
+    if !ispath(path_to_use)
+        mkpath(path_to_use)
     end
-
 
     # 1. Train model
 
@@ -485,7 +441,7 @@ function train_basic(
         fi_df.rel_importance .= fi_df.rel_importance ./ maximum(fi_df.rel_importance)
         sort!(fi_df, :rel_importance; rev=true)
 
-        CSV.write(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).csv"), fi_df)
+        CSV.write(joinpath(path_to_use, "importance_ranking__$(suffix).csv"), fi_df)
 
         rel_importance = fi_df.rel_importance[1:n_features]
         var_names = [name_replacements[s] for s ∈ String.(fi_df.feature_name[1:n_features])]
@@ -514,55 +470,14 @@ function train_basic(
         #xlims!(ax,-0.01, 1.025)
         ylims!(ax, 0.5, n_features + 0.5)
 
-        save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "importance_ranking__$(suffix).pdf"), fig)
+        save(joinpath(path_to_use, "importance_ranking__$(suffix).png"), fig)
+        save(joinpath(path_to_use, "importance_ranking__$(suffix).pdf"), fig)
 
-
-        # do the same for ONLY reflectances
-        ref_vals = Symbol.(["R_" * lpad(i, 3, "0") for i in 1:462])
-        fi_pairs_ref = [p for p in fi_pairs if (Symbol(p.first) in ref_vals)]
-
-        fi_df_ref = DataFrame()
-        fi_df_ref.feature_name = [x[1] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance = [x[2] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance .= fi_df_ref.rel_importance ./ maximum(fi_df_ref.rel_importance)
-        sort!(fi_df_ref, :rel_importance; rev=true)
-
-        rel_importance = fi_df_ref.rel_importance[1:n_features]
-        var_names = [name_replacements[s] for s ∈ String.(fi_df_ref.feature_name[1:n_features])]
-
-
-        fig = Figure(; resolution=(1000, 1000))
-        ax = Axis(
-            fig[1, 1],
-            yticks=(1:n_features, var_names[end:-1:1]),
-            xlabel="Normalized Feature Importance",
-            title="$(target_long)",
-            yminorgridvisible=false,
-            xscale=log10,
-        )
-
-        b = barplot!(ax,
-                     1:n_features,
-                     rel_importance[end:-1:1] .+ eps(1.0),
-                     direction=:x,
-                     color=var_colors
-                     )
-
-        # xlims!(ax, -0.01, 1.025)
-        ylims!(ax, 0.5, n_features + 0.5)
-
-        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).png"), fig)
-        save(joinpath(outpath_featuresreduced, "importance_ranking_refs_only__$(suffix).pdf"), fig)
-
-
-        # now retrain the model with a limited number of features
-        # N_features_to_use = [1,2, 3, 4, 5,10,15,20,(25:25:(ncol(X)÷25)*25)...]
-        # N_features_to_use = [1,2,3,4,5,10,25,50,100,150,300, ncol(X)]
-        # r2_vals = Float64[]
         if run_occam
-            N_features_to_use = [50, 100, 150, 200, 250, 300, 350]
+            #N_features_to_use = [10, 25, 50, 100, 150, 200, 250, 300, 350, 400]
+            N_features_to_use = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,25,50,100,150]
             r2_vals = Float64[]
+            rmse_vals = Float64[]
 
             for N_features in N_features_to_use
                 @info "Evaluating models for $(N_features) features..."
@@ -579,58 +494,84 @@ function train_basic(
                 ŷtest = MLJ.predict(mach_fi, X[idx_test,:]);
 
                 push!(r2_vals, rsq(ŷtest, ytest))
+                push!(rmse_vals, rmse(ŷtest, ytest))
             end
 
             # now let's plot the error as a function of number of features and pick the best
             fig = Figure();
             ax = Axis(fig[1,1], xlabel="N features", ylabel="test R² for $(target_long)")
-            lines!(ax, N_features_to_use, r2_vals, linewidth=3)
-            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "feature-dependence__$(suffix).pdf"), fig)
+            ax2 = Axis(fig[1,1], ylabel="test RMSE for $(target_long)", yaxisposition = :right)
+            hidespines!(ax2)
+            hidexdecorations!(ax2)
+
+            lines!(ax, N_features_to_use, r2_vals, linewidth=3, color=mints_colors[1])
+            lines!(ax2, N_features_to_use, rmse_vals, linewidth=3, color=mints_colors[2])
+
+            save(joinpath(path_to_use, "feature-dependence__$(suffix).png"), fig)
+            save(joinpath(path_to_use, "feature-dependence__$(suffix).pdf"), fig)
 
 
-            # train feature reduced model
-            # N_final = N_features_to_use[argmin(rmse_vals)]
-            N_final = N_features_to_use[argmax(r2_vals)]
+            # train feature reduced model using top 100 features
+            # N_final = N_features_to_use[argmax(r2_vals)]
+            res_dict = Dict()
+            res_dict["n_best"] = N_features_to_use[argmax(r2_vals)]
+
+            N_final = 10
 
             fi_n = @view fi_df[1:N_final, :]
             pipe = Pipeline(selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
                 model=mdl,
             )
 
-
             mach_fi = machine(pipe, X, y)
             fit!(mach_fi, rows=idx_train, verbosity=0)
-
-
 
             @info "\tGenerating predictions"
             ŷtrain = MLJ.predict(mach_fi, X[idx_train,:]);
             ŷtest = MLJ.predict(mach_fi, X[idx_test,:]);
 
 
-            fig = scatter_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+            fig = scatter_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
 
-            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "scatterplot__$(suffix).pdf"), fig)
+            save(joinpath(path_to_use, "scatterplot-fi__$(suffix).png"), fig)
+            save(joinpath(path_to_use, "scatterplot-fi__$(suffix).pdf"), fig)
 
 
             # generate quantile-quantile plot
-            fig = quantile_results(y, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
-            save(joinpath(outpath_featuresreduced, "qq__$(suffix).png"), fig)
-            save(joinpath(outpath_featuresreduced, "qq__$(suffix).pdf"), fig)
+            fig = quantile_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+            save(joinpath(path_to_use, "qq-fi__$(suffix).png"), fig)
+            save(joinpath(path_to_use, "qq-fi__$(suffix).pdf"), fig)
 
 
-            res_dict = Dict()
-            res_dict["rsq_train"] = rsq(ŷtrain, y)
+            res_dict["rsq_train"] = rsq(ŷtrain, ytrain)
             res_dict["rsq_test"] = rsq(ŷtest, ytest)
-            res_dict["rmse_train"] = rmse(ŷtrain, y)
+            res_dict["rmse_train"] = rmse(ŷtrain, ytrain)
             res_dict["rmse_test"] = rmse(ŷtest, ytest)
-            res_dict["mae_train"] = mae(ŷtrain, y)
+            res_dict["mae_train"] = mae(ŷtrain, ytrain)
             res_dict["mae_test"] = mae(ŷtest, ytest)
-            res_dict["r_train"] = Statistics.cor(ŷtrain, y)
+            res_dict["r_train"] = Statistics.cor(ŷtrain, ytrain)
             res_dict["r_test"] = Statistics.cor(ŷtest, ytest)
-            open(joinpath(outpath_featuresreduced, "$(savename)__$(suffix).json"), "w") do f
+
+            let
+                @info "\tEstimating uncertainty with conformal prediction"
+                conf_model = conformal_model(pipe; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
+                Xtrain = X[idx_train,:]
+                Xtest = X[idx_test,:]
+
+                mach_conf = machine(conf_model, Xtrain, ytrain);
+                fit!(mach_conf, verbosity=0)
+
+                yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
+                cov = emp_coverage(yhat_conf, ytest);
+                @info "\tEmpirical coverage: $(cov)"
+                res_dict["emp_cov"] = cov
+
+                Δy = (yhat_conf[1][2] - yhat_conf[1][1])/2
+                res_dict["uncertainty"] = Δy
+                @info "\tEstimated uncertainty: $(Δy ) $(units)"
+            end
+
+            open(joinpath(path_to_use, "$(savename)-fi__$(suffix).json"), "w") do f
                 JSON.print(f, res_dict)
             end
         end
@@ -956,6 +897,7 @@ function train_hpo(
     target_name, units, target_long,
     mdl,
     outpath;
+    nfolds=10,
     nmodels=100,
     rng=Xoshiro(42),
     )
@@ -966,15 +908,14 @@ function train_hpo(
 
     outpathdefault = joinpath(outpath, savename, "default")
     outpath_featuresreduced = joinpath(outpath, savename, "important_only")
-    outpath_hpo = joinpath(outpath, savename, "hyperparameter_optimized")
 
-    for path ∈ [outpathdefault, outpath_featuresreduced, outpath_hpo]
-        if !isdir(path)
-            mkpath(path)
-        end
+    outpath_hpo = joinpath(outpath, savename, "hyperparameter_optimized")
+    path_to_use = outpath_hpo
+
+    if !ispath(path_to_use)
+        mkpath(path_to_use)
     end
 
-    path_to_use = outpath_hpo
 
     # 1. Train model
     @info "\tSetting model random seed"
@@ -989,6 +930,13 @@ function train_hpo(
     # verify scitype is satisfied
     scitype(y) <: target_scitype(mdl)
     scitype(X) <: input_scitype(mdl)
+
+
+    Xtrain = @view X[idx_train, :]
+    Xtest = @view X[idx_test, :]
+
+    ytrain = @view y[idx_train]
+    ytest = @view y[idx_test]
 
 
 
@@ -1015,14 +963,14 @@ function train_hpo(
         model=mdl,
         range=rs,
         tuning=tuning,
-        measures=[rmse, mae, rsq],
-        resampling=[(idx_train, idx_test),],
-#        resampling=CV(nfolds=10, rng=rng),
+        measures=[mae, rmse, rsq],
+        # resampling=[(idx_train, idx_test),],
+        resampling=CV(nfolds=6, rng=rng),
         n=nmodels,
         cache=false,
     )
 
-    mach = machine(tuning_pipe, X, y; cache=false)
+    mach = machine(tuning_pipe, Xtrain, ytrain; cache=false)  # <- data leakage covered by resampling strategy above
 
     @info "\tStarting training..."
     fit!(mach) #, verbosity=0)
@@ -1063,135 +1011,64 @@ function train_hpo(
 
     # fit the machine
     @info "\tTraining final hpo model"
-    mach = machine(mdl_final, X, y)
-    fit!(mach, rows=idx_train, verbosity=0)
+    mach = machine(mdl_final, Xtrain, ytrain)
+    cv = CV(nfolds=nfolds, rng=rng)
 
-    # generate predictions
-    @info "\tGenerating predictions"
-    ytrain = y[idx_train]
-    ytest = y[idx_test]
-    ŷtrain = MLJ.predict(mach, X[idx_train,:]);
-    ŷtest = MLJ.predict(mach, X[idx_test,:]);
+    e = evaluate!(
+        mach,
+        resampling=cv,
+        measures=[rsq, rmse, mae, cor_coef]
+    )
 
-    # generate scatterplot
-    @info "\tCreating Plots"
-    fig = scatter_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    res_dict = Dict()
+    res_dict["rsq_mean"] = mean(e.per_fold[1])
+    res_dict["rsq_std"] = std(e.per_fold[1])
+    res_dict["rmse_mean"] = mean(e.per_fold[2])
+    res_dict["rmse_std"] = std(e.per_fold[2])
+    res_dict["mae_mean"] = mean(e.per_fold[3])
+    res_dict["mae_std"] = std(e.per_fold[3])
+    res_dict["r_mean"] = mean(e.per_fold[4])
+    res_dict["r_std"] = std(e.per_fold[4])
+
+
+    @info "\tTraining model on full training set..."
+    fit!(mach)
+
+    yhat_train = MLJ.predict(mach, Xtrain)
+    yhat_test = MLJ.predict(mach, Xtest)
+
+
+    # generate plots:
+    @info "\tGenerating plots"
+    fig = scatter_results(
+        ytrain,
+        yhat_train,
+        ytest,
+        yhat_test,
+        "$(target_long) ($(units))"
+    )
+
     save(joinpath(path_to_use, "scatterplot__$(suffix).png"), fig)
     save(joinpath(path_to_use, "scatterplot__$(suffix).pdf"), fig)
 
-    # generate quantile-quantile plot
-    fig = quantile_results(ytrain, ŷtrain, ytest, ŷtest, "$(target_long) ($(units))")
+    fig = quantile_results(
+        ytrain,
+        yhat_train,
+        ytest,
+        yhat_test,
+        "$(target_long) ($(units))"
+    )
     save(joinpath(path_to_use, "qq__$(suffix).png"), fig)
     save(joinpath(path_to_use, "qq__$(suffix).pdf"), fig)
 
-    # save the model println("\tSaving the model")
+    @info "\tSaving model"
     MLJ.save(joinpath(path_to_use, "$(savename)__$(suffix).jls"), mach)
 
-    res_dict = Dict()
-    res_dict["rsq_train"] = rsq(ŷtrain, ytrain)
-    res_dict["rsq_test"] = rsq(ŷtest, ytest)
-    res_dict["rmse_train"] = rmse(ŷtrain, ytrain)
-    res_dict["rmse_test"] = rmse(ŷtest, ytest)
-    res_dict["mae_train"] = mae(ŷtrain, ytrain)
-    res_dict["mae_test"] = mae(ŷtest, ytest)
-    res_dict["r_train"] = Statistics.cor(ŷtrain, ytrain)
-    res_dict["r_test"] = Statistics.cor(ŷtest, ytest)
-
-
-    if reports_feature_importances(mdl_final)
-        n_features = 25
-
-        @info "\tComputing feature importances"
-        rpt = report(mach);
-
-
-        fi_pairs = feature_importances(mach) #.model, mach.fitresult, rpt);
-
-        fi_df = DataFrame()
-        fi_df.feature_name = [x[1] for x ∈ fi_pairs]
-        fi_df.rel_importance = [x[2] for x ∈ fi_pairs]
-        fi_df.rel_importance .= fi_df.rel_importance ./ maximum(fi_df.rel_importance)
-        sort!(fi_df, :rel_importance; rev=true)
-
-        CSV.write(joinpath(path_to_use, "importance_ranking__$(suffix).csv"), fi_df)
-
-        rel_importance = fi_df.rel_importance[1:n_features]
-        var_names = [name_replacements[s] for s ∈ String.(fi_df.feature_name[1:n_features])]
-
-
-        var_colors = cgrad([mints_colors[2], mints_colors[1]], n_features)[1:n_features]
-
-
-        fig = Figure(; resolution=(1000, 1000))
-        ax = Axis(
-            fig[1, 1],
-            yticks=(1:n_features, var_names[end:-1:1]),
-            xlabel="Normalized Feature Importance",
-            title="$(target_long)",
-            yminorgridvisible=false,
-            xscale=log10,
-        )
-
-        b = barplot!(ax,
-            1:n_features,
-            rel_importance[end:-1:1] .+ eps(1.0),
-            direction=:x,
-            color=var_colors
-        )
-
-        #xlims!(ax,-0.01, 1.025)
-        ylims!(ax, 0.5, n_features + 0.5)
-
-        save(joinpath(path_to_use, "importance_ranking__$(suffix).png"), fig)
-        save(joinpath(path_to_use, "importance_ranking__$(suffix).pdf"), fig)
-
-
-        # do the same for ONLY reflectances
-        ref_vals = Symbol.(["R_" * lpad(i, 3, "0") for i in 1:462])
-        fi_pairs_ref = [p for p in fi_pairs if (Symbol(p.first) in ref_vals)]
-
-        fi_df_ref = DataFrame()
-        fi_df_ref.feature_name = [x[1] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance = [x[2] for x ∈ fi_pairs_ref]
-        fi_df_ref.rel_importance .= fi_df_ref.rel_importance ./ maximum(fi_df_ref.rel_importance)
-        sort!(fi_df_ref, :rel_importance; rev=true)
-
-        rel_importance = fi_df_ref.rel_importance[1:n_features]
-        var_names = [name_replacements[s] for s ∈ String.(fi_df_ref.feature_name[1:n_features])]
-
-
-        fig = Figure(; resolution=(1000, 1000))
-        ax = Axis(
-            fig[1, 1],
-            yticks=(1:n_features, var_names[end:-1:1]),
-            xlabel="Normalized Feature Importance",
-            title="$(target_long)",
-            yminorgridvisible=false,
-            xscale=log10,
-        )
-
-        b = barplot!(ax,
-                     1:n_features,
-                     rel_importance[end:-1:1] .+ eps(1.0),
-                     direction=:x,
-                     color=var_colors
-                     )
-
-        # xlims!(ax, -0.01, 1.025)
-        ylims!(ax, 0.5, n_features + 0.5)
-
-        save(joinpath(path_to_use, "importance_ranking_refs_only__$(suffix).png"), fig)
-        save(joinpath(path_to_use, "importance_ranking_refs_only__$(suffix).pdf"), fig)
-    end
-
-
+    # now let's fit a conformal model to estimate an uncertainty bound
     let
         @info "\tEstimating uncertainty with conformal prediction"
-        conf_model = conformal_model(mdl; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
-        Xtrain = X[idx_train,:]
-        Xtest = X[idx_test,:]
-
-        mach_conf = machine(conf_model, Xtrain, ytrain);
+        conf_model = conformal_model(mdl_final; method=:simple_inductive, train_ratio=(8/9), coverage=0.9)
+        mach_conf = machine(conf_model, Xtrain, ytrain)
         fit!(mach_conf, verbosity=0)
 
         yhat_conf = ConformalPrediction.predict(mach_conf, Xtest);
@@ -1204,6 +1081,7 @@ function train_hpo(
         @info "\tEstimated uncertainty: $(Δy ) $(units)"
     end
 
+    # save dict of evaluation results...
     open(joinpath(path_to_use, "$(savename)__$(suffix).json"), "w") do f
         JSON.print(f, res_dict)
     end

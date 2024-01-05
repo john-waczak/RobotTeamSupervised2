@@ -61,12 +61,12 @@ datapath = "/Users/johnwaczak/data/robot-team/supervised"
 # DecisionTreeRegressor and RandomForestRegressor don't seem to work.
 
 
+ETR = @load EvoTreeRegressor pkg=EvoTrees
 RFR = @load RandomForestRegressor pkg=DecisionTree
 DTR = @load DecisionTreeRegressor pkg=DecisionTree
 XGBR = @load XGBoostRegressor pkg=XGBoost
 NNR = @load NeuralNetworkRegressor pkg=MLJFlux
 Standardizer = @load Standardizer pkg=MLJModels
-ETR = @load EvoTreeRegressor pkg=EvoTrees
 
 
 # 1. Construct dictionary of models
@@ -126,8 +126,10 @@ use_metrics = false
 #                  :longname=>"XGBoost Regressor",
 #                  :savename=>"XGBoostRegressor",
 #                  :packagename=>"XGBoost",
+#                  :suffix => "vanilla",
 #                  :mdl=>XGBR(),
 #                  )
+
 
 MODELS[:etr] = (;
                 :longname=>"Evo Tree Regressor",
@@ -141,6 +143,7 @@ MODELS[:etr] = (;
 # MODELS[:dtr] = (;
 #                 :longname => "Decision Tree Regressor",
 #                 :savename => "DecisionTreeRegressor",
+#                 :suffix => "vanilla",
 #                 :mdl => DTR()
 #                 )
 
@@ -155,56 +158,22 @@ MODELS[:rfr] = (;
 
 
 
-# MODELS[:rfr0] = (;
-#                 :longname => "Random Forest Regressor",
-#                 :savename => "RandomForestRegressor",
-#                 :packagename => "DecisionTree",
-#                 :suffix => "vanilla",
-#                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=150),
-#                 )
-
-# MODELS[:rfr1] = (;
-#                 :longname => "Random Forest Regressor",
-#                 :savename => "RandomForestRegressor",
-#                 :packagename => "DecisionTree",
-#                 :suffix => "vanilla_200",
-#                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.9, n_trees=200),
-#                 )
-
-
-# MODELS[:rfr2] = (;
-#                  :longname => "Random Forest Regressor",
-#                  :savename => "RandomForestRegressor",
-#                  :packagename => "DecisionTree",
-#                  :suffix => "hpo1",
-#                  :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=85),
-#                 )
-
-# MODELS[:rfr3] = (;
-#                  :longname => "Random Forest Regressor",
-#                  :savename => "RandomForestRegressor",
-#                  :packagename => "DecisionTree",
-#                  :suffix => "hpo2",
-#                  :mdl => RFR(n_subfeatures=350, sampling_fraction=0.95, n_trees=100),
-#                  )
-
-
 # 5. Fit each of the models to different subsets of features.
-# targets_to_try = [:CDOM, :CO, :Na, :Cl]
 
+collections = ["11-23", "Full"]
+# collections = ["Full"]
 
-# collections = ["11-23", "Full"]
 
 targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
-#collections = ["11-23", "Full"]
-collections = ["Full"]
 
+# targets_to_try = [:CDOM,:CO]
 # targets_to_try = [:CDOM,]
 
-# collections = ["11-23",]
+# targets_to_try = [:Chl]
 
 for collection ∈ collections
     for target ∈ targets_to_try
+
         target_name = String(target)
         target_long = targets_dict[target][2]
         units = targets_dict[target][1]
@@ -223,26 +192,20 @@ for collection ∈ collections
         idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1]
         idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1]
 
-        # Xtrain = X[idx_train, :]
-        # ytrain = y[idx_train]
-
-        # Xtest = X[idx_test, :]
-        # ytest = y[idx_test]
 
         for (shortname, model) ∈ MODELS
             try
                 T1 = now()
 
-                train_basic(
+                train_folds(
                     X, y,
                     idx_train, idx_test,
                     model.longname, model.savename, model.mdl,
                     target_name, units, target_long,
                     outpath;
                     suffix=model.suffix,
-                    run_occam=false,
+                    nfolds=10,
                 )
-
 
 
                 T2 = now()
@@ -251,17 +214,29 @@ for collection ∈ collections
 
                 GC.gc()
 
+                # for each of these models, let's now load in
+                # the most important features and do hyperparameter
+                # optimization
+
+                fi_path = joinpath(outpath, model.savename, "default", "importance_ranking__$(model.suffix).csv")
+                fi_df = CSV.read(fi_path, DataFrame)
+                N_final = 25
+                fi_n = @view fi_df[1:N_final, :]
+                fi_occam = Symbol.(fi_n.feature_name)
+
+                X_occam = X[:, fi_occam]
 
                 T1 = now()
 
                 train_hpo(
-                    X, y,
+                    X_occam, y,
                     idx_train, idx_test,
                     model.longname, model.savename, model.packagename,
                     target_name, units, target_long,
                     model.mdl,
                     outpath;
-                    nmodels=100
+                    nfolds=10,
+                    nmodels=100,
                 )
 
                 T2 = now()
@@ -284,6 +259,8 @@ GC.gc()
 
 
 
+
+# now we need to revert the summary table to the old version... lol
 function make_summary_table(collection, savename, type, suffix)
     res_dicts = Dict[]
 
@@ -292,8 +269,7 @@ function make_summary_table(collection, savename, type, suffix)
         target_long = targets_dict[target][2]
         units = targets_dict[target][1]
 
-        res_path = joinpath(datapath, collection, target_name, "models", savename, type, savename*"__$(suffix).json")
-
+        res_path = joinpath(datapath, collection, target_name, "models", savename, type, savename * suffix * ".json")
         @assert ispath(res_path)
 
         res_string = read(res_path, String)
@@ -313,20 +289,20 @@ function make_summary_table(collection, savename, type, suffix)
 
     df_res = DataFrame(res_dicts)
 
-    sort!(df_res, :rsq_test; rev=true)
+    sort!(df_res, :rsq_mean; rev=true)
 
-    select!(df_res, [:target_long, :target, :rsq_train, :rsq_test, :rmse_train, :rmse_test, :mae_train, :mae_test, :r_train, :r_test, :uncertainty, :emp_cov])
+    select!(df_res, [:target_long, :target, :rsq_mean, :rsq_std, :rmse_mean, :rmse_std, :mae_mean, :mae_std, :r_mean, :r_std, :uncertainty, :emp_cov])
     rename!(df_res,
             "target_long" => "Target",
             "target" => "Var Name",
-            "rsq_train" => "R² (train)",
-            "rsq_test" => "R² (test)",
-            "rmse_train" => "RMSE (train)",
-            "rmse_test" => "RMSE (test)",
-            "mae_train" => "MAE (train)",
-            "mae_test" => "MAE (test)",
-            "r_train" => "R (train)",
-            "r_test" => "R (test)",
+            "rsq_mean" => "R² (mean)",
+            "rsq_std" => "R² (std)",
+            "rmse_mean" => "RMSE (mean)",
+            "rmse_std" => "RMSE (std)",
+            "mae_mean" => "MAE (mean)",
+            "mae_std" => "MAE (std)",
+            "r_mean" => "R (mean)",
+            "r_std" => "R (std)",
             "uncertainty" => "Estimated Uncertainty",
             "emp_cov" => "Empirical Coverage"
             )
@@ -343,27 +319,22 @@ function generate_tex_table(df)
     out = out * "  \\caption{This is a table caption.\\label{tab:fit-results}}\n"
     out = out * "  \\begin{adjustwidth}{-\\extralength}{0cm}\n"
     out = out * "  \\newcolumntype{C}{>{\\centering\\arraybackslash}X}\n"
-    out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCCCCC}\n"
+    out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCC}\n"
     out = out * "    \\toprule\n"
-    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2 (train)\$}	& \\textbf{\$\\text{R}^2 (test)\$}	& \\textbf{RMSE (train)} & \\textbf{RMSE (test)} & \\textbf{MAE (train)} & \\textbf{MAE (test)} & \\textbf{Estimated Uncertainty} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
+    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2\$} & \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
     out = out * "    \\midrule\n"
 
     for row in eachrow(df)
         target_tex = targets_latex[Symbol(row["Var Name"])]
 
-        r2_train = string(round(row["R² (train)"], sigdigits=3))
-        r2_test = string(round(row["R² (train)"], sigdigits=3))
-
-        RMSE_train = string(round(row["RMSE (train)"], sigdigits=3))
-        RMSE_test = string(round(row["RMSE (test)"], sigdigits=3))
-
-        MAE_train = string(round(row["MAE (train)"], sigdigits=3))
-        MAE_test = string(round(row["MAE (test)"], sigdigits=3))
-
+        r2_str = string(round(row["R² (mean)"], sigdigits=3)) * " ± " * string(round(row["R² (std)"], sigdigits=3))
+        rmse_str = string(round(row["RMSE (mean)"], sigdigits=3)) * " ± " * string(round(row["RMSE (std)"], sigdigits=3))
+        mae_str = string(round(row["MAE (mean)"], sigdigits=3)) * " ± " * string(round(row["MAE (std)"], sigdigits=3))
+        # r_str = string(round(row["R (mean)"], sigdigits=3)) * " ± " * string(round(row["R (std)"], sigdigits=3))
         unc = " ± " * string(round(row["Estimated Uncertainty"], sigdigits=2))
-        cov = string(round(row["Empirical Coverage"]*100, sigdigits=3))
+        cov = string(round(Int, row["Empirical Coverage"]*100))
 
-        out = out * "    $(target_tex) & $(r2_train) & $(r2_test) & $(RMSE_train) & $(RMSE_test) & $(MAE_train) & $(MAE_test) & $(unc) & $(cov)\\\\\n"
+        out = out * "    $(target_tex) & $(r2_str) & $(rmse_str) & $(mae_str) & $(unc) & $(cov)\\\\\n"
         out = out * "    \\midrule\n"
     end
 
@@ -378,31 +349,38 @@ end
 
 
 
-
-
+collections[1]
+res_path = joinpath(datapath, collections[1], "CDOM", "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"-occam__vanilla.json")
+ispath(res_path)
 
 dfs = [
-    make_summary_table(collections[1], "EvoTreeRegressor", "default", "vanilla"),
-    make_summary_table(collections[1], "EvoTreeRegressor", "hyperparameter_optimized", "hpo"),
-    make_summary_table(collections[1], "RandomForestRegressor", "default", "vanilla"),
-    make_summary_table(collections[1], "RandomForestRegressor", "hyperparameter_optimized", "hpo"),
+    #make_summary_table(collections[1], "EvoTreeRegressor", "default", "-occam__vanilla"),
+    make_summary_table(collections[1], "EvoTreeRegressor", "hyperparameter_optimized", "__hpo"),
+    #make_summary_table(collections[1], "RandomForestRegressor", "default", "-occam__vanilla"),
+    make_summary_table(collections[1], "RandomForestRegressor", "hyperparameter_optimized", "__hpo"),
 ]
 
 
 
+model_ids = ["etr hpo", "rfr hpo"]
+
 df_out = []
 
+
 for target in targets_to_try
-    idx_winner = argmax([df[df[:, "Var Name"] .== string(target), "R² (test)"]] for df in dfs)
+    idx_winner = argmax([df[df[:, "Var Name"] .== string(target), "R² (mean)"] for df in dfs])
     row = dfs[idx_winner][findfirst(dfs[idx_winner][:, "Var Name"] .== string(target)), :]
 
     df_row = DataFrame(row)
-    df_row[!, "model"] = [models[idx_winner]]
+    df_row[!, "model"] = [model_ids[idx_winner]]
     push!(df_out, df_row)
 end
 
+
 df_out = vcat(df_out...)
-sort!(df_out, "R² (test)"; rev=true)
+sort!(df_out, "R² (mean)"; rev=true)
+
+df_out[:, ["Var Name", "R² (mean)", "RMSE (mean)", "Estimated Uncertainty", "Empirical Coverage"]]
 
 CSV.write(joinpath(datapath, "Full", "Summary-results.csv"), df_out)
 tex_str = generate_tex_table(df_out)
