@@ -153,20 +153,25 @@ MODELS[:rfr] = (;
                  :savename => "RandomForestRegressor",
                  :packagename => "DecisionTree",
                  :suffix => "vanilla",
-                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=1.0, n_trees=150),
+                 :mdl => RFR(n_subfeatures=-1, sampling_fraction=0.85, n_trees=150, max_depth=20),
                  )
 
 
 
 # 5. Fit each of the models to different subsets of features.
 
-collections = ["11-23", "Full"]
-# collections = ["Full"]
+# collections = ["11-23", "Full"]
+collections = ["Full"]
 
 
 targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
 
+# targets_to_try = [:bgm]
+
+
+
 # targets_to_try = [:CDOM,:CO]
+
 # targets_to_try = [:CDOM,]
 
 # targets_to_try = [:Chl]
@@ -204,7 +209,7 @@ for collection ∈ collections
                     target_name, units, target_long,
                     outpath;
                     suffix=model.suffix,
-                    nfolds=10,
+                    nfolds=6,
                 )
 
 
@@ -235,7 +240,7 @@ for collection ∈ collections
                     target_name, units, target_long,
                     model.mdl,
                     outpath;
-                    nfolds=10,
+                    nfolds=6,
                     nmodels=100,
                 )
 
@@ -332,7 +337,7 @@ function generate_tex_table(df)
         mae_str = string(round(row["MAE (mean)"], sigdigits=3)) * " ± " * string(round(row["MAE (std)"], sigdigits=3))
         # r_str = string(round(row["R (mean)"], sigdigits=3)) * " ± " * string(round(row["R (std)"], sigdigits=3))
         unc = " ± " * string(round(row["Estimated Uncertainty"], sigdigits=2))
-        cov = string(round(Int, row["Empirical Coverage"]*100))
+        cov = string(round(row["Empirical Coverage"]*100, digits=1))
 
         out = out * "    $(target_tex) & $(r2_str) & $(rmse_str) & $(mae_str) & $(unc) & $(cov)\\\\\n"
         out = out * "    \\midrule\n"
@@ -349,20 +354,16 @@ end
 
 
 
-collections[1]
-res_path = joinpath(datapath, collections[1], "CDOM", "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"-occam__vanilla.json")
-ispath(res_path)
-
 dfs = [
-    #make_summary_table(collections[1], "EvoTreeRegressor", "default", "-occam__vanilla"),
+    make_summary_table(collections[1], "EvoTreeRegressor", "default", "-occam__vanilla"),
     make_summary_table(collections[1], "EvoTreeRegressor", "hyperparameter_optimized", "__hpo"),
-    #make_summary_table(collections[1], "RandomForestRegressor", "default", "-occam__vanilla"),
+    make_summary_table(collections[1], "RandomForestRegressor", "default", "-occam__vanilla"),
     make_summary_table(collections[1], "RandomForestRegressor", "hyperparameter_optimized", "__hpo"),
 ]
 
 
 
-model_ids = ["etr hpo", "rfr hpo"]
+model_ids = ["etr occam", "etr hpo", "rfr occam", "rfr hpo"]
 
 df_out = []
 

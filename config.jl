@@ -19,9 +19,9 @@ targets_dict = Dict(
     :Na => ["mg/l", "Na⁺", 0.0],
     :OB => ["ppb", "Optical Brighteners", 0.0],
     :RefFuel => ["ppb", "Refined Fuels", 0.0],
-    :Salinity3488 => ["PSS", "Salinity (3488)"],
-    #:Salinity3489 => ["PSS", "Salinity (3489)"],
-    :Salinity3490 => ["PSS", "Salinity (3490)"],
+    :Salinity3488 => ["PSU", "Salinity"],
+    #:Salinity3489 => ["PSU", "Salinity (3489)"],
+    :Salinity3490 => ["PSU", "Salinity"],
     :SpCond => ["μS/cm", "Conductivity"],
     :TDS => ["mg/l", "Total Dissolved Solids", 0.0],
     :TRYP => ["ppb", "Tryptophan", 0.0],
@@ -31,8 +31,8 @@ targets_dict = Dict(
     :Turb3489 => ["FNU", "Turbidity"],
     :Turb3488 => ["FNU", "Turbidity"],
     :Turb3490 => ["FNU", "Turbidity"],
-    :bg => ["ppb", "Blue-Green Algae\nfresh water (Phycocyanin)", 0.0],
-    :bgm => ["ppb", "Blue-Green Algae\nsalt water (Phycoerythrin)", 0.0],
+    :bg => ["ppb", "Blue-Green Algae\n (Phycocyanin)", 0.0],
+    :bgm => ["ppb", "Blue-Green Algae\n (Phycoerythrin)", 0.0],
     :pH => ["", "pH", 0.0],
     :pH_mV => ["mV", "pH"],
 )
@@ -56,8 +56,8 @@ targets_latex= Dict(
     :Na => L"\mathrm{Na^+} (mg/l)",
     :OB => "Optical Brighteners (ppb)",
     :RefFuel => "Refined Fuels (ppb)",
-    :Salinity3488 => "Salinity (PSS)",
-    :Salinity3490 => "Salinity (PSS)",
+    :Salinity3488 => "Salinity (PSU)",
+    :Salinity3490 => "Salinity (PSU)",
     :SpCond => L"Conductivity ($\mu$S/cm)",
     :TDS => "Total Dissolved Solids (mg/l)",
     :TRYP => "Tryptophan (ppb)",
@@ -91,6 +91,7 @@ end
 name_replacements["roll"] = "Roll"
 name_replacements["pitch"] = "Pitch"
 name_replacements["heading"] = "Heading"
+name_replacements["altitude"] = "Altitude"
 
 # angle to pixel in scanline from center
 name_replacements["view_angle"] = "Viewing Angle"
@@ -167,4 +168,85 @@ name_replacements["Σrad"] = "Total Pixel Intensity"
 name_replacements["Σdownwelling"] = "Total Downwelling Intensity"
 
 
+
+
+
+
+bad_hsi_dict = Dict(
+    "11-23" => Dict(
+        "Scotty_1" => [
+            "Scotty_1-16.h5",
+            "Scotty_1-25.h5",
+            "Scotty_1-26.h5",
+            "Scotty_1-27.h5",
+            "Scotty_1-28.h5",
+            "Scotty_1-29.h5",
+            "Scotty_1-30.h5",
+            "Scotty_1-31.h5",
+            "Scotty_1-32.h5",
+        ],
+        "Scotty_2" => [
+            "Scotty_2-9.h5",
+            "Scotty_2-10.h5",
+            "Scotty_2-16.h5",
+            "Scotty_2-20.h5",
+            "Scotty_2-21.h5",
+            "Scotty_2-22.h5",
+            "Scotty_2-23.h5",
+            "Scotty_2-25.h5",
+            "Scotty_2-26.h5",
+            "Scotty_2-27.h5",
+            "Scotty_2-28.h5",
+            "Scotty_2-29.h5",
+            "Scotty_2-30.h5",
+            "Scotty_2-31.h5",
+            "Scotty_2-32.h5",
+        ],
+    ),
+    "12-09" => Dict(
+        "NoDye_1" => [
+            "NoDye_1-1.h5",
+            "NoDye_1-9.h5",
+            "NoDye_1-19.h5",
+            "NoDye_1-23.h5",
+        ],
+        "NoDye_2" => [
+            "NoDye_2-1.h5",
+            "NoDye_2-3.h5",
+            "NoDye_2-4.h5",
+            "NoDye_2-5.h5",
+            "NoDye_2-6.h5",
+            "NoDye_2-7.h5",
+            "NoDye_2-8.h5",
+            "NoDye_2-9.h5",
+            "NoDye_2-20.h5",
+        ],
+    ),
+    "12-10" => Dict(
+        "NoDye_1" => [
+            "NoDye_1-14.h5",
+            "NoDye_1-19.h5",
+            "NoDye_1-20.h5",
+            "NoDye_1-23.h5",
+        ],
+        "NoDye_2" => [
+            "NoDye_2-8.h5",
+            "NoDye_2-9.h5",
+            "NoDye_2-10.h5",
+            "NoDye_2-11.h5",
+            "NoDye_2-12.h5",
+            "NoDye_2-13.h5",
+            "NoDye_2-14.h5",
+            "NoDye_2-15.h5",
+            "NoDye_2-16.h5",
+            "NoDye_2-17.h5",
+            "NoDye_2-18.h5",
+            "NoDye_2-19.h5",
+            "NoDye_2-20.h5",
+            "NoDye_2-21.h5",
+            "NoDye_2-22.h5",
+            "NoDye_2-23.h5",
+        ]
+    ),
+)
 

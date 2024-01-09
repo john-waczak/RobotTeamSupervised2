@@ -35,7 +35,7 @@ outpath = "/Users/johnwaczak/data/robot-team/supervised"
 
 collections = ["11-23", "12-09", "12-10", "Full"]
 # collections = ["11-23", "Full"]
-
+# collections = ["Full",]
 
 
 targets = String.(keys(targets_dict))

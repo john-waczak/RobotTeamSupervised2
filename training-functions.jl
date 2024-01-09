@@ -186,59 +186,59 @@ function train_folds(
 
 
         # run occam
-        @info "\tRunning Occam Selection..."
-        N_features_to_use = [1,5,10,15,25,50,100]
-        r2_vals = Float64[]
-        rmse_vals = Float64[]
+        # @info "\tRunning Occam Selection..."
+        # N_features_to_use = [1,2,3,4,5,10,15,25,50,100]
+        # r2_vals = Float64[]
+        # rmse_vals = Float64[]
 
-        for N_features in N_features_to_use
-            @info "\tEvaluating models for $(N_features) features..."
-            fi_n = @view fi_df[1:N_features, :]
+        # for N_features in N_features_to_use
+        #     @info "\tEvaluating models for $(N_features) features..."
+        #     fi_n = @view fi_df[1:N_features, :]
 
-            try
-                pipe = Pipeline(
-                    selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
-                    model=mdl,
-                )
+        #     try
+        #         pipe = Pipeline(
+        #             selector=FeatureSelector(features=Symbol.(fi_n.feature_name)),
+        #             model=mdl,
+        #         )
 
 
-                mach = machine(pipe, Xtrain, ytrain)
-                cv = CV(nfolds=6, rng=rng)
+        #         mach = machine(pipe, Xtrain, ytrain)
+        #         cv = CV(nfolds=6, rng=rng)
 
-                e = evaluate!(
-                    mach,
-                    resampling=cv,
-                    measures=[rsq, rmse, mae, cor_coef]
-                )
+        #         e = evaluate!(
+        #             mach,
+        #             resampling=cv,
+        #             measures=[rsq, rmse, mae, cor_coef]
+        #         )
 
-                push!(r2_vals, mean(e.per_fold[1]))
-                push!(rmse_vals, mean(e.per_fold[2]))
+        #         push!(r2_vals, mean(e.per_fold[1]))
+        #         push!(rmse_vals, mean(e.per_fold[2]))
 
-            catch e
-                println(e)
-            end
-        end
+        #     catch e
+        #         println(e)
+        #     end
+        # end
 
-        # now let's plot the error as a function of number of features and pick the best
-        fig = Figure();
-        ax = Axis(fig[1,1], xlabel="N features", ylabel="R² for $(target_long)")
-        ax2 = Axis(fig[1,1], ylabel="RMSE for $(target_long)", yaxisposition = :right)
-        hidespines!(ax2)
-        hidexdecorations!(ax2)
+        # # now let's plot the error as a function of number of features and pick the best
+        # fig = Figure();
+        # ax = Axis(fig[1,1], xlabel="N features", ylabel="R² for $(target_long)")
+        # ax2 = Axis(fig[1,1], ylabel="RMSE for $(target_long)", yaxisposition = :right)
+        # hidespines!(ax2)
+        # hidexdecorations!(ax2)
 
-        l1 = lines!(ax, N_features_to_use, r2_vals, linewidth=3, color=mints_colors[1])
-        l2 = lines!(ax2, N_features_to_use, rmse_vals, linewidth=3, color=mints_colors[2], linestyle=:dash)
+        # l1 = lines!(ax, N_features_to_use, r2_vals, linewidth=3, color=mints_colors[1])
+        # l2 = lines!(ax2, N_features_to_use, rmse_vals, linewidth=3, color=mints_colors[2], linestyle=:dash)
 
-        save(joinpath(path_to_use, "feature-dependence__$(suffix).png"), fig)
-        save(joinpath(path_to_use, "feature-dependence__$(suffix).pdf"), fig)
+        # save(joinpath(path_to_use, "feature-dependence__$(suffix).png"), fig)
+        # save(joinpath(path_to_use, "feature-dependence__$(suffix).pdf"), fig)
 
-        # train feature reduced model
-        res_dict = Dict()
-        res_dict["n_best"] = N_features_to_use[argmax(r2_vals)]
+        # # train feature reduced model
+        # res_dict = Dict()
+        # res_dict["n_best"] = N_features_to_use[argmax(r2_vals)]
 
         N_final = 25
 
-        @info "\tTraining model with $(N_final) features..."
+        @info "\tTraining occam model with $(N_final) features..."
 
         fi_n = @view fi_df[1:N_final, :]
         fi_occam = Symbol.(fi_n.feature_name)
@@ -1255,7 +1255,7 @@ function train_stack(
                   lgbr=lgbr,
                   nnr=nnr,
                   catr=catr,
-                  resampling=CV(nfolds=10, rng=rng),
+                  resampling=CV(nfolds=6, rng=rng),
                   cache=false,
                   )
 
