@@ -170,17 +170,7 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Each day over X terabytes of remote sensing data are collected fr
-
-
-Context
-
-Need
-
-Task 
-
-Objective
-
+Each day over X terabytes of remote sensing data are collected from...
 
 - First sentence about amount of remote sensing data generated per year w/ citation and a forecast for how much it will increase. 
 - Second sentence about the lack of in-situ reference data (this is the limitation we can fill) 
@@ -197,38 +187,8 @@ Objective
 - Describe our work to create a robotic team which can do all of this... 
 
 
-% https://gisgeography.com/hyperspectral-imaging/
-% https://hyperspectral.azavea.com/
-% https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-1-sar/document-library/-/asset_publisher/1dO7RF5fJMbd/content/sentinel-high-level-operations-plan  <-- for amount of data produced by sentinel
-The main areas of usage for hyperspectral imagery can be categorized into 8 groups. This includes vegetation, agriculture, geology, soil, water resources, disaster, and land use.
-
-The underlying principle is that it improves any type of classification. For example, you can get more detail for geologic surface composition. The same is true for vegetation types, soil classes, and land cover too.
-
-Hyperspectral imaging helps identify pests for crop management. Water resources are about understanding bathymetry, water quality, and chemistry. And it’s been used for disaster management such as prevention and post-monitoring
-
-
-Step 1: Introduce your topic
-Step 2: Describe the background
-Step 3: Establish your research problem
-Step 4: Specify your objective(s)
-Step 5: Map out your paper
-
-
-The introduction should answer three important questions:
-1. What am I writing about?
-2. Why is it important?
-3. What do I want the reader to know about it?
-
-Step 1: Establish a Territory
-"In recent years..." or "researchers have become interested..." 
-
-Step 2: Establish a Niche
-- Identify a gap that your research fills 
-
-
 
 In (cite last robot team paper) we outlined a paradigmatic approach to the generation of remote sensing data sets for water-based environmental studies by employing a coordinated team of autonomous sensing sentinels. In this paper, we demonstrate the use of this platform across multiple observation periods...
-
 
 
 Remote sensing data products 
@@ -245,12 +205,24 @@ Autonomous robotic teams (cite our previous paper)
 
 Overview of what we demonstrate here...
 
-\\
-
-
 somewhere we need to mention the limitations from \cite{robotTeam1} due to low spatial variablility in a single day's collection... We are demonstrating that by including multiple observations from different days, we can improve our modelling capabilities by representing a larger variety of incident lighting conditions and in-situ values.
 
 In-situ measurements are expensive to collect and suffer from poor spatial coverage. Remote sensing data cover much wider areas but do not directly provide parameters needed for environmental assessments. Additionally, remote sensing data, particularly satellite based imagers, also suffer from long orbit-dependent site revisit times and can be easily occluded by the presence of clouds. This makes it incredibly challenging to collocate sufficient quantities of in-situ measurements with overlapping remote sensing imagery to enable their calibration. \textcolor{red}{(add reference to David's CDOM paper here...)}. To address this gap, we have developed an autonomous team of sensing sentinels combining a mobile uncrewed surface vessel (USV) with a unmanned aerial vehicle (UAV) which together rapidly collect hyperspectral imgaery \textit{and} comprehensive in-situ measurements to enable the estimation of key environmental parameters including concentrations of key constituents like CDOM, Crude Oils, Ions,as well as physical parameters like temperature, salinity, and dissolved oxygen. In our previous work we established a methodology for calibrating the hyperspectral imagery against reference measurements during a collection window \cite{robotTeam1}. In his study, we demonstrate that such models can be reliably trained using data collected from multiple observations....  
+
+
+
+- optically significant substances (OSS)
+- Colored dissolved organic matter (CDOM, also known as yellow substances, humic matter or gelbstoff) includes compounds produced during the decay of plant matter
+- Estimates concentrations of Chlorophyll-a, Total Suspended Solids, and the absorption coefficient of CDOM $a_{CDOM}(400)$ using Medium Resolution Imaging Spectrometer (MERIS) data during bloom in Gulf of Finland. They do this using band-ratio algorithms \cite{remote-sensing-finland}.
+-  We should note that band-ratio algroithms are impacted by atmospheric factors like the in-column aerosol distribution.
+- The amounts of aerosols (dust, haze, etc) and gases (ozone, water vapor, etc) present in the atmosphere vary spatially and temporally. These variations impact the estimation of water quality characteristics via remote sensing methods \cite{remote-sensing-finland}
+- However, when data from different dates and locations are compared and atmospheric correction is necessary \cite{remote-sensing-finland}.
+
+- Used a support vector machine (SVM) to classify hyperspectral images of vegetation acquired by a UAV and produced a high-resolution classification map \cite{uav-hsi-classification}.
+- Large misclassification occured in shaded areas
+
+
+For example, Garcia -Ruiz et al. (2013) conducted a UAV-based 56 aerial survey with multispectral cameras over a citrus orchard, and found that 57 UAV-based datasets yielded better classification accuracy than aircraft-based 58 datasets for diseased citrus trees. Moreover, Peña et al. (2013, 2015) applied 59 UAV-based multispectral imaging for the early detection of weed seedlings in 60 combination with object-based image analysis.
 
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
 
@@ -357,54 +329,53 @@ where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 
-The results of fitting our hyperparameter optimized models are listed in Table~\ref{tab:fit-results}. For each model, the $R^2$, RMSE, and MAE were evaluated using 10-fold cross validation. We observe considerable 
+The results of fitting our hyperparameter optimized models are listed in Table~\ref{tab:fit-results}. For each model, the $R^2$, RMSE, and MAE were evaluated using 6-fold cross validation. We observe considerable 
 
 \begin{table}[H]
-  \caption{Summary of fitting statistics for each target measurement. Values were evaluated using 10-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the validation holdout set. The empirical coverage is the percentage of predictions in the holdout testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
+  \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
   \begin{adjustwidth}{-\extralength}{0cm}
   \newcolumntype{C}{>{\centering\arraybackslash}X}
   \begin{tabularx}{\fulllength}{CCCCCC}
     \toprule
     \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)}\\
     \midrule
-    Temperature (°C) & 0.999 ± 5.1e-5 & 0.0546 ± 0.0022 & 0.0316 ± 0.0015 & ± 0.084 & 89.7\\
+    Temperature (°C) & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8\\
     \midrule
-    Conductivity ($\mu$S/cm) & 0.999 ± 0.00011 & 0.888 ± 0.067 & 0.497 ± 0.025 & ± 1.3 & 91.5\\
+    Conductivity ($\mu$S/cm) & 0.999 ± 2.17e-5 & 0.853 ± 0.0114 & 0.55 ± 0.00564 &  ± 1.3 & 89.8\\
     \midrule
-    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 0.00031 & 0.544 ± 0.058 & 0.267 ± 0.013 & ± 0.72 & 89.9\\
+    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 3.53e-5 & 0.423 ± 0.0101 & 0.243 ± 0.00552 &  ± 0.59 & 89.7\\
     \midrule
-    Dissolved Oxygen (mg/l) & 0.998 ± 0.00015 & 0.0931 ± 0.004 & 0.055 ± 0.0022 & ± 0.14 & 88.5\\
+    Dissolved Oxygen (mg/l) & 0.999 ± 3.17e-5 & 0.0705 ± 0.000984 & 0.0467 ± 0.000418 &  ± 0.11 & 89.8\\
     \midrule
-    Salinity (PSS) & 0.995 ± 0.00061 & 0.00124 ± 6.2e-5 & 0.000432 ± 2.6e-5 & ± 0.0009 & 90.1\\
+    Salinity (PSU) & 0.998 ± 0.000129 & 0.000759 ± 1.8e-5 & 0.000265 ± 6.1e-6 &  ± 0.00051 & 89.6\\
     \midrule
-    Tryptophan (ppb) & 0.989 ± 0.0046 & 0.206 ± 0.046 & 0.117 ± 0.0085 & ± 0.28 & 89.0\\
+    $\mathrm{Cl^-}$ (mg/l) & 0.994 ± 0.000441 & 1.15 ± 0.0418 & 0.578 ± 0.00534 &  ± 1.4 & 90.3\\
     \midrule
-    pH & 0.988 ± 0.0018 & 0.0232 ± 0.0019 & 0.0119 ± 0.00045 & ± 0.032 & 92.5\\
+    $\mathrm{Na^+} (mg/l)$ & 0.992 ± 0.000309 & 6.17 ± 0.134 & 2.85 ± 0.0536 &  ± 7.2 & 89.9\\
     \midrule
-    $\mathrm{Na^+} (mg/l)$ & 0.982 ± 0.0034 & 9.01 ± 0.88 & 4.17 ± 0.22 & ± 11.0 & 90.8\\
+    Tryptophan (ppb) & 0.991 ± 0.00038 & 0.188 ± 0.00404 & 0.112 ± 0.00149 &  ± 0.26 & 89.9\\
     \midrule
-    $\mathrm{Cl^-}$ (mg/l) & 0.982 ± 0.0054 & 1.96 ± 0.28 & 1.0 ± 0.066 & ± 2.3 & 89.7\\
+    pH & 0.991 ± 0.000327 & 0.0177 ± 0.000295 & 0.0109 ± 6.56e-5 &  ± 0.024 & 89.9\\
     \midrule
-    Blue-Green Algae [Phycoerythrin] (ppb) & 0.939 ± 0.017 & 3.12 ± 0.43 & 0.84 ± 0.065 & ± 1.8 & 91.4\\
+    Blue-Green Algae [Phycoerythrin] (ppb) & 0.981 ± 0.00186 & 1.72 ± 0.0947 & 0.608 ± 0.0218 &  ± 1.4 & 90.2\\
     \midrule
-    CDOM (ppb) & 0.934 ± 0.02 & 0.58 ± 0.093 & 0.219 ± 0.013 & ± 0.46 & 90.3\\
+    $\mathrm{NO_3^-} (mg/l-N)$ & 0.968 ± 0.00203 & 0.0308 ± 0.00113 & 0.0146 ± 0.000256 &  ± 0.043 & 89.9\\
     \midrule
-    Optical Brighteners (ppb) & 0.920 ± 0.015 & 0.11 ± 0.0092 & 0.0617 ± 0.0019 & ± 0.13 & 92.4\\
+    CDOM (ppb) & 0.966 ± 0.00228 & 0.464 ± 0.0195 & 0.144 ± 0.00449 &  ± 0.22 & 89.3\\
     \midrule
-    $\mathrm{NO_3^-} (mg/l-N)$ & 0.890 ± 0.013 & 0.0575 ± 0.0036 & 0.0353 ± 0.00091 & ± 0.079 & 90.7\\
+    Chlorophyll A ($\mu$g/l) & 0.924 ± 0.00645 & 1.29 ± 0.0667 & 0.359 ± 0.0079 &  ± 0.73 & 90.2\\
     \midrule
-    Crude Oil (ppb) & 0.890 ± 0.037 & 0.55 ± 0.11 & 0.174 ± 0.019 & ± 0.3 & 89.2\\
+    Optical Brighteners (ppb) & 0.915 ± 0.00406 & 0.118 ± 0.00169 & 0.0568 ± 0.000218 &  ± 0.1 & 89.8\\
     \midrule
-    Chlorophyll A with Red Excitation ($\mu$g/l) & 0.728 ± 0.11 & 94.9 ± 37.0 & 17.0 ± 2.5 &  ± 31.0 & 91.1\\
+    Chlorophyll A with Red Excitation ($\mu$g/l) & 0.909 ± 0.00794 & 77.6 ± 3.91 & 15.6 ± 0.418 &  ± 25.0 & 90.5\\
     \midrule
-    Chlorophyll A ($\mu$g/l) & 0.672 ± 0.17 & 1.96 ± 0.25 & 0.482 ± 0.044 &  ± 0.83 & 90.6\\
+    Crude Oil (ppb) & 0.906 ± 0.00606 & 0.588 ± 0.019 & 0.162 ± 0.00234 &  ± 0.23 & 89.7\\
     \midrule
-    Turbidity (FNU) & 0.616 ± 0.19 & 52.6 ± 23.0 & 7.62 ± 2.2 & ± 9.2 & 87.9\\
+    Turbidity (FNU) & 0.812 ± 0.0158 & 60.2 ± 2.61 & 6.98 ± 0.431 &  ± 3.4 & 89.5\\
     \bottomrule
   \end{tabularx}
   \end{adjustwidth}
 \end{table}
-
 
 
 
@@ -446,7 +417,7 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
 \end{figure}  
 
 
-\subsection{Chemicals-of-Concern}
+\subsection{Biochemical Measurements}
 
 
 \begin{figure}[H]
@@ -487,9 +458,28 @@ However, the presence of DOM/POM (dissolved and particulate organic matter), dec
 
 \subsection{Limitations}
 
+\begin{figure}[H]
+\includegraphics[width=10.5 cm]{paper/figures/results/downwelling-hist.pdf}
+\caption{Distribution of total downwelling intensity during each of the three HSI collection flights. The multi-modal nature of these distributions reflects the impact of the relative orientation of the drone to the sun as well as potential occlusion due to the presence of clouds.\label{fig:downwelling-hist}}
+\end{figure}   
+
 \subsection{Data Product Streaming}
 
 Authors should discuss the results and how they can be interpreted from the perspective of previous studies and of the working hypotheses. The findings and their implications should be discussed in the broadest context possible. Future research directions may also be highlighted.
+
+\subsection{Extensions and Next Steps}
+
+The current implementation of conformal prediction utilized in these models estimates a fixed width confidence interval for all outputs. This could be improved by training a secondary \textit{residual} model on the errors produced by the base learner, that is, a model which predicts 
+\begin{equation}
+    r(X) = \lvert f(X) - y \rvert = \lvert \hat{y} - y \rvert.
+\end{equation}
+In the conformal prediction framework, such a model could then be used to produce \textit{adaptive} uncertainty estimates using the augmented heuristic function
+\begin{equation}
+    S(X,y)  = \dfrac{\lvert \hat{y} - y \rvert }{r(X)}
+\end{equation}
+to produce scores on the calibration holdout set. With access to adaptive uncertainty estimates, we can then augment the navigation control for the USV to encourage data collection in regions of high model uncertainty. This would further optimize the data collection and calibration procedure at the expense of increased model training times. 
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
