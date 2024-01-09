@@ -220,9 +220,34 @@ In-situ measurements are expensive to collect and suffer from poor spatial cover
 
 - Used a support vector machine (SVM) to classify hyperspectral images of vegetation acquired by a UAV and produced a high-resolution classification map \cite{uav-hsi-classification}.
 - Large misclassification occured in shaded areas
+- \cite{uav-hsi-classification} calls these technqieus \textit{precision agriculture}
+- \cite{uav-hsi-classification-2} used a UAV aerial survey with multispectral cameras for citrus orchard classification
+
+- \cite{andres2018review}: \textit{Remote monitoring, via satellite assets and distributed in situ sensors, may help meet many of the challenges of information asymmetry and data gaps in developing countries, including unreliable (and time-consuming) survey data and reliance on spot checks to assess accurate reporting and performance.}
+- \cite{andres2018review}: \textit{(UAVs, or drones), are being used by researchers to map watersheds. Structure from Motion (SfM) three-dimensional point clouds can be derived from digital images collected on board UAVs, similar to the type of data produced by Light Detection and Ranging (LiDAR) technology [19]. The technological development of UAVs and their ability to derive high-resolution 3D information (and with much lower operational and up-front costs than manned airborne platforms) and satellite imaging has made UAV image acquisition appealing in several applications.}
+
+- \cite{robert2017analysis} Used Landsat and MODIS data to estimate suspended particulate matter in the Sahelian (Sahel?) region in Africa. 
+- \cite{robert2017analysis} found near infrared bands are well suited for estimating turbidity and SPM up to $R^2=0.70$.
+- \cite{robert2017analysis} \textit{the strong and variable atmospheric load (aerosols and water vapor) were potentially challenging for a remote sensing approach.}
+
+- \cite{ross2019aquasat} constructed a dataset comprised of 600,000 paired observations of water quality and landsat reflectance for bodies across US from 1984-2019
+- Chlorophyll is a photosynthetically active pigment contained in all phytoplankton
+
+- \cite{lary2010artificial} Neural Networks and Support Vector Machines are popular choices for machine learning applications in remote sesnsing and geoscience
 
 
-For example, Garcia -Ruiz et al. (2013) conducted a UAV-based 56 aerial survey with multispectral cameras over a citrus orchard, and found that 57 UAV-based datasets yielded better classification accuracy than aircraft-based 58 datasets for diseased citrus trees. Moreover, Peña et al. (2013, 2015) applied 59 UAV-based multispectral imaging for the early detection of weed seedlings in 60 combination with object-based image analysis.
+- \cite{kaufman1992atmospherically} Developed the Atmospherically Resistant Vegetation Index (AVRI) for use in vegetation studies which takes advantage of blue band. It is reported to be 4-times less sensative to atmospheric effects than NDVI
+
+- \cite{chi2016big} NASA's Earth Science Data and Information System (ESDIS) holds 7.5 PB of data with ~7000 unique data sets.
+
+- Google Earth Engine's public data archive contains over 80 petabytes of data 
+
+- \cite{garcia2013comparison} used a multi-band imager equipped UAV to identify citrus greening diseas (Huanglongbing) in Florida citrus trees.
+- Spatial resolution is easily controlled by adjusting the UAV flying altitude.
+
+- \cite{rostom2017evaluation} Evaluated water quality in an Egyptian lake using 
+
+
 
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
 
@@ -453,8 +478,19 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion} \label{sec:discussion}
 
-However, the presence of DOM/POM (dissolved and particulate organic matter), decreases “blue” instrument sensitivity hindering the primary benefit of having a blue excitation fluorometer. The “red” chlorophyll sensor effectively eliminates interference effects from DOM/POM, by using a specific set of optics. Because these materials don’t absorb red excitation energy, but algae do, red excitation fluorometry is used to detect and estimate algal abundance free from DOM/POM interference. Note that although this optical setup is less sensitive for detecting eukaryotic algae, the errors associated with these interference materials may outweigh the increased sensitivity of blue excitation fluorometry. Also, red excitation fluorometry is significantly more sensitive to prokaryotic algae (blue-green or cyanobacteria), making it a favorable instrument for freshwater systems which are typically rich in DOM and blue-green algae.  
 
+\subsection{Optically Active Components and Physio-Chemical Parameter Estimation}
+
+We can probably explain the inference of salinity, ion concentrations, etc as being directly related to the observed concentrations of chlorophyll, cdom, co, bgm, etc... which are all optically active (i.e. have absorption features spectral region of our hyperspectral imager).
+
+\begin{figure}[H]
+\includegraphics[width=10.5 cm]{paper/figures/results/target_correlations.pdf}
+\caption{\label{fig:target-correlations}}
+\end{figure}   
+
+
+
+\subsection{Data Product Streaming}
 
 \subsection{Limitations}
 
@@ -463,9 +499,6 @@ However, the presence of DOM/POM (dissolved and particulate organic matter), dec
 \caption{Distribution of total downwelling intensity during each of the three HSI collection flights. The multi-modal nature of these distributions reflects the impact of the relative orientation of the drone to the sun as well as potential occlusion due to the presence of clouds.\label{fig:downwelling-hist}}
 \end{figure}   
 
-\subsection{Data Product Streaming}
-
-Authors should discuss the results and how they can be interpreted from the perspective of previous studies and of the working hypotheses. The findings and their implications should be discussed in the broadest context possible. Future research directions may also be highlighted.
 
 \subsection{Extensions and Next Steps}
 
