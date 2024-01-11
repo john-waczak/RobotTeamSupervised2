@@ -259,7 +259,7 @@ In the study we employ a team of autonomous sensing sentinels, hereafter referre
 
 \subsection{USV: In-situ Measurements}
 
-The USV employed in the robot team is the Maritime Robotics Otter which features a flexible modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements used in this study is given in Table~\ref{tab:sensors}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not explored in this study.
+The USV employed in the robot team is a Maritime Robotics Otter which features a modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements utilized in this study is given in Table~\ref{tab:sensors}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not explored in this study.
 
 % add table describing sensors here: 
 
@@ -289,7 +289,7 @@ Chlorophyll A                       & ppb               & Fluorometer \\
 Chlorophyll A (Red Excitation)      & ppb               & Fluorometer \\
 \bottomrule
 \end{tabularx}
-\noindent{\footnotesize{\textsuperscript{1} Tables may have a footer.}}
+% \noindent{\footnotesize{\textsuperscript{1} Tables may have a footer.}}
 \end{table}
 
 
@@ -313,13 +313,13 @@ To effectively utilize the spectra collected by our UAV, we must account for the
 \caption{Hyperspectral Image Processing: Hyperspectral datacubes are collected one scan-line at a time (left). By utilizing downwelling irradiance spectra we convert each pixel from spectral radiance to reflectance. By using orientation and position data from the on-board GPS and INS, we georeference each pixel to assign it a latitude and longitude on the ground. The final data product is a georectified hyperspectral reflectance data cube visualized at the right. \label{fig:hsi-pipeline}}
 \end{figure}  
 
-The hyperspectral imager utilized in our robot team is in a so-called \textit{pushbroom} configuration, that is, each image captured by the drone is formed one scan-line at a time as the UAV flies. Each scan-line consists of 1600 pixels for which incoming light is diffracted into 462 wavelength bins. In the collection software a regular cutoff of 1000 lines is chosen so that each resulting \textit{image} forms a tensor of size 462$\times$1600$\times$1000 called a \textit{hyperspectral data cube}. Initially, the sampled spectra are in units of spectral radiance (measured in microflicks) however this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance by utilizing the skyward-facing downwelling irradiance spectrometer (see Figure~\ref{fig:drone-components}). When our camera is normal to this surface, then the reflectance is given by
+The hyperspectral imager utilized in our robot team is in a so-called \textit{pushbroom} configuration, that is, each image captured by the drone is formed one scan-line at a time as the UAV flies. Each scan-line consists of 1600 pixels for which incoming light is diffracted into 462 wavelength bins. In the collection software, a regular cutoff of 1000 lines is chosen so that each resulting \textit{image} forms a array of size 462$\times$1600$\times$1000 called a \textit{hyperspectral data cube}. Initially, the sampled spectra are in units of spectral radiance (measured in microflicks) however this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance by utilizing the skyward-facing downwelling irradiance spectrometer (see Figure~\ref{fig:drone-components}). When our camera is normal to this surface, then the reflectance is given by
 \begin{equation}
-    R(\lambda) = \pi L(\lambda)/E(\lambda)
+    R(\lambda) = \pi L(\lambda)/E_d(\lambda)
 \end{equation}
-where $L$ is the spectral radiance, $E$ is the downwelling irradiance, and a factor of $\pi$ steradians resutls from assuming the water surface is Lambertian (diffuse) \cite{reflectance-conversion}. We will address the impact of this assumption in Section~\ref{sec:discussion}.
+where $L$ is the spectral radiance, $E_d$ is the downwelling irradiance, and a factor of $\pi$ steradians results from assuming the water surface is Lambertian (diffuse) \cite{reflectance-conversion}. We will address the impact of this assumption in Section~\ref{sec:discussion}.
 
-Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan-line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized, however this can be increased to reduce the processing time for real-time applications. Finally, the UTM coordinates are transformed to latitude and longitude for easy comparison with in-situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downwelling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
+Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into a geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan-line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized, however this can be increased to reduce the processing time for real-time applications. Finally, the UTM coordinates are transformed to latitude and longitude for easy comparison with in-situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downwelling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
@@ -328,28 +328,34 @@ Having converted the hyperspectral data cube to units of reflectance, we must al
 \end{adjustwidth}
 \caption{A georectified reflectance data cube is visualized (center) with the $\log10$-reflectance along the z axis and a pseudo-color image on the top. In the top left we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
 \end{figure}  
-The above processing pipeline was implemented using the Julia programming language, a just-in-time compiled language with native multi-theading support \cite{julia-1}. By running this pipeline on the on-board processing computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications where we need to quickly asses if an area is safe and can not afford to wait to download and post-process collected imagery after a flight.
+
+The above processing pipeline was implemented using the Julia programming language, a just-in-time compiled language with native multi-theading support \cite{julia-1}. By running this pipeline on the on-board processing computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications where we need to quickly asses if an area is safe and can not afford to wait to download and post-process collected imagery \textit{after} a flight.
 
 \subsection{Data Collection and Training Set Curation}
 
-Data were collected using the robot team at a site in north Texas across three observation periods in the fall of 2020. For each collection period, the UAV first completed a wide survey of the lake capturing hyperspectral data cubes. Subsequently, the the USV sampled across the lake, collecting in-situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra where the USV track overlapped with UAV pixels. These combined data form a tabular data set on which we seek use to train regression models; pixel spectra form input features and each separate USV sensor forms a distinct target variable. Together, this combined data set contains over 11,000 records.
+Data were collected using the robot team at a site in north Texas across three observation periods in the fall of 2020. For each collection period, the UAV first completed two wide surveys of the lake capturing multiple hyperspectral data cubes. Subsequently, the the USV sampled across the lake, collecting in-situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra where the USV track overlapped with UAV pixels. To account for any time-delays in the values measured by the in-situ instruments and to account for the fact the the USV is larger than the final resolution of our resampled HSI, each in-siture measurent is associated with a 3$\times$3 grid of HSI pixels, that is, a 30 cm $\times$ 30 cm square. These combined data form a tabular data set on which we seek use to train regression models; pixel spectra form input features and each separate USV sensor forms a distinct target variable. Together, this combined data set contains over 130,000 records.
 
-Each collection was performed near solar noon to maximize the amount of incident sunlight illuminating the water, however, to account for any potential variation in lighting conditions between data cubes, we augment the training set with additional features including the drone viewing geometry (roll, pitch, heading) and solar illumination geometry (solar azimuth, solar elevation, solar zenith) as wall as the total at-pixel intensity (before refelctance conversion) as well as the total downwelling intensity. Additional feature engineering is performed to add a combination of spectral indices like the normalized difference vegetation index (NDVI), modified normalized difference water index (mNDWI), simple ratio (SR), photochemical reflectance index (PRI), and more (see Appendix~\ref{appendix:spec-indices} for a full list of included spectral indices). 
+Each collection was performed near solar noon to maximize the amount of incident sunlight illuminating the water, however, to account for any potential variation in lighting conditions between data cubes, we augment the training set with additional features including the drone viewing geometry (roll, pitch, heading) and solar illumination geometry (solar azimuth, solar elevation, solar zenith) as well as the total at-pixel intensity (before refelctance conversion), the total downwelling intensity, and the drone altitude. Feature engineering is performed to add a additional spectral indices utilizing combinations of specific wavelength bands like the normalized difference vegetation index (NDVI), normalized difference water index (NDWI), simple ratio (SR), photochemical reflectance index (PRI), and more as described in \cite{envi_vegetation_indices, thenkabail2018hyperspectral,kaufman1992atmospherically, SpectralIndexWheat}. A comprehensive list of these added features is provided in supplementary table S1.
 
 \subsection{Machine Learning Methods}
 
-For each of the 17 target variables listed in Table~\ref{tab:sensors}, data were randomly partitioned into a 90:10 training/testing split resulting 10,005 training points and 1,112 holdout testing points. Using the MLJ machine learning framework, a variety of machine learning models compatible with the regression task were identified \cite{MLJ1}. This selection of models included linear regression (and it's variations), Gaussian Process Regression, shallow Neural Networks, and decision tree based models. Out of this set, Random Forest Regression from \cite{decision-trees} and a native Julia implementation of gradient boosted trees were selected for their quick training time and high performance. Both random forests and gradient boosted trees are ensembling techniques based on individual decision tree regressors \cite{decision-trees, random-forest, gradient-boosting}. 
+For each of the 17 target variables listed in Table~\ref{tab:sensors}, data were randomly partitioned into a 90:10 training/testing split resulting 120,350 training points and 13,372 holdout testing points. Using the MLJ machine learning framework, a variety of machine learning models compatible with the regression task were identified \cite{MLJ1}. This selection of models included linear regression (and it's variations), Gaussian Process Regression, shallow Neural Networks, and decision tree based models. Out of this set, Random Forest Regression from \cite{decision-trees} and a native Julia implementation of gradient boosted tree regression from the EvoTrees package were selected for their quick training and inference times. Both random forests and gradient boosted trees are ensembling techniques based on individual decision tree regressors \cite{decision-trees, random-forest, gradient-boosting}. These tree-based methods also enable an impurity based ranking of the relative \textit{importance} of each feature to the target predictions as described in \cite{rfr-orig,rfr-importance-ranking}. We use these feature rankings to identify the most impactful features and perform feature selection and reduction. 
 
-Each model was trained and hyperparameter optimized using 10-fold cross validation with a random hyperparameter search.  Model performance was evaluated by computing out-of-fold values for the $R^2$ (coefficient of determination), as well as
+The training procedure for each model is as follow: First, the model is trained using 6-fold cross validation on the training set with default hyperparameters. Feature importances for the trained model are then computed and the top 25 features are identified. A second, reduced-feature model is then trained using the same 6-fold cross validation technique to ensure an improvement in model performance. Next, each model is hyperparameter optimized using a random parameter search. Model performance is evaluated by computing out-of-fold values for the $R^2$ (coefficient of determination), as well as
 \begin{align}
     \text{RMSE} &= \sqrt{\frac{\sum\limits_{i=1}^N (\hat{y}_i-y_i)^2}{N}}, \\
     \text{MAE} &= \frac{\sum\limits_{i=1}^N \lvert \hat{y}_i - y_i \vert}{N},
 \end{align}
-where RMSE is the root-mean-square error, and MAE is the mean absolute error between true values $y_i$ and predictions $\hat{y}_i$. To assess the uncertainty of model predictions, we employ Inductive Conformal Prediction as described in \cite{conformal-prediction-1, conformal-prediction-2, conformal-prediction-3, conformal-prediction-4}. To do this, the training set is further partitioned so that we obtain an additional hold out set which we may call the \textit{calibration set}. We chose this split to achieve a 80:10:10 training, calibration, and testing ratios which results in a calibration set of ~1,000 records which \cite{conformal-prediction-2} suggest to be sufficient for most cases. First, the chosen model is trained on the training set. We then compute a set of nonconformity scores on the calibration set using an uncertainty heuristic, in this case, the absolute error
+where RMSE is the root-mean-square error, and MAE is the mean absolute error between true values $y_i$ and predictions $\hat{y}_i$.
+
+Having identified the model with the best out-of-fold performance, we proceed to train the final hyperparameter optimized model on the full training set. To assess the uncertainty of the final model's predictions, we employ Inductive Conformal Prediction as described in \cite{conformal-prediction-1, conformal-prediction-2, conformal-prediction-3, conformal-prediction-4}. To do this, the training set is further partitioned so that we obtain an additional validation hold out set with the split chosen to achieve a 80:10:10 training, validation, and testing ratio. This resulting validation set contains >10,000 records which \cite{conformal-prediction-2} suggests to be more than sufficient for most cases. 
+
+The hyperparameter optimized model is trained on the full training set. We then compute a set of nonconformity scores on the validation set using an uncertainty heuristic, in this case, the absolute error
 \begin{equation}
     s_i = s(X_i, y_i) = \lvert f(X_i) - y_i \rvert = \lvert \hat{y}_i - y_i \rvert
 \end{equation}
-where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ calibration record. These n-many scores are sorted, and the interval half width $d$ is computed as the $\frac{\lceil(\alpha)(n+1) \rceil}{n}$ quantile of this set in order to achieve a coverage of $\alpha$ on the calibration set. Predictions intervals for new data are then formed as $f(X)\pm d$. For this study, we have chosen a coverage of $\alpha=0.9$.
+where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ calibration record. These n-many scores are sorted, and the interval half width $d$ is computed as the $\frac{\lceil(\alpha)(n+1) \rceil}{n}$ quantile of this set in order to achieve a coverage of $\alpha$ on the calibration set. Predictions intervals for new data are then formed as $f(X)\pm d$. For this study, we have chosen a coverage of $\alpha=0.9$ corresponding to a 90\% confidence interval. Finally, each of these resulting hyperparameter optimized models is evaluated on the previously untouched testing set.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
@@ -357,49 +363,34 @@ where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ ca
 The results of fitting our hyperparameter optimized models are listed in Table~\ref{tab:fit-results}. For each model, the $R^2$, RMSE, and MAE were evaluated using 6-fold cross validation. We observe considerable 
 
 \begin{table}[H]
-  \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the confidence interval determined by conformal prediction. \label{tab:fit-results}}
+  \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the confidence interval determined by conformal prediction. The final column shows the best performing model. \label{tab:fit-results}}
   \begin{adjustwidth}{-\extralength}{0cm}
   \newcolumntype{C}{>{\centering\arraybackslash}X}
-  \begin{tabularx}{\fulllength}{CCCCCC}
+  \begin{tabularx}{\fulllength}{CCCCCCC}
     \toprule
-    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)}\\
+    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} & \textbf{Model*}\\
     \midrule
-    Temperature (°C) & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8\\
-    \midrule
+    Temperature (°C) & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8 &\\
     Conductivity ($\mu$S/cm) & 0.999 ± 2.17e-5 & 0.853 ± 0.0114 & 0.55 ± 0.00564 &  ± 1.3 & 89.8\\
-    \midrule
     $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 3.53e-5 & 0.423 ± 0.0101 & 0.243 ± 0.00552 &  ± 0.59 & 89.7\\
-    \midrule
     Dissolved Oxygen (mg/l) & 0.999 ± 3.17e-5 & 0.0705 ± 0.000984 & 0.0467 ± 0.000418 &  ± 0.11 & 89.8\\
-    \midrule
     Salinity (PSU) & 0.998 ± 0.000129 & 0.000759 ± 1.8e-5 & 0.000265 ± 6.1e-6 &  ± 0.00051 & 89.6\\
-    \midrule
     $\mathrm{Cl^-}$ (mg/l) & 0.994 ± 0.000441 & 1.15 ± 0.0418 & 0.578 ± 0.00534 &  ± 1.4 & 90.3\\
-    \midrule
     $\mathrm{Na^+} (mg/l)$ & 0.992 ± 0.000309 & 6.17 ± 0.134 & 2.85 ± 0.0536 &  ± 7.2 & 89.9\\
-    \midrule
     Tryptophan (ppb) & 0.991 ± 0.00038 & 0.188 ± 0.00404 & 0.112 ± 0.00149 &  ± 0.26 & 89.9\\
-    \midrule
     pH & 0.991 ± 0.000327 & 0.0177 ± 0.000295 & 0.0109 ± 6.56e-5 &  ± 0.024 & 89.9\\
-    \midrule
     Blue-Green Algae [Phycoerythrin] (ppb) & 0.981 ± 0.00186 & 1.72 ± 0.0947 & 0.608 ± 0.0218 &  ± 1.4 & 90.2\\
-    \midrule
     $\mathrm{NO_3^-} (mg/l-N)$ & 0.968 ± 0.00203 & 0.0308 ± 0.00113 & 0.0146 ± 0.000256 &  ± 0.043 & 89.9\\
-    \midrule
     CDOM (ppb) & 0.966 ± 0.00228 & 0.464 ± 0.0195 & 0.144 ± 0.00449 &  ± 0.22 & 89.3\\
-    \midrule
     Chlorophyll A ($\mu$g/l) & 0.924 ± 0.00645 & 1.29 ± 0.0667 & 0.359 ± 0.0079 &  ± 0.73 & 90.2\\
-    \midrule
     Optical Brighteners (ppb) & 0.915 ± 0.00406 & 0.118 ± 0.00169 & 0.0568 ± 0.000218 &  ± 0.1 & 89.8\\
-    \midrule
     Chlorophyll A with Red Excitation ($\mu$g/l) & 0.909 ± 0.00794 & 77.6 ± 3.91 & 15.6 ± 0.418 &  ± 25.0 & 90.5\\
-    \midrule
     Crude Oil (ppb) & 0.906 ± 0.00606 & 0.588 ± 0.019 & 0.162 ± 0.00234 &  ± 0.23 & 89.7\\
-    \midrule
     Turbidity (FNU) & 0.812 ± 0.0158 & 60.2 ± 2.61 & 6.98 ± 0.431 &  ± 3.4 & 89.5\\
     \bottomrule
   \end{tabularx}
   \end{adjustwidth}
+  \noindent{\footnotesize{* RFR = Random Forest Regressor, ETR = EvoTree Regressor}}
 \end{table}
 
 
@@ -525,7 +516,7 @@ This section is not mandatory, but can be added to the manuscript if the discuss
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% optional
-%\supplementary{The following supporting information can be downloaded at:  \linksupplementary{s1}, Figure S1: title; Table S1: title; Video S1: title.}
+\supplementary{The following supporting information can be downloaded at:  \linksupplementary{s1}, Table S1: Hyperspectral Reflectance Indices.}
 
 % Only for journal Methods and Protocols:
 % If you wish to submit a video article, please do so with any other supplementary material.
