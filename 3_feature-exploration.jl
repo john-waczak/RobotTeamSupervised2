@@ -34,14 +34,10 @@ using MLJBase: train_test_pairs
 using ConformalPrediction
 using JSON
 
-# using ShapML
-
 
 # for base model prediction:
 # using MLJModelInterface: reformat
 # predict(conf_model.model, mach.fitresult, reformat(conf_model.model, Xtest)...)
-
-
 
 
 # seed reproducible pseudo-random number generator
