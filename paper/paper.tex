@@ -245,8 +245,71 @@ In-situ measurements are expensive to collect and suffer from poor spatial cover
 - \cite{garcia2013comparison} used a multi-band imager equipped UAV to identify citrus greening diseas (Huanglongbing) in Florida citrus trees.
 - Spatial resolution is easily controlled by adjusting the UAV flying altitude.
 
-- \cite{rostom2017evaluation} Evaluated water quality in an Egyptian lake using 
+- \cite{rostom2017evaluation} Modeled water quality in an Egyptian lake using reflectance data to predict concentrations of a variety of parameters and even some metals.
 
+- \cite{adao2017hyperspectral} \textit{The hyperspectral sensors’ ability for measuring hundreds of bands raises complexity when considering the sheer quantity of acquired data, whose usefulness depends on both calibration and corrective tasks occurring in pre- and post-flight stages.}
+
+- \cite{adao2017hyperspectral, padua2017uas} applications of UAV remote sensing data include: biomass estimation, disease monitoring, wildfire detection, forest preservation
+
+- \cite{adao2017hyperspectral} many applications require higher spectral fidelity of multispectral and hyperspectral imagers
+
+- \cite{adao2017hyperspectral} remote sensing spectrometry has involved applications like mineral exploration, landmine detection, agroforestry, 
+
+- \cite{adao2017hyperspectral} spatial resolution of many remote sensing satellites is too coarse for some applications. Sentinel 2 provides up to 10 m resolution.
+
+- \cite{adao2017hyperspectral} no need for atmospheric corrections as in traditional remote sensing platforms. 
+
+
+- \cite{arroyo2019implementation} UAV hyperspectral imaging system using a hexacopter equiped with a HSI with 288 sepctral bands with IMU-GNSS recorder.
+
+- \cite{koparan2018situ} used a hexacopter equiped with floatation equipment and in-situ sensors for Temperature, Conductivity, Dissolved Oxygen, and pH to autonomously collect data in water at many different locations.
+
+
+- \cite{gursoy2019investigating} perform water quality classification for a river using CHRIS/PROBA compact high resolution imaging spectrometer data
+
+- \cite{brezonik2005landsat} Uses multi-spectral satellite bands from Landsat to model water quality parameters Chlorophyll A and CDOM (Humic matter)
+
+
+- \cite{sagan2020monitoring} Successfully modelled conductivity, total dissolved solids, transparency, turbidity, depth, suspended particulate matter, and chlorophyll-a for a lake using high-spatial resolution remotely sensed multi-spectral imagery
+
+
+- \cite{ehmann2019monitoring} used two small UAVs with multispectral imagers to collect imagery for a river in Syracuse, NY across a variety of environmental conditions. They also collected in-situ turbidity measurements after each flight. They found red bands were strong predictors of turbidity
+
+- \cite{schiller1999neural} Used neural networks to approximate radiative transfer codes to predict concentrations of CDOM, phytoplankton pigment, and suspended matter using simulated bands of Medium Resolution Imaging Spectrometer.
+
+- \cite{brown2008neural} Use neural networks to calibrate NDVI from AVHRR (Advanced Very High Resolution Radiometer) to those from MODIS, i.e. sensor fusion.
+
+- \cite{paavel2011optical} found that CDOM was the main factor influencing light attenuation in coastal Baltic Waters. They analyzed in-situ data together with remote sensing data from MODIS and could predict CDOM but not Chlorphyll or suspended matter.
+
+- \cite{hruska2012radiometric} demonstrate the use of Resonon PIKA II hyperpsectral imager on a UAV (fixed wing) platform
+
+- \cite{belgiu2016random} random forests handle data dimensionality and multicolinearity for remote sensing domains and is fast \textit{and} insensitive to overfitting. Feature importance ranking is useful for dimensionality reduction, data selection, etc... 
+
+
+- \cite{aurin2018remote}  presented Global Ocean Carbon Algorithm Database (GOCAD) developed from 500 oceanographic field campaigns over 30 years with in-situ reflectances \textit{and} coincident satellite imagery, CDOM absorption coefficients, spectral slopes, and other parameters.
+
+- \cite{topp2020research} "For low biomass, oligotrophic to mesotrophic waterbodies, the chl-a spectrum is characterized by a sun-induced fluorescence peak around 680 nm"
+
+- \cite{topp2020research} "Sources of CDOM can be either autochthonous (i.e., phytoplankton) or allochthonous (i.e., terrestrial carbon)."
+
+- \cite{topp2020research} "Similar to TSS, the reflectance spectra of waterbodies with varying concentrations of CDOM are highly dependent on the composition of other optically active constituents, and in certain areas can be complicated by the presence of colloidal iron, which shares similar optical properties [128]."
+
+
+- \cite{lu2021retrieval} utilized a hyperspectral imager to predict in situe measurements of Chlorophyll-a in a Chinese lake. Found that CatBoost was the best model.
+
+
+- \cite{austin1976index} The index of refraction of water is wavelength, temperature, pressure, and salinity dependent.
+
+
+-\cite{banerjee2020uav} "Near-earth spectroscopy from UAV-hyperspectral systems addresses the limitations of resolution, signal-to-noise ratio, and cloud cover from traditional satellite or airborne platforms."
+
+-\cite{kurihara2020unmanned} Another HSI equipped drone platform for precision agriculture
+
+-\cite{feng2015urban} ML using random forests to classify flooding from UAV imagery. Used feature importance rankings as well...
+
+-\cite{bonansea2019using} mapped secchi disk transparency using Landsat 8 and Sentinel-2A
+
+-\cite{laonamsai2023utilizing} Used hyperspectral indices to estimate erosion/deposition in Thailand river
 
 
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
@@ -259,40 +322,37 @@ In the study we employ a team of autonomous sensing sentinels, hereafter referre
 
 \subsection{USV: In-situ Measurements}
 
-The USV employed in the robot team is a Maritime Robotics Otter which features a modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements utilized in this study is given in Table~\ref{tab:sensors}. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not explored in this study.
+The USV employed in the robot team is a Maritime Robotics Otter which features a modular design and 20 hour battery life. The USV is equipped with an in-situ sensing payload utilizing a combination of Eureka Manta-40 multi-probes including fluorometers, ion selective electrodes, and other physical sensors which together enable the collection of comprehensive near-surface measurements including Colored Dissolved Organic Matter (CDOM), Crude Oil, Blue-Green Algae (phycoerythrin and phycocyanin), Chlorophyll-A, Tryptophan, $\mathrm{Na^+}$, $\mathrm{Ca^{2+}}$, $\mathrm{Cl^-}$, Temperature, Conductivity, and many others. The full list of measurements utilized in this study is given in Table~\ref{tab:sensors} and are categorized into four distinct types: physical, ion, biochemical, and chemical. Additionally, the USV is equipped with an ultra-sonic weather monitoring sensor for measuring air speed and direction as well as a a BioSonics MX Aquatic Habitat Echosounder sonar which are not explored in this study.
 
 % add table describing sensors here: 
 
 \begin{table}[H] 
 \caption{In-situ reference sensors modelled in this study.\label{tab:sensors}}
 \newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
+\begin{tabularx}{\textwidth}{CCCC}
 \toprule
-\textbf{Sensor}	& \textbf{Units}	& \textbf{Sensor Type}\\
+\textbf{Sensor}	& \textbf{Units} & \textbf{Sensor Type} & \textbf{Target Category}\\
 \midrule
-Temperature		                    & $^{\circ}$C       & Thermistor \\
-Conductivity                        & $\mu$S/cm         & Four-Electrode Graphite Sensor \\
-Dissolved Oxygen                    & mg/l              & Optical Sensor\\
-Salinity                            & PSU               & Four-Electrode Graphite Sensor \\
-pH                                  & logarithmic (0-14)& Flowing-junction Reference Electrode\\
-Turbidity                           & FNU               & Ion-Selective Electrode \\
-$\mathrm{Ca^{2+}}$                  & mg/l              & Ion-Selective Electrode \\
-$\mathrm{Na^+}$                     & mg/l              & Ion-Selective Electrode \\
-$\mathrm{Cl^-}$                     & mg/l              & Ion-Selective Electrode \\
-$\mathrm{NO_3^-}$                   & mg/l as nitrogen  & Ion-Selective Electrode \\
-Tryptophan                          & ppb               & Fluorometer \\
-Blue-Green Algae (phycoerythrin)    & ppb               & Fluorometer \\
-CDOM                                & ppb               & Fluorometer \\
-Optical Brighteners                 & ppb               & Fluorometer \\
-Crude Oil                           & ppb               & Fluorometer \\
-Chlorophyll A                       & ppb               & Fluorometer \\
-Chlorophyll A (Red Excitation)      & ppb               & Fluorometer \\
+Temperature		                    & $^{\circ}$C       & Thermistor  & Physical \\
+Conductivity                        & $\mu$S/cm         & Four-Electrode Graphite Sensor & Physical  \\
+Dissolved Oxygen                    & mg/l              & Optical Sensor & Physical \\
+pH                                  & logarithmic (0-14)& Flowing-junction Reference Electrode & Physical \\
+Turbidity                           & FNU               & Ion-Selective Electrode  & Physical \\
+$\mathrm{Ca^{2+}}$                  & mg/l              & Ion-Selective Electrode  & Ions \\
+$\mathrm{Cl^-}$                     & mg/l              & Ion-Selective Electrode & Ions \\
+$\mathrm{Na^+}$                     & mg/l              & Ion-Selective Electrode & Ions \\
+Blue-Green Algae (phycoerythrin)    & ppb               & Fluorometer & Biochemical \\
+CDOM                                & ppb               & Fluorometer & Biochemical \\
+Chlorophyll A                       & ppb               & Fluorometer & BioChemical \\
+Chlorophyll A (Red Excitation)      & ppb               & Fluorometer & BioChemical\\
+Optical Brighteners                 & ppb               & Fluorometer & Chemical \\
+Crude Oil                           & ppb               & Fluorometer & Chemical\\
+%Salinity                            & PSU               & Four-Electrode Graphite Sensor \\
+%$\mathrm{NO_3^-}$                   & mg/l as nitrogen  & Ion-Selective Electrode \\
 \bottomrule
 \end{tabularx}
 % \noindent{\footnotesize{\textsuperscript{1} Tables may have a footer.}}
 \end{table}
-
-
 
 \subsection{UAV: Hyperspectral Data Cubes}
 
@@ -319,7 +379,7 @@ The hyperspectral imager utilized in our robot team is in a so-called \textit{pu
 \end{equation}
 where $L$ is the spectral radiance, $E_d$ is the downwelling irradiance, and a factor of $\pi$ steradians results from assuming the water surface is Lambertian (diffuse) \cite{reflectance-conversion}. We will address the impact of this assumption in Section~\ref{sec:discussion}.
 
-Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into a geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan-line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized, however this can be increased to reduce the processing time for real-time applications. Finally, the UTM coordinates are transformed to latitude and longitude for easy comparison with in-situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downwelling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
+Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into a geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan-line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS INS. After a sequence of coordinate transformations, pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections a resolution of 10 cm was utilized, however this can be increased to reduce the processing time for real-time applications. Finally, the UTM coordinates are transformed to latitude and longitude for easy comparison with in-situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one such data cube, highlighting a selection of exemplar pixel spectra from the scene as well as the incident downwelling irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
@@ -360,7 +420,10 @@ where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ ca
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 
-The results of fitting our hyperparameter optimized models are listed in Table~\ref{tab:fit-results}. For each model, the $R^2$, RMSE, and MAE were evaluated using 6-fold cross validation. We observe considerable 
+Add description of the full dataset and relevant statistics... maybe add another table? 
+
+
+The results of the model training procedure are outlined in Table~\ref{tab:fit-results}. Model performance is identified by the $R^2$, RMSE, and MAE out-of-fold estimates (mean $\pm$ standard deviation) of the final hyperparameter-optimized model with target variables ranked in descending order by the $R^2$ value. Additionally, we report the interval width that which yields a 90\% confidence interval on the holdout validation set. We then evaluate how the estimated uncertainty generalizes by computing the \textit{emprical coverage} on the holdout testing set, that is, we compute the percentage of predictions on the testing set that \textit{actually} fall within the desired 90\% interval. 
 
 \begin{table}[H]
   \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated using conformal prediction so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the confidence interval determined by conformal prediction. The final column shows the best performing model. \label{tab:fit-results}}
@@ -368,31 +431,38 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
   \newcolumntype{C}{>{\centering\arraybackslash}X}
   \begin{tabularx}{\fulllength}{CCCCCCC}
     \toprule
-    \textbf{Target (units)} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} & \textbf{Model*}\\
+    \textbf{Target} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} & \textbf{Model*}\\
     \midrule
-    Temperature (°C) & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8 &\\
-    Conductivity ($\mu$S/cm) & 0.999 ± 2.17e-5 & 0.853 ± 0.0114 & 0.55 ± 0.00564 &  ± 1.3 & 89.8\\
-    $\mathrm{Ca}^{2+}$ (mg/l) & 0.999 ± 3.53e-5 & 0.423 ± 0.0101 & 0.243 ± 0.00552 &  ± 0.59 & 89.7\\
-    Dissolved Oxygen (mg/l) & 0.999 ± 3.17e-5 & 0.0705 ± 0.000984 & 0.0467 ± 0.000418 &  ± 0.11 & 89.8\\
-    Salinity (PSU) & 0.998 ± 0.000129 & 0.000759 ± 1.8e-5 & 0.000265 ± 6.1e-6 &  ± 0.00051 & 89.6\\
-    $\mathrm{Cl^-}$ (mg/l) & 0.994 ± 0.000441 & 1.15 ± 0.0418 & 0.578 ± 0.00534 &  ± 1.4 & 90.3\\
-    $\mathrm{Na^+} (mg/l)$ & 0.992 ± 0.000309 & 6.17 ± 0.134 & 2.85 ± 0.0536 &  ± 7.2 & 89.9\\
-    Tryptophan (ppb) & 0.991 ± 0.00038 & 0.188 ± 0.00404 & 0.112 ± 0.00149 &  ± 0.26 & 89.9\\
-    pH & 0.991 ± 0.000327 & 0.0177 ± 0.000295 & 0.0109 ± 6.56e-5 &  ± 0.024 & 89.9\\
-    Blue-Green Algae [Phycoerythrin] (ppb) & 0.981 ± 0.00186 & 1.72 ± 0.0947 & 0.608 ± 0.0218 &  ± 1.4 & 90.2\\
-    $\mathrm{NO_3^-} (mg/l-N)$ & 0.968 ± 0.00203 & 0.0308 ± 0.00113 & 0.0146 ± 0.000256 &  ± 0.043 & 89.9\\
-    CDOM (ppb) & 0.966 ± 0.00228 & 0.464 ± 0.0195 & 0.144 ± 0.00449 &  ± 0.22 & 89.3\\
-    Chlorophyll A ($\mu$g/l) & 0.924 ± 0.00645 & 1.29 ± 0.0667 & 0.359 ± 0.0079 &  ± 0.73 & 90.2\\
-    Optical Brighteners (ppb) & 0.915 ± 0.00406 & 0.118 ± 0.00169 & 0.0568 ± 0.000218 &  ± 0.1 & 89.8\\
-    Chlorophyll A with Red Excitation ($\mu$g/l) & 0.909 ± 0.00794 & 77.6 ± 3.91 & 15.6 ± 0.418 &  ± 25.0 & 90.5\\
-    Crude Oil (ppb) & 0.906 ± 0.00606 & 0.588 ± 0.019 & 0.162 ± 0.00234 &  ± 0.23 & 89.7\\
-    Turbidity (FNU) & 0.812 ± 0.0158 & 60.2 ± 2.61 & 6.98 ± 0.431 &  ± 3.4 & 89.5\\
+    Temperature & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8 & ETR \\
+    Conductivity & 0.999 ± 2.17e-5 & 0.853 ± 0.0114 & 0.55 ± 0.00564 &  ± 1.3 & 89.8 & ETR \\
+    $\mathrm{Ca}^{2+}$ & 0.999 ± 3.53e-5 & 0.423 ± 0.0101 & 0.243 ± 0.00552 &  ± 0.59 & 89.7 & ETR \\
+    Dissolved Oxygen & 0.999 ± 3.17e-5 & 0.0705 ± 0.000984 & 0.0467 ± 0.000418 &  ± 0.11 & 89.8 & ETR \\
+    $\mathrm{Cl^-}$ & 0.994 ± 0.000441 & 1.15 ± 0.0418 & 0.578 ± 0.00534 &  ± 1.4 & 90.3 & RFR \\
+    $\mathrm{Na^+}$ & 0.992 ± 0.000309 & 6.17 ± 0.134 & 2.85 ± 0.0536 &  ± 7.2 & 89.9 & RFR \\
+    pH & 0.991 ± 0.000327 & 0.0177 ± 0.000295 & 0.0109 ± 6.56e-5 &  ± 0.024 & 89.9 & ETR \\
+    Blue-Green Algae & 0.981 ± 0.00186 & 1.72 ± 0.0947 & 0.608 ± 0.0218 &  ± 1.4 & 90.2 & ETR \\
+    CDOM & 0.966 ± 0.00228 & 0.464 ± 0.0195 & 0.144 ± 0.00449 &  ± 0.22 & 89.3 & RFR \\
+    Chlorophyll A & 0.924 ± 0.00645 & 1.29 ± 0.0667 & 0.359 ± 0.0079 &  ± 0.73 & 90.2 & ETR\\
+    Optical Brighteners & 0.915 ± 0.00406 & 0.118 ± 0.00169 & 0.0568 ± 0.000218 &  ± 0.1 & 89.8 & RFR \\
+    Chlorophyll A with Red Excitation & 0.909 ± 0.00794 & 77.6 ± 3.91 & 15.6 ± 0.418 &  ± 25.0 & 90.5 & ETR \\
+    Crude Oil & 0.906 ± 0.00606 & 0.588 ± 0.019 & 0.162 ± 0.00234 &  ± 0.23 & 89.7 & RFR \\
+    Turbidity & 0.812 ± 0.0158 & 60.2 ± 2.61 & 6.98 ± 0.431 &  ± 3.4 & 89.5 & RFR\\
     \bottomrule
   \end{tabularx}
   \end{adjustwidth}
   \noindent{\footnotesize{* RFR = Random Forest Regressor, ETR = EvoTree Regressor}}
 \end{table}
 
+From Table~\ref{tab:fit-results}, it is clear that neither the random forest model nor the gradient boosted tree model is superior for all targets. We see that the empirical coverage achieved by the inferred confidence interval is within 1\% of our desired coverage for each target modelled. This indicates that the uncertainties obtained by the conformal prediction procedure are reliable, at least within the extremes of the collected dataset. 
+
+To further understand the differences in model performance between the target variables, we can consider the difference between the RMSE and MAE scores. Because the MAE is less sensitive to impacts from outliers than the RMSE, any large difference between the two is a good indication that model performance has been degraded by outliers. Indeed for turbidity, the worst performing model in the collection, there is an order of magnitude difference between the two. This is easily explained upon confirmation that ~3\% of data points had values greater than 100 FNU despite a median value of 1.34 FNU.
+
+The advantage of combining multiple datsets is clear, particularly for target variables like Chlorophyll which show unimodal distributions within each collection period. As there is only slight variation within a single collection, combining multiple collections with different mean values dramatically improves the capability of a model to identify variations... yada yada yada
+
+
+
+
+discuss distribution of values each day and identify variables which had mostly constant values between all three days (and so were highly impaced by the presece of outliers)...
 
 
 \subsection{Physical Parameters}
@@ -414,7 +484,7 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
 \end{figure}  
 
 
-\subsection{Ion Measurements}
+\subsection{Ions}
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
@@ -433,7 +503,7 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
 \end{figure}  
 
 
-\subsection{Biochemical Measurements}
+\subsection{Biochemical Parameters}
 
 
 \begin{figure}[H]
@@ -452,6 +522,8 @@ The results of fitting our hyperparameter optimized models are listed in Table~\
 \caption{Ranked feature importances for the same three chemical concentration models.\label{fig:chemicals-fit}}
 \end{figure}  
 
+
+\subsection{Chemical Parameters}
 
 
 \subsection{Mapping}
