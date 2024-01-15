@@ -1,5 +1,5 @@
 using CSV, DataFrames, JSON, Tables
-using Random, Statistics
+using Random, Statistics, StatsBase
 using CairoMakie
 using MintsMakieRecipes
 
@@ -76,54 +76,98 @@ save("./paper/figures/results/downwelling-hist.png", fig)
 save("./paper/figures/results/downwelling-hist.pdf", fig)
 
 
-
 # make another plot of the correlations between all targets to try and explain the
 # ability to predict physical parameters like salinity
 
-# load full dataset
-function get_targets(target)
-    target_name = String.(target)
-
-    df_1123 = CSV.read(joinpath(datapath, "11-23", target_name, "data", "y.csv"), DataFrame)
-    df_1209 = CSV.read(joinpath(datapath, "12-09", target_name, "data", "y.csv"), DataFrame)
-    df_1210 = CSV.read(joinpath(datapath, "12-10", target_name, "data", "y.csv"), DataFrame)
-
-    return vcat(df_1123, df_1209, df_1210)
-end
-
-get_targets(:CDOM)
 
 
 
-targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
 
-targets_to_try = [
+targets_to_try= [
     :Temp3488,
     :SpCond,
     :Ca,
     :HDO,
-    :Salinity3488,
     :Cl,
     :Na,
-    :TRYP,
     :pH,
+    :bg,
     :bgm,
-    :NO3,
     :CDOM,
     :Chl,
     :OB,
     :ChlRed,
     :CO,
-    :Turb3490
+    :Turb3489,
+    #:RefFuel
 ]
 
-df_targets = hcat([get_targets(t) for t in targets_to_try]...)
-
-names(df_targets)
 
 
+# df_1123 = CSV.read(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_11_23.csv"), DataFrame)
+# df_1209 = CSV.read(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_12_09.csv"), DataFrame)
+# df_1210 = CSV.read(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_12_10.csv"), DataFrame)
 
-cm = cor(Matrix(df_targets[:, :]))
+df_full = CSV.read(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_full.csv"), DataFrame)
+df_targets= df_full[:, targets_to_try]
+
+# df_targets_1123 = df_1123[:, targets_to_try]
+# df_targets_1209 = df_1209[:, targets_to_try]
+# df_targets_1210 = df_1210[:, targets_to_try]
+
+
+# target = :CDOM
+# y_1123 = df_targets_1123[:, target]
+# y_1209= df_targets_1209[:, target]
+# y_1210 = df_targets_1210[:,target]
+
+# nbins_1123, _ = get_n_bins(y_1123)
+# nbins_1209, _ = get_n_bins(y_1209)
+# nbins_1210, _ = get_n_bins(y_1210)
+
+# fig = Figure();
+# ax = Axis(fig[1,1]);
+
+# h1 = hist!(ax, y_1123, bins=nbins_1123, color=(mints_colors[1], 0.8));
+# v1 = vlines!(ax, [minimum(y_1123), quantile(y_1123, 0.05), quantile(y_1123, 0.95), maximum(y_1123)], color=mints_colors[1]);
+
+# h2 = hist!(ax, y_1209, bins=nbins_1209, color=(mints_colors[2], 0.8));
+# v2 = vlines!(ax, [minimum(y_1209), quantile(y_1209, 0.05), quantile(y_1209, 0.95), maximum(y_1209)], color=mints_colors[2]);
+
+# h3 = hist!(ax, y_1210, bins=nbins_1210, color=(mints_colors[3], 0.8));
+# v3 = vlines!(ax, [minimum(y_1210), quantile(y_1210, 0.05), quantile(y_1210, 0.95), maximum(y_1210)], color=mints_colors[3]);
+
+# axislegend(ax, [h1, h2, h3], ["11-23", "12-09", "12-10"]);
+
+# println("11-23:\t", quantile(y_1123, 0.05), "\t", quantile(y_1123, 0.95))
+# println("12-09:\t", quantile(y_1209, 0.05), "\t", quantile(y_1209, 0.95))
+# println("12-10:\t", quantile(y_1210, 0.05), "\t", quantile(y_1210, 0.95))
+
+# xlims!(ax, 0, 50)
+# fig
+
+
+# println("11-23:\t", extrema(y_1123))
+# println("12-09:\t",extrema(y_1209))
+# println("12-10:\t",extrema(y_1210))
+
+
+
+
+
+Y_mat = Matrix(df_targets[:,:])
+
+cm = corspearman(Y_mat, Y_mat)
+
+for i in axes(cm,1), j in axes(cm,2)
+    if j < i
+        cm[i,j] = NaN
+    end
+end
+
+
+# replace everything below the 
+# cm = cor(Matrix(df_targets[:, :]))
 
 var_names = [targets_dict[t][2] for t in targets_to_try]
 n_vars = ncol(df_targets)
@@ -138,13 +182,19 @@ ax = Axis(
     xticklabelsize=15,
     yticks=var_ticks,
     yticklabelsize=15,
-    xticklabelrotation=π/2
+    xticklabelrotation=π/2,
+    yreversed = true,
+    xgridvisible=false,
+    ygridvisible=false,
+    xminorgridvisible=false,
+    yminorgridvisible=false
 )
+
 
 cmap = cgrad(:roma, 10, categorical=true, rev=true)
 clims=(-1,1)
 hm = heatmap!(ax, cm, colormap=cmap, colorrange=clims)
-cb = Colorbar(fig[1,2], hm, label="Correlation", ticks=-1:0.2:1)
+cb = Colorbar(fig[1,2], hm, label="Spearman's Rank Correlation", ticks=-1:0.2:1)
 fig
 
 save("./paper/figures/results/target_correlations.png", fig)

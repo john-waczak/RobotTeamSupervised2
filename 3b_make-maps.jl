@@ -100,70 +100,172 @@ ETR = @load EvoTreeRegressor pkg=EvoTrees
 collection = "Full"
 day = "11-23"
 flight = "Scotty_2"
+# flight = "Scotty_1"
 
 
-day = "12-09"
-flight = "NoDye_1"
+# day = "12-09"
+# flight = "NoDye_1"
+
+
 
 
 # flight = "Scotty_1"
 
 # targets_to_map = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490, :TRYP])]
 
-# targets_to_map = [:CDOM, :CO, :SpCond, :HDO, :bgm, :Na, :Cl, :Chl]
-targets_to_map = [:bgm]
 
-# targets_to_map = [:CDOM, :CO,]
+# targets_to_map = [
+#     :Temp3488,
+#     :SpCond,
+#     :Ca,
+#     :HDO,
+#     :Cl,
+#     :Na,
+#     :pH,
+#     :bgm,
+#     :CDOM,
+#     :Chl,
+#     :OB,
+#     :ChlRed,
+#     :CO,
+#     :Turb3489
+# ]
+
+
+targets_to_map = [
+    :Temp3488,
+    :SpCond,
+    :Ca,
+    :HDO,
+    :Cl,
+    :Na,
+    :pH,
+    :bg,
+    :bgm,
+    :CDOM,
+    :Chl,
+    :OB,
+    :ChlRed,
+    :CO,
+    :Turb3489,
+#    :RefFuel,
+]
+
+#targets_to_map = [:HDO, :pH]
+
 # targets_to_map = [:CDOM]
+
 
 # set up relevant paths
 hsi_paths = joinpath(hsipath, day)
-h5_files = sort_files_numerical!([joinpath(hsi_paths, flight, f) for f in readdir(joinpath(hsi_paths, flight)) if endswith(f, ".h5")])
-h5_files_to_use = [f for f in h5_files if !(split(f, "/")[end] in bad_hsi_dict[day][flight])]
+
+# h5_files = sort_files_numerical!([joinpath(hsi_paths, flight, f) for f in readdir(joinpath(hsi_paths, flight)) if endswith(f, ".h5")])
+# h5_files_to_use = [f for f in h5_files if !(split(f, "/")[end] in bad_hsi_dict[day][flight])]
+
+
+flight = "Scotty_1"
+h5_files_1 = sort_files_numerical!([joinpath(hsi_paths, flight, f) for f in readdir(joinpath(hsi_paths, flight)) if endswith(f, ".h5")])
+h5_files_to_use_1 = [f for f in h5_files_1 if !(split(f, "/")[end] in bad_hsi_dict[day][flight])]
+
+flight = "Scotty_2"
+h5_files_2 = sort_files_numerical!([joinpath(hsi_paths, flight, f) for f in readdir(joinpath(hsi_paths, flight)) if endswith(f, ".h5")])
+h5_files_to_use_2 = [f for f in h5_files_2 if !(split(f, "/")[end] in bad_hsi_dict[day][flight])]
+
+
+flight = "Scotty_combined"
+h5_files_to_use = vcat(h5_files_to_use_1..., h5_files_to_use_2...)
+
+
 h5_date = day
 
 
+
+
+
+
 color_clims= Dict(
-    "CDOM"  => Dict(
-        "11-23" => (20.0, 22.0),
-        "12-09" => (17.0, 19.0),
-        "12-10" => (16.0, 18.0),
-    ),
-    "CO" => Dict(
-        "11-23" => (25.5, 27.5),
-        "12-09" => (23.0, 25.0),
-        "12-10" => (24.0, 26.0),
+    "Temp3488" => Dict(
+        "11-23" => (13.25, 13.95),
+        "12-09" => (8.84, 9.36),
     ),
     "SpCond" => Dict(
-        "11-23" => (794, 800),
-        "12-09" => (850, 868),
-        "12-10" => (855, 870),
+        "11-23" => (783, 802),
+        "12-09" => (852, 869),
+        # "11-23" => (794, 800),
+        # "12-09" => (850, 868),
+    ),
+    "Ca" => Dict(
+        "11-23" => (20, 56),
+        "12-09" => (1.0, 3.4),
     ),
     "HDO" => Dict(
-        "11-23" => (8.0, 9.8),
-        "12-09" => (13.0,13.9),
-        "12-10" => (13.0,13.7),
-    ),
-    "bgm" => Dict(
-        "11-23" => (0.0, 4.0),
-        "12-09" => (5.0, 15.0),
-        "12-10" => (25,40),
-    ),
-    "Na" => Dict(
-        "11-23" => (200, 400),
-        "12-09" => (210, 350),
-        "12-10" => (120, 140),
+        "11-23" => (7.8, 9.6),
+        "12-09" => (13.2, 13.85),
+        # "11-23" => (8.0, 9.8),
+        # "12-09" => (13.0,13.9),
     ),
     "Cl" => Dict(
-        "11-23" => (43,58),
-        "12-09" => (66,100),
-        "12-10" => (50,62),
+        "11-23" => (44, 57),
+        "12-09" => (68, 96),
+        # "11-23" => (43,58),
+        # "12-09" => (66,100),
+    ),
+    "Na" => Dict(
+        "11-23" => (200, 380),
+        "12-09" => (220, 340),
+        # "11-23" => (200, 400),
+        # "12-09" => (210, 350),
+    ),
+    "pH" => Dict(
+        "11-23" => (8.0, 8.25),
+        "12-09" => (8.2, 8.6),
+    ),
+    "bg" => Dict(
+        "11-23" => (0, 2.1),
+        "12-09" => (0,6),
+    ),
+    "bgm" => Dict(
+        #"11-23" => (1.5, 2.5),
+        "11-23" => (0.0, 10.0),
+        "12-09" => (25, 40),
+        # "11-23" => (0.0, 4.0),
+        # "12-09" => (5.0, 15.0),
+    ),
+    "CDOM" => Dict(
+        "11-23" => (20.1, 21.6),
+        "12-09" => (16, 19),
+        # "11-23" => (20.0, 22.0),
+        # "12-09" => (17.0, 19.0),
     ),
     "Chl" => Dict(
-        "11-23" => (0.5, 3.5),
-        "12-09" => (0.0, 4.0),
-        "12-10" => (0.5, 4.0),
-    )
+        #"11-23" => (1.15, 2.0),
+        "11-23" => (1.0, 3.0),
+        "12-09" => (0.5, 2.0),
+        # "11-23" => (0.5, 3.5),
+        # "12-09" => (0.0, 4.0),
+    ),
+    "OB" => Dict(
+        "11-23" => (4.5, 5.0),
+        "12-09" => (3.8, 4.4),
+    ),
+    "ChlRed" => Dict(
+        "11-23" => (22, 40),
+        "12-09" => (10, 50),
+    ),
+    "CO" => Dict(
+        "11-23" => (25.7, 27.3),
+        "12-09" => (23, 25),
+        # "11-23" => (25.5, 27.5),
+        # "12-09" => (23.0, 25.0),
+    ),
+    "Turb3489" => Dict(
+        "11-23" => (1,3),
+        "12-09" => (1,3),
+    ),
+    "RefFuel" => Dict(
+        "11-23" => (1.55, 2.4),
+        "12-09" => (1.55, 2.4),
+    ),
 )
 
 
@@ -174,16 +276,24 @@ for target ∈ targets_to_map
     target_long = targets_dict[target][2]
     units = targets_dict[target][1]
 
-    ml_models = ["EvoTreeRegressor","EvoTreeRegressor", "EvoTreeRegressor", "RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor"]
-    suffixes = ["vanilla", "vanilla-occam", "hpo", "vanilla", "vanilla-occam", "hpo"]
+    # ml_models = ["EvoTreeRegressor","EvoTreeRegressor", "EvoTreeRegressor", "RandomForestRegressor", "RandomForestRegressor", "RandomForestRegressor"]
+    # suffixes = ["vanilla", "vanilla-occam", "hpo", "vanilla", "vanilla-occam", "hpo"]
+    # model_paths = [
+    #     joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"__vanilla.jls"),
+    #     joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"-occam__vanilla.jls"),
+    #     joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "hyperparameter_optimized", "EvoTreeRegressor"*"__hpo.jls"),
+    #     joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "default", "RandomForestRegressor"*"__vanilla.jls"),
+    #     joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "default", "RandomForestRegressor"*"-occam__vanilla.jls"),
+    #     joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "hyperparameter_optimized", "RandomForestRegressor"*"__hpo.jls"),
+    # ]
+
+
+    ml_models = ["RandomForestRegressor",]
+    suffixes = ["vanilla"]
     model_paths = [
-        joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"__vanilla.jls"),
-        joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "default", "EvoTreeRegressor"*"-occam__vanilla.jls"),
-        joinpath(datapath, collection, target_name, "models", "EvoTreeRegressor", "hyperparameter_optimized", "EvoTreeRegressor"*"__hpo.jls"),
         joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "default", "RandomForestRegressor"*"__vanilla.jls"),
-        joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "default", "RandomForestRegressor"*"-occam__vanilla.jls"),
-        joinpath(datapath, collection, target_name, "models", "RandomForestRegressor", "hyperparameter_optimized", "RandomForestRegressor"*"__hpo.jls"),
     ]
+
 
 
     @info "Loading $(target) data for $(h5_date)"
@@ -289,6 +399,11 @@ for target ∈ targets_to_map
                 Y_pred = Y_pred[rows_pred]
             end
 
+            if any([occursin(piece, split(h5path, "/")[end]) for piece in ["1-3", "2-3"]])
+                rows_pred = findall([Longitudes[ij] < -97.7152 for ij in ij_water])
+                ij_water = ij_water[rows_pred]
+                Y_pred = Y_pred[rows_pred]
+            end
 
             # deal with this one HSI
             if h5_date == "11-23" && occursin("2-19", h5path)
@@ -296,7 +411,7 @@ for target ∈ targets_to_map
                 Y_pred[ij_skip] .= NaN
             end
 
-            sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=1)
+            sc = cmk.scatter!(ax, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=1, alpha=0.85)
 
             cmk.scatter!(ax_tot, Longitudes[ij_water[1:nskip:end]], Latitudes[ij_water[1:nskip:end]], color=Y_pred[1:nskip:end], colormap=cm, colorrange=clims, markersize=3)
 

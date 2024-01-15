@@ -56,6 +56,9 @@ collection = "Full"
 
 
 
+target = :Turb3489
+target_name = String(target)
+
 
 
 datapath = "/Users/johnwaczak/data/robot-team/supervised"
@@ -75,6 +78,21 @@ y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
 idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1]
 idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1]
 
+
+
+mean(y)
+median(y)
+extrema(y)
+std(y)
+
+fig,ax,d = density(y[y .< 10])
+xlims!(ax, 0, 10)
+fig
+
+quantile(y, 0.90)
+
+
+sum(y .> 100) ./ length(y)
 
 mach_etr = machine(etr_path)
 mach_rfr = machine(rfr_path)

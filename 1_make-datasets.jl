@@ -321,6 +321,13 @@ df_full = df_full[:, Not([:longitude, :latitude])]
 
 
 
+CSV.write(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_11_23.csv"), df_11_23)
+CSV.write(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_12_09.csv"), df_12_09)
+CSV.write(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_12_10.csv"), df_12_10)
+CSV.write(joinpath("/Users/johnwaczak/data/robot-team/finalized/Full/df_full.csv"), df_full)
+
+
+
 collections = ["11-23", "12-09", "12-10", "Full"]
 dfs_out = [df_11_23, df_12_09, df_12_10, df_full]
 dfs_latlong = [df_latlong_11_23, df_latlong_12_09, df_latlong_12_10, df_latlong_full]
@@ -363,15 +370,34 @@ for i in 1:length(collections)
         end
 
         (y,X) = make_datasets(df_out, target_name, feature_names)
-        idx_train, idx_test = partition(eachindex(y), 0.9, shuffle=true, rng=rng)
+
+
+        # get quantiles
+        if target in keys(target_ranges)
+            q_low = target_ranges[target][1]
+            q_high = target_ranges[target][2]
+        else
+            q_low = minimum(y)
+            q_high = maximum(y)
+        end
+
+        idx_to_use = findall(y .>= q_low .&& y .<= q_high)
+
+        X_out = X[idx_to_use, :]
+        y_out = y[idx_to_use]
+
+        df_latlong_out = df_latlong[idx_to_use, :]
+
+
+        idx_train, idx_test = partition(eachindex(y_out), 0.9, shuffle=true, rng=rng)
 
 
         CSV.write(joinpath(outpath_final, "idx_train.csv"), DataFrame(Dict(:idx => idx_train)))
         CSV.write(joinpath(outpath_final, "idx_test.csv"), DataFrame(Dict(:idx => idx_test)))
 
-        CSV.write(joinpath(outpath_final, "X.csv"), X)
-        CSV.write(joinpath(outpath_final, "y.csv"), DataFrame(Dict(target => y)))
-        CSV.write(joinpath(outpath_final, "lat_lon.csv"), df_latlong)
+        CSV.write(joinpath(outpath_final, "X.csv"), X_out)
+        CSV.write(joinpath(outpath_final, "y.csv"), DataFrame(Dict(target => y_out)))
+        CSV.write(joinpath(outpath_final, "lat_lon.csv"), df_latlong_out)
 
     end
 end

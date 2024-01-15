@@ -33,11 +33,28 @@ targets_dict = Dict(
     :Turb3490 => ["FNU", "Turbidity"],
     :bg => ["ppb", "Blue-Green Algae\n (Phycocyanin)", 0.0],
     :bgm => ["ppb", "Blue-Green Algae\n (Phycoerythrin)", 0.0],
-    :pH => ["", "pH", 0.0],
+    :pH => ["0-14", "pH", 0.0],
     :pH_mV => ["mV", "pH"],
 )
 
-
+target_ranges = Dict(
+    :Temp3488 => (8.4, 14),
+    :SpCond => (784, 873),
+    :Ca => (0, 57),
+    :HDO => (8, 14),
+    :Cl => (0, 100),
+    :Na => (0, 401),
+    :pH => (7.9, 8.7),
+    :bg => (0, 10),
+    :bgm => (0, 40),
+    :CDOM => (12, 22),
+    :Chl => (0, 10),
+    :OB => (2.5, 5.1),
+    :ChlRed => (0, 50),
+    :CO => (20, 28.2),
+    :Turb3489 => (0, 100),
+    :RefFuel => (1.55, 2.4),
+)
 
 using LaTeXStrings
 

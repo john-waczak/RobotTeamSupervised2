@@ -938,70 +938,74 @@ function train_hpo(
     ytrain = @view y[idx_train]
     ytest = @view y[idx_test]
 
+    # only do hpo search if results don't already exist...
+    if !ispath(joinpath(path_to_use, "hp_defaults.json"))
+        @info "\tNo HPO Model found... running optimization."
+        # set up hyperparameter ranges
+        rs = []
+
+        # Either add allowed values or ranges for hyperparameters
+        for item in hpo_ranges[packagename][savename]
+            if :values ∈ keys(item)
+                push!(rs, range(mdl, item.hpname, values=item.values))
+            else
+                push!(rs, range(mdl, item.hpname, lower=item.lower, upper=item.upper))
+            end
+        end
 
 
-    # set up hyperparameter ranges
-    rs = []
+        @info "\tPerforming hyperparameter optimization..."
 
-    # Either add allowed values or ranges for hyperparameters
-    for item in hpo_ranges[packagename][savename]
-        if :values ∈ keys(item)
-            push!(rs, range(mdl, item.hpname, values=item.values))
-        else
-            push!(rs, range(mdl, item.hpname, lower=item.lower, upper=item.upper))
+
+        # search for hyperparameters without doing conformal prediction
+        tuning = RandomSearch(rng=rng)
+
+        tuning_pipe = TunedModel(
+            model=mdl,
+            range=rs,
+            tuning=tuning,
+            measures=[mae, rmse, rsq],
+            # resampling=[(idx_train, idx_test),],
+            resampling=CV(nfolds=6, rng=rng),
+            n=nmodels,
+            cache=false,
+        )
+
+        mach = machine(tuning_pipe, Xtrain, ytrain; cache=false)  # <- data leakage covered by resampling strategy above
+
+        @info "\tStarting training..."
+        fit!(mach) #, verbosity=0)
+
+        @info "\t...\tFinished training"
+
+        open(joinpath(path_to_use, "$(savename)__hpo.txt"), "w") do f
+            show(f,"text/plain", fitted_params(mach).best_model)
+            println(f, "\n")
+            println(f,"---------------------")
+            show(f,"text/plain", fitted_params(mach).best_fitted_params)
+            println(f,"\n")
+            println(f,"---------------------")
+            show(f,"text/plain", report(mach).best_history_entry)
+            println(f,"\n")
+        end
+
+
+        @info "\tSaving params to json file"
+        fitted_ps = fitted_params(mach).best_model
+        params_dict = Dict()
+        for hp in hpo_ranges[packagename][savename]
+            val = getproperty(fitted_ps, hp.hpname)
+            name = hp.hpname
+            params_dict[name] = val
+        end
+
+        open(joinpath(path_to_use, "hp_defaults.json"), "w") do f
+            JSON.print(f, params_dict)
         end
     end
 
 
-    @info "\tPerforming hyperparameter optimization..."
-
-
-    # search for hyperparameters without doing conformal prediction
-    tuning = RandomSearch(rng=rng)
-
-    tuning_pipe = TunedModel(
-        model=mdl,
-        range=rs,
-        tuning=tuning,
-        measures=[mae, rmse, rsq],
-        # resampling=[(idx_train, idx_test),],
-        resampling=CV(nfolds=6, rng=rng),
-        n=nmodels,
-        cache=false,
-    )
-
-    mach = machine(tuning_pipe, Xtrain, ytrain; cache=false)  # <- data leakage covered by resampling strategy above
-
-    @info "\tStarting training..."
-    fit!(mach) #, verbosity=0)
-
-    @info "\t...\tFinished training"
-
-    open(joinpath(path_to_use, "$(savename)__hpo.txt"), "w") do f
-        show(f,"text/plain", fitted_params(mach).best_model)
-        println(f, "\n")
-        println(f,"---------------------")
-        show(f,"text/plain", fitted_params(mach).best_fitted_params)
-        println(f,"\n")
-        println(f,"---------------------")
-        show(f,"text/plain", report(mach).best_history_entry)
-        println(f,"\n")
-    end
-
-
-    @info "\tSaving params to json file"
-    fitted_ps = fitted_params(mach).best_model
-    params_dict = Dict()
-    for hp in hpo_ranges[packagename][savename]
-        val = getproperty(fitted_ps, hp.hpname)
-        name = hp.hpname
-        params_dict[name] = val
-    end
-
-    open(joinpath(path_to_use, "hp_defaults.json"), "w") do f
-        JSON.print(f, params_dict)
-    end
-
+    params_dict = JSON.parsefile(joinpath(path_to_use, "hp_defaults.json"))
 
     # now we want to train and evaluate a final model
     mdl_final = mdl

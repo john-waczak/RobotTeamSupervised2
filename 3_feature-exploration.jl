@@ -35,9 +35,12 @@ using ConformalPrediction
 using JSON
 
 
+
 # for base model prediction:
 # using MLJModelInterface: reformat
 # predict(conf_model.model, mach.fitresult, reformat(conf_model.model, Xtest)...)
+
+
 
 
 # seed reproducible pseudo-random number generator
@@ -160,16 +163,34 @@ MODELS[:rfr] = (;
 collections = ["Full"]
 
 
-targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
+# targets_to_try = [t for t in Symbol.(keys(targets_dict)) if !(t in [:TDS, :Salinity3490, :bg, :Br, :NH4, :Turb3488, :Turb3490])]
+
+
+targets_to_try= [
+    :Temp3488,
+    :SpCond,
+    :Ca,
+    :HDO,
+    :Cl,
+    :Na,
+    :pH,
+    :bg,
+    :bgm,
+    :CDOM,
+    :Chl,
+    :OB,
+    :ChlRed,
+    :CO,
+    :Turb3489,
+    :RefFuel
+]
+
+
+
 
 # targets_to_try = [:bgm]
-
-
-
 # targets_to_try = [:CDOM,:CO]
-
 # targets_to_try = [:CDOM,]
-
 # targets_to_try = [:Chl]
 
 for collection ∈ collections
@@ -336,7 +357,6 @@ function generate_tex_table(df)
         cov = string(round(row["Empirical Coverage"]*100, digits=1))
 
         out = out * "    $(target_tex) & $(r2_str) & $(rmse_str) & $(mae_str) & $(unc) & $(cov)\\\\\n"
-        out = out * "    \\midrule\n"
     end
 
     out = out * "    \\bottomrule\n"

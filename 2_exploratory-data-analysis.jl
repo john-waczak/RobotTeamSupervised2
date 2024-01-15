@@ -64,18 +64,6 @@ for collection in collections
         X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
         y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
 
-        nbins = 1
-        bin_width = maximum(y) - minimum(y)
-        try
-            nbins, bin_width = get_n_bins(y)
-        catch e
-            println("Failed to find n_bins")
-            nbins = 30
-            bin_width = (maximum(y) - minimum(y))/nbins
-        end
-
-
-
 
         # compute correlation matrix between reflectances
         @info "\t\tcomputing inter-feature correlations"
@@ -114,14 +102,30 @@ for collection in collections
         # generate target histogram/distribution visualization
         @info "\t\tgenerating histogram..."
 
+        # y_hist = y[y .>= quantile(y,0.05) .&& y .<= quantile(y, 0.95)]
+        y_hist = y
+
+        nbins = 1
+        bin_width = maximum(y_hist) - minimum(y_hist)
+        try
+            nbins, bin_width = get_n_bins(y_hist)
+            @info "\t\t\tNbins=$(nbins)"
+            # nbins = minimum(nbins, 75)
+        catch e
+            println("Failed to find n_bins")
+            nbins = 30
+            bin_width = (maximum(y_hist) - minimum(y_hist))/nbins
+        end
+
         fig = Figure();
 
-        ax = Axis(fig[1,1], xlabel="$(pretty_name) ($(units))", ylabel="Counts", title="N bins = $(nbins), bin width=$(round(bin_width, digits=3))")
+        ax = Axis(fig[1,1], xlabel="$(pretty_name) ($(units))", ylabel="Counts") # , title="N bins = $(nbins), bin width=$(round(bin_width, digits=3))")
         ax2 = Axis(fig[1,1], yaxisposition=:right)
         linkxaxes!(ax, ax2)
 
-        h = hist!(ax, y; bins=nbins, color=(mints_colors[1], 0.75), normalization=:none)
-        d = density!(ax2, y[:,1], color=(mints_colors[2], 0.25), strokecolor=(mints_colors[2],0.75), strokewidth=3)
+        h = hist!(ax, y_hist; bins=nbins, color=(mints_colors[1], 0.75), normalization=:none)
+        d = density!(ax2, y_hist; color=(mints_colors[2], 0.25), strokecolor=(mints_colors[2],0.75), strokewidth=3)
+
 
         # h_train = hist!(ax, ytrain_vals; bins=y_hist.edges, color=(mints_colors[1], 0.75), normalization=:pdf)
         # h_test = hist!(ax, ytest_vals; bins=round(Int, sqrt(length(ytest_vals))), color=(mints_colors[2], 0.75))
