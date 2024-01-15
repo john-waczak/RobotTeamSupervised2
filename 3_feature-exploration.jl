@@ -341,9 +341,9 @@ function generate_tex_table(df)
     out = out * "  \\caption{This is a table caption.\\label{tab:fit-results}}\n"
     out = out * "  \\begin{adjustwidth}{-\\extralength}{0cm}\n"
     out = out * "  \\newcolumntype{C}{>{\\centering\\arraybackslash}X}\n"
-    out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCC}\n"
+    out = out * "  \\begin{tabularx}{\\fulllength}{CCCCCCC}\n"
     out = out * "    \\toprule\n"
-    out = out * "    \\textbf{Target (units)} & \\textbf{\$\\text{R}^2\$} & \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty} & \\textbf{Empirical Coverage (\\%)}\\\\\n"
+    out = out * "    \\textbf{Target} & \\textbf{\$\\text{R}^2\$} & \\textbf{RMSE} & \\textbf{MAE} & \\textbf{Estimated Uncertainty} & \\textbf{Empirical Coverage (\\%)} & \\textbf{Best Model} \\\\\n"
     out = out * "    \\midrule\n"
 
     for row in eachrow(df)
@@ -355,8 +355,9 @@ function generate_tex_table(df)
         # r_str = string(round(row["R (mean)"], sigdigits=3)) * " ± " * string(round(row["R (std)"], sigdigits=3))
         unc = " ± " * string(round(row["Estimated Uncertainty"], sigdigits=2))
         cov = string(round(row["Empirical Coverage"]*100, digits=1))
+        winning_model = row["model"]
 
-        out = out * "    $(target_tex) & $(r2_str) & $(rmse_str) & $(mae_str) & $(unc) & $(cov)\\\\\n"
+        out = out * "    $(target_tex) & $(r2_str) & $(rmse_str) & $(mae_str) & $(unc) & $(cov) & $(winning_model)\\\\\n"
     end
 
     out = out * "    \\bottomrule\n"
