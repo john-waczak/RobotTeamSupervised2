@@ -379,6 +379,8 @@ dfs = [
 ]
 
 
+dfs[2][:, 1:3]
+dfs[end][:, 1:3]
 
 model_ids = ["etr occam", "etr hpo", "rfr occam", "rfr hpo"]
 
