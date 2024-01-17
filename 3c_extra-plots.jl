@@ -86,19 +86,17 @@ save("./paper/figures/results/downwelling-hist.pdf", fig)
 targets_to_try= [
     :Temp3488,
     :SpCond,
+    :pH,
+    :Turb3489,
     :Ca,
-    :HDO,
     :Cl,
     :Na,
-    :pH,
     :bg,
     :bgm,
     :CDOM,
     :Chl,
     :OB,
-    :ChlRed,
     :CO,
-    :Turb3489,
     #:RefFuel
 ]
 
@@ -179,9 +177,9 @@ fig = Figure();
 ax = Axis(
     fig[1,1],
     xticks=var_ticks,
-    xticklabelsize=15,
+    xticklabelsize=14,
     yticks=var_ticks,
-    yticklabelsize=15,
+    yticklabelsize=13,
     xticklabelrotation=π/2,
     yreversed = true,
     xgridvisible=false,

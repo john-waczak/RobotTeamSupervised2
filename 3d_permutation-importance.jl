@@ -79,6 +79,7 @@ idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1]
 idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1]
 
 
+ncol(X)
 
 mean(y)
 median(y)
