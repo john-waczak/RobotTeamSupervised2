@@ -71,7 +71,7 @@
 
 %=================================================================
 % Full title of the paper (Capitalized)
-\Title{\textcolor{red}{Leveraging Machine Learning to Characterize Aquatic Environments with an Autonomous Team of Sensing Sentinels }}
+\Title{\textcolor{red}{Leveraging Machine Learning to Characterize Water Quality with an Autonomous Team of Sensing Sentinels }}
 
 % MDPI internal command: Title for citation in the left column
 \TitleCitation{Robot Team II: Electric Boogaloo}
@@ -170,147 +170,63 @@ Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Each day over X terabytes of remote sensing data are collected from...
 
-- First sentence about amount of remote sensing data generated per year w/ citation and a forecast for how much it will increase. 
-- Second sentence about the lack of in-situ reference data (this is the limitation we can fill) 
-- Further limitations of current remote sensing data products (spectral resolution, spatial resolution, observation frequency)
-- Discuss newly launched and and soon-to-be-launched satellites with HSI capabilities
-- Discuss use of multi-sepctral imagery for environmental studies
-    - Generation of spectral indices like the NDVI and others which have shown to be helpful for environmental characterization
-    - Cite David's previous CDOM paper that used the Atlantic shipping data.
-- Discuss use of ML in remote sensing/environmental assessment applications. Here, the possibilities are limited by the availability of high-quality reference data which is why many remote sensing ML models employ unsupervised methods to enable pixel classification (i.e. surface type, cloudiness fraction, etc...)
-- Outline need for in-situ reference data to calibrate HSI data products
-- Autonomous teams are perfect for this application due to their transportability, rapid deployment, and elastic configuration
-- Give examples of drone use for smart agriculture, etc... 
-- Give examples of autonomous boat use for water studies, cleanup, etc... 
-- Describe our work to create a robotic team which can do all of this... 
-
-
-
-In (cite last robot team paper) we outlined a paradigmatic approach to the generation of remote sensing data sets for water-based environmental studies by employing a coordinated team of autonomous sensing sentinels. In this paper, we demonstrate the use of this platform across multiple observation periods...
-
-
-Remote sensing data products 
-
-Hyper-spectral imagery
-
-Launched and soon-to-be-launched HSI satellites 
-
-Generation of in-situe reference measurements for the calibration of remote sensing data products 
-
-Drone based applications of hyper-spectral imagers
-
-Autonomous robotic teams (cite our previous paper) 
-
-Overview of what we demonstrate here...
-
-somewhere we need to mention the limitations from \cite{robotTeam1} due to low spatial variablility in a single day's collection... We are demonstrating that by including multiple observations from different days, we can improve our modelling capabilities by representing a larger variety of incident lighting conditions and in-situ values.
-
-In-situ measurements are expensive to collect and suffer from poor spatial coverage. Remote sensing data cover much wider areas but do not directly provide parameters needed for environmental assessments. Additionally, remote sensing data, particularly satellite based imagers, also suffer from long orbit-dependent site revisit times and can be easily occluded by the presence of clouds. This makes it incredibly challenging to collocate sufficient quantities of in-situ measurements with overlapping remote sensing imagery to enable their calibration. \textcolor{red}{(add reference to David's CDOM paper here...)}. To address this gap, we have developed an autonomous team of sensing sentinels combining a mobile uncrewed surface vessel (USV) with a unmanned aerial vehicle (UAV) which together rapidly collect hyperspectral imgaery \textit{and} comprehensive in-situ measurements to enable the estimation of key environmental parameters including concentrations of key constituents like CDOM, Crude Oils, Ions,as well as physical parameters like temperature, salinity, and dissolved oxygen. In our previous work we established a methodology for calibrating the hyperspectral imagery against reference measurements during a collection window \cite{robotTeam1}. In his study, we demonstrate that such models can be reliably trained using data collected from multiple observations....  
-
-
-
-- optically significant substances (OSS)
-- Colored dissolved organic matter (CDOM, also known as yellow substances, humic matter or gelbstoff) includes compounds produced during the decay of plant matter
-- Estimates concentrations of Chlorophyll-a, Total Suspended Solids, and the absorption coefficient of CDOM $a_{CDOM}(400)$ using Medium Resolution Imaging Spectrometer (MERIS) data during bloom in Gulf of Finland. They do this using band-ratio algorithms \cite{remote-sensing-finland}.
--  We should note that band-ratio algroithms are impacted by atmospheric factors like the in-column aerosol distribution.
-- The amounts of aerosols (dust, haze, etc) and gases (ozone, water vapor, etc) present in the atmosphere vary spatially and temporally. These variations impact the estimation of water quality characteristics via remote sensing methods \cite{remote-sensing-finland}
-- However, when data from different dates and locations are compared and atmospheric correction is necessary \cite{remote-sensing-finland}.
-
-- Used a support vector machine (SVM) to classify hyperspectral images of vegetation acquired by a UAV and produced a high-resolution classification map \cite{uav-hsi-classification}.
-- Large misclassification occured in shaded areas
-- \cite{uav-hsi-classification} calls these technqieus \textit{precision agriculture}
-- \cite{uav-hsi-classification-2} used a UAV aerial survey with multispectral cameras for citrus orchard classification
-
-- \cite{andres2018review}: \textit{Remote monitoring, via satellite assets and distributed in situ sensors, may help meet many of the challenges of information asymmetry and data gaps in developing countries, including unreliable (and time-consuming) survey data and reliance on spot checks to assess accurate reporting and performance.}
-- \cite{andres2018review}: \textit{(UAVs, or drones), are being used by researchers to map watersheds. Structure from Motion (SfM) three-dimensional point clouds can be derived from digital images collected on board UAVs, similar to the type of data produced by Light Detection and Ranging (LiDAR) technology [19]. The technological development of UAVs and their ability to derive high-resolution 3D information (and with much lower operational and up-front costs than manned airborne platforms) and satellite imaging has made UAV image acquisition appealing in several applications.}
-
-- \cite{robert2017analysis} Used Landsat and MODIS data to estimate suspended particulate matter in the Sahelian (Sahel?) region in Africa. 
-- \cite{robert2017analysis} found near infrared bands are well suited for estimating turbidity and SPM up to $R^2=0.70$.
-- \cite{robert2017analysis} \textit{the strong and variable atmospheric load (aerosols and water vapor) were potentially challenging for a remote sensing approach.}
-
-- \cite{ross2019aquasat} constructed a dataset comprised of 600,000 paired observations of water quality and landsat reflectance for bodies across US from 1984-2019
-- Chlorophyll is a photosynthetically active pigment contained in all phytoplankton
-
-- \cite{lary2010artificial} Neural Networks and Support Vector Machines are popular choices for machine learning applications in remote sesnsing and geoscience
-
-
-- \cite{kaufman1992atmospherically} Developed the Atmospherically Resistant Vegetation Index (AVRI) for use in vegetation studies which takes advantage of blue band. It is reported to be 4-times less sensative to atmospheric effects than NDVI
-
-- \cite{chi2016big} NASA's Earth Science Data and Information System (ESDIS) holds 7.5 PB of data with ~7000 unique data sets.
-
-- Google Earth Engine's public data archive contains over 80 petabytes of data 
-
-- \cite{garcia2013comparison} used a multi-band imager equipped UAV to identify citrus greening diseas (Huanglongbing) in Florida citrus trees.
-- Spatial resolution is easily controlled by adjusting the UAV flying altitude.
-
-- \cite{rostom2017evaluation} Modeled water quality in an Egyptian lake using reflectance data to predict concentrations of a variety of parameters and even some metals.
-
-- \cite{adao2017hyperspectral} \textit{The hyperspectral sensors’ ability for measuring hundreds of bands raises complexity when considering the sheer quantity of acquired data, whose usefulness depends on both calibration and corrective tasks occurring in pre- and post-flight stages.}
-
-- \cite{adao2017hyperspectral, padua2017uas} applications of UAV remote sensing data include: biomass estimation, disease monitoring, wildfire detection, forest preservation
-
-- \cite{adao2017hyperspectral} many applications require higher spectral fidelity of multispectral and hyperspectral imagers
-
-- \cite{adao2017hyperspectral} remote sensing spectrometry has involved applications like mineral exploration, landmine detection, agroforestry, 
-
-- \cite{adao2017hyperspectral} spatial resolution of many remote sensing satellites is too coarse for some applications. Sentinel 2 provides up to 10 m resolution.
-
-- \cite{adao2017hyperspectral} no need for atmospheric corrections as in traditional remote sensing platforms. 
-
-
-- \cite{arroyo2019implementation} UAV hyperspectral imaging system using a hexacopter equiped with a HSI with 288 sepctral bands with IMU-GNSS recorder.
-
-- \cite{koparan2018situ} used a hexacopter equiped with floatation equipment and in-situ sensors for Temperature, Conductivity, Dissolved Oxygen, and pH to autonomously collect data in water at many different locations.
-
-
-- \cite{gursoy2019investigating} perform water quality classification for a river using CHRIS/PROBA compact high resolution imaging spectrometer data
-
-- \cite{brezonik2005landsat} Uses multi-spectral satellite bands from Landsat to model water quality parameters Chlorophyll A and CDOM (Humic matter)
-
-
-- \cite{sagan2020monitoring} Successfully modelled conductivity, total dissolved solids, transparency, turbidity, depth, suspended particulate matter, and chlorophyll-a for a lake using high-spatial resolution remotely sensed multi-spectral imagery
-
-
-- \cite{ehmann2019monitoring} used two small UAVs with multispectral imagers to collect imagery for a river in Syracuse, NY across a variety of environmental conditions. They also collected in-situ turbidity measurements after each flight. They found red bands were strong predictors of turbidity
-
-- \cite{schiller1999neural} Used neural networks to approximate radiative transfer codes to predict concentrations of CDOM, phytoplankton pigment, and suspended matter using simulated bands of Medium Resolution Imaging Spectrometer.
-
-- \cite{brown2008neural} Use neural networks to calibrate NDVI from AVHRR (Advanced Very High Resolution Radiometer) to those from MODIS, i.e. sensor fusion.
-
-- \cite{paavel2011optical} found that CDOM was the main factor influencing light attenuation in coastal Baltic Waters. They analyzed in-situ data together with remote sensing data from MODIS and could predict CDOM but not Chlorphyll or suspended matter.
-
-- \cite{hruska2012radiometric} demonstrate the use of Resonon PIKA II hyperpsectral imager on a UAV (fixed wing) platform
-
-- \cite{belgiu2016random} random forests handle data dimensionality and multicolinearity for remote sensing domains and is fast \textit{and} insensitive to overfitting. Feature importance ranking is useful for dimensionality reduction, data selection, etc... 
-
-
-- \cite{aurin2018remote}  presented Global Ocean Carbon Algorithm Database (GOCAD) developed from 500 oceanographic field campaigns over 30 years with in-situ reflectances \textit{and} coincident satellite imagery, CDOM absorption coefficients, spectral slopes, and other parameters.
-
-- \cite{topp2020research} "For low biomass, oligotrophic to mesotrophic waterbodies, the chl-a spectrum is characterized by a sun-induced fluorescence peak around 680 nm"
-
-- \cite{topp2020research} "Sources of CDOM can be either autochthonous (i.e., phytoplankton) or allochthonous (i.e., terrestrial carbon)."
-
-- \cite{topp2020research} "Similar to TSS, the reflectance spectra of waterbodies with varying concentrations of CDOM are highly dependent on the composition of other optically active constituents, and in certain areas can be complicated by the presence of colloidal iron, which shares similar optical properties [128]."
-
-
-- \cite{lu2021retrieval} utilized a hyperspectral imager to predict in situe measurements of Chlorophyll-a in a Chinese lake. Found that CatBoost was the best model.
-
-
-- \cite{austin1976index} The index of refraction of water is wavelength, temperature, pressure, and salinity dependent.
-
-
--\cite{banerjee2020uav} "Near-earth spectroscopy from UAV-hyperspectral systems addresses the limitations of resolution, signal-to-noise ratio, and cloud cover from traditional satellite or airborne platforms."
-
--\cite{kurihara2020unmanned} Another HSI equipped drone platform for precision agriculture
-
--\cite{feng2015urban} ML using random forests to classify flooding from UAV imagery. Used feature importance rankings as well...
-
--\cite{bonansea2019using} mapped secchi disk transparency using Landsat 8 and Sentinel-2A
-
--\cite{laonamsai2023utilizing} Used hyperspectral indices to estimate erosion/deposition in Thailand river
-
+% Overview and Remote Sensing 
+
+% Water Quality
+
+% UAVs 
+
+% Machine Learning 
+
+% Our Approach
+- Most remote sensing data products are from multi-spectral imagers, i.e. LANDSAT, MODIS, ETC... 
+    - multispectral imagers have limited spectral resolution 
+    - Much progress has been made in the development of spectral indices
+    - It can be challenging to directly associate these to desired measurements, rather we typically just track the index (without use of in-situ data), or generate classifications that can be challenging to interpret (i.e. good vs acceptable vs poor air/water quality)
+- Existing hyperspectral imagers do not have global coverage, but many are on the way EnMAP
+    - AVRIS was used in a plane 
+    - Regardless, the increased data volume due to improved spectral resolution has an impact on the rate at which data are registered, processed, and transferred
+- In situ measurements are expensive and challenging to collect
+    - Existing in-situ data often require collection in the field and analysis back in the lab
+    - In-situ measurements tend to have poor spatial resolution and volume (~10-100 of measurements per site)
+    - Collection and analysis is slow. At best, we can have fixed location sensors which stream their data
+- Retrieval of water quality parameters from remote sensing data requires the existence of co-aligned imagery
+    - This could never be "real time" due to satellite revisit times (usual 1/day) 
+    - remote sensing imagery are easily occluded by clouds and are impacted by atmospheric effects due to aerosols (dust) and gasses (ozone, water vapor, etc). 
+- UAVs provided an excellent solution allowing for improved spatial resolution easily controlled by flight altitude
+    - Much less expensive
+    - Can rapidly survey wide areas that are hard to reach with conventional reference instruments
+    - Can be equipped with many instruments including hyperspectral imagers
+    - Can enable rapid development of relevant spectral indices by \textit{brining the spectrometer to the problem}
+- UAVs alone are not a complete solution as we still suffer from an insufficient sampling density of in-situ reference data
+    - The ideal solution is to use a team of autonomous sensing sentinels including a UAV to provide the hyperspectral imagery complemented by additional sentinels for collecting in-situ reference data
+    - In this team, an uncrewed survey vehicle (USV), i.e. a boat is equipped with a suite of reference instruments. 
+    - These instruments provide the ground truth data used to map reflectance measurements made by the UAV directly to the water quality parameters we actually care about.
+- In our previous work, we devised and implemented such a team \cite{robotTeam1}. 
+    - Prevously we showcased how the team can work for a single collection in the field 
+    - In this work, we demonstrate how combining data from multiple collections allows the ML models to learn the representation of a wider range of target concentrations under a variety of lighting conditions. 
+        - This is clearly beneficial when single-day collections are uni-modal. That is, for targets that show little variation within a single collection, there is a significant benefit to combining multiple days of observations 
+        - This is successful even for collections with complicated distributions.
+    - For use in near-real time safety assessments it's important that the proposed architecture be both fast and accurate
+        - We describe the implementation of a rapid georectification procedure that can run \textit{on the UAV}
+        - The selected ML models achieve a balance of both training time \textit{and} inference time allowing us to rapidly deploy the models
+        - We additionally include a characterization of ML model uncertainty (which is typically lacking) using Conformal Prediction
+        - Key reflectance features that impact model performance can be quickly identifed using permutation importance
+            - This is less biased than typical tree-based impurity methods 
+            - This is also model agnostic (can be applied to any black-box model) 
+            - This is easily interpretable: we measure the impact on model performance ($R^2$ value) when a feature is randomly permuted and all others remain the same. The change in $R^2$ value tells us how sensivie the final model is to each feature 
+            - This can aid the generation of new spectral indices as well as allow for reduced model size while maximizing performance, i.e. an Occam's razor approach. 
+    - we showcase maps generated using the trained ML models
+    
+    
+    
+
+
+
+% The shrinking size of multispectral and hyperspectral imagers has enabled their inclusion as the payload of multi-rotor Unmanned Aerial Vehicles (quadcopters, hexacopters, etc.). These platforms are able to address the shortcoming of remote sensing imagery, namely poor spatial resolution and atmospheric interference effects due to aerosols, dust, water vapor, etc by flying close to the ground. Further, UAVs can be taken \textit{to the reference sensors} to better facilitate collocation with reference data. However, 
+
+% In-situ measurements are expensive to collect and suffer from poor spatial coverage. Remote sensing data cover much wider areas but do not directly provide parameters needed for environmental assessments. Additionally, remote sensing data, particularly satellite based imagers, also suffer from long orbit-dependent site revisit times and can be easily occluded by the presence of clouds. This makes it incredibly challenging to collocate sufficient quantities of in-situ measurements with overlapping remote sensing imagery to enable their calibration. \textcolor{red}{(add reference to David's CDOM paper here...)}. To address this gap, we have developed an autonomous team of sensing sentinels combining a mobile uncrewed surface vessel (USV) with a unmanned aerial vehicle (UAV) which together rapidly collect hyperspectral imgaery \textit{and} comprehensive in-situ measurements to enable the estimation of key environmental parameters including concentrations of key constituents like CDOM, Crude Oils, Ions,as well as physical parameters like temperature, salinity, and dissolved oxygen. In our previous work we established a methodology for calibrating the hyperspectral imagery against reference measurements during a collection window \cite{robotTeam1}. In his study, we demonstrate that such models can be reliably trained using data collected from multiple observations....  
 
 %The introduction should briefly place the study in a broad context and highlight why it is important. It should define the purpose of the work and its significance. The current state of the research field should be reviewed carefully and key publications cited. Please highlight controversial and diverging hypotheses when necessary. Finally, briefly mention the main aim of the work and highlight the principal conclusions. As far as possible, please keep the introduction comprehensible to scientists outside your particular field of research. Citing a journal paper \cite{ref-journal}. Now citing a book reference \cite{ref-book1,ref-book2} or other reference types \cite{ref-unpublish,ref-communication,ref-proceeding}. Please use the command \citep{ref-thesis,ref-url} for the following MDPI journals, which use author--date citation: Administrative Sciences, Arts, Econometrics, Economies, Genealogy, Humanities, IJFS, Journal of Intelligence, Journalism and Media, JRFM, Languages, Laws, Religions, Risks, Social Sciences, Literature.
 
@@ -335,7 +251,7 @@ The USV employed in the robot team is a Maritime Robotics Otter which features a
 \midrule
 Temperature		                    & $^{\circ}$C       & Thermistor  & Physical \\
 Conductivity                        & $\mu$S/cm         & Four-Electrode Graphite Sensor & Physical  \\
-Dissolved Oxygen                    & mg/l              & Optical Sensor & Physical \\
+%Dissolved Oxygen                    & mg/l              & Optical Sensor & Physical \\
 pH                                  & logarithmic (0-14)& Flowing-junction Reference Electrode & Physical \\
 Turbidity                           & FNU               & Ion-Selective Electrode  & Physical \\
 $\mathrm{Ca^{2+}}$                  & mg/l              & Ion-Selective Electrode  & Ions \\
@@ -431,27 +347,33 @@ The results of the model training procedure are outlined in Table~\ref{tab:fit-r
   \newcolumntype{C}{>{\centering\arraybackslash}X}
   \begin{tabularx}{\fulllength}{CCCCCCC}
     \toprule
-    \textbf{Target} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} & \textbf{Model*}\\
+    \textbf{Target} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} & \textbf{Best Model} \\
     \midrule
-    Temperature & 1.0 ± 1.98e-5 & 0.0398 ± 0.00096 & 0.0267 ± 0.00055 &  ± 0.061 & 89.8 & ETR \\
-    Conductivity & 0.999 ± 2.17e-5 & 0.853 ± 0.0114 & 0.55 ± 0.00564 &  ± 1.3 & 89.8 & ETR \\
-    $\mathrm{Ca}^{2+}$ & 0.999 ± 3.53e-5 & 0.423 ± 0.0101 & 0.243 ± 0.00552 &  ± 0.59 & 89.7 & ETR \\
-    Dissolved Oxygen & 0.999 ± 3.17e-5 & 0.0705 ± 0.000984 & 0.0467 ± 0.000418 &  ± 0.11 & 89.8 & ETR \\
-    $\mathrm{Cl^-}$ & 0.994 ± 0.000441 & 1.15 ± 0.0418 & 0.578 ± 0.00534 &  ± 1.4 & 90.3 & RFR \\
-    $\mathrm{Na^+}$ & 0.992 ± 0.000309 & 6.17 ± 0.134 & 2.85 ± 0.0536 &  ± 7.2 & 89.9 & RFR \\
-    pH & 0.991 ± 0.000327 & 0.0177 ± 0.000295 & 0.0109 ± 6.56e-5 &  ± 0.024 & 89.9 & ETR \\
-    Blue-Green Algae & 0.981 ± 0.00186 & 1.72 ± 0.0947 & 0.608 ± 0.0218 &  ± 1.4 & 90.2 & ETR \\
-    CDOM & 0.966 ± 0.00228 & 0.464 ± 0.0195 & 0.144 ± 0.00449 &  ± 0.22 & 89.3 & RFR \\
-    Chlorophyll A & 0.924 ± 0.00645 & 1.29 ± 0.0667 & 0.359 ± 0.0079 &  ± 0.73 & 90.2 & ETR\\
-    Optical Brighteners & 0.915 ± 0.00406 & 0.118 ± 0.00169 & 0.0568 ± 0.000218 &  ± 0.1 & 89.8 & RFR \\
-    Chlorophyll A with Red Excitation & 0.909 ± 0.00794 & 77.6 ± 3.91 & 15.6 ± 0.418 &  ± 25.0 & 90.5 & ETR \\
-    Crude Oil & 0.906 ± 0.00606 & 0.588 ± 0.019 & 0.162 ± 0.00234 &  ± 0.23 & 89.7 & RFR \\
-    Turbidity & 0.812 ± 0.0158 & 60.2 ± 2.61 & 6.98 ± 0.431 &  ± 3.4 & 89.5 & RFR\\
+    Temperature & 1.0 ± 6.04e-6 & 0.0289 ± 0.000466 & 0.0162 ± 0.00016 &  ± 0.039 & 90.3 & RFR\\
+    $Conductivity$ & 1.0 ± 1.54e-5 & 0.574 ± 0.0128 & 0.322 ± 0.00579 &  ± 0.76 & 90.6 & RFR\\
+    $\mathrm{Ca}^{2+}$ & 1.0 ± 1.06e-5 & 0.285 ± 0.00357 & 0.137 ± 0.00224 &  ± 0.33 & 89.8 & RFR\\
+    %Dissolved Oxygen & 0.999 ± 2.63e-5 & 0.054 ± 0.00114 & 0.0303 ± 0.000534 &  ± 0.08 & 89.9 & RFR\\
+    $\mathrm{Cl^-}$ & 0.995 ± 0.000196 & 0.895 ± 0.0202 & 0.516 ± 0.00759 &  ± 1.2 & 90.1 & RFR\\
+    Blue-Green Algae (Phycoerythrin) & 0.995 ± 0.000601 & 0.783 ± 0.0489 & 0.287 ± 0.00959 &  ± 0.73 & 89.3 & RFR\\
+    pH & 0.994 ± 0.000288 & 0.0145 ± 0.000304 & 0.00739 ± 9.49e-5 &  ± 0.017 & 89.5 & RFR\\
+    $\mathrm{Na^+}$ & 0.993 ± 0.000229 & 6.16 ± 0.102 & 2.83 ± 0.0303 &  ± 7.3 & 90.0 & RFR\\
+    CDOM & 0.965 ± 0.00352 & 0.248 ± 0.0142 & 0.0921 ± 0.0024 &  ± 0.15 & 89.9 & RFR\\
+    Crude Oil & 0.949 ± 0.00267 & 0.247 ± 0.00597 & 0.0935 ± 0.00114 &  ± 0.17 & 89.8 & RFR\\
+    Optical Brighteners & 0.943 ± 0.00122 & 0.0806 ± 0.0014 & 0.0481 ± 0.000416 &  ± 0.095 & 89.8 & RFR\\
+    $Chlorophyll A$ & 0.908 ± 0.00664 & 0.37 ± 0.00934 & 0.131 ± 0.00228 &  ± 0.27 & 89.2 & RFR\\
+    Turbidity & 0.897 ± 0.00611 & 3.13 ± 0.084 & 0.736 ± 0.0156 &  ± 1.1 & 89.8 & RFR \\
+    Blue-Green Algae (Phycocyanin) & 0.708 ± 0.00689 & 0.749 ± 0.0129 & 0.446 ± 0.00405 &  ± 0.93 & 89.8 & RFR\\
     \bottomrule
   \end{tabularx}
   \end{adjustwidth}
   \noindent{\footnotesize{* RFR = Random Forest Regressor, ETR = EvoTree Regressor}}
 \end{table}
+
+
+
+
+
+
 
 From Table~\ref{tab:fit-results}, it is clear that neither the random forest model nor the gradient boosted tree model is superior for all targets. We see that the empirical coverage achieved by the inferred confidence interval is within 1\% of our desired coverage for each target modelled. This indicates that the uncertainties obtained by the conformal prediction procedure are reliable, at least within the extremes of the collected dataset. 
 
