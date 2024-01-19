@@ -156,6 +156,9 @@ targets_to_map = [
 # targets_to_map = [:CDOM]
 
 
+targets_to_map = [:pH]
+
+
 # set up relevant paths
 hsi_paths = joinpath(hsipath, day)
 
@@ -217,7 +220,8 @@ color_clims= Dict(
         # "12-09" => (210, 350),
     ),
     "pH" => Dict(
-        "11-23" => (8.0, 8.25),
+        "11-23" => (7.95, 8.5),
+        #"11-23" => (7.95, 8.65),
         "12-09" => (8.2, 8.6),
     ),
     "bg" => Dict(
@@ -259,7 +263,7 @@ color_clims= Dict(
         # "12-09" => (23.0, 25.0),
     ),
     "Turb3489" => Dict(
-        "11-23" => (1,3),
+        "11-23" => (1,25),
         "12-09" => (1,3),
     ),
     "RefFuel" => Dict(
@@ -350,7 +354,7 @@ for target ∈ targets_to_map
 
 
         fig_tot = cmk.Figure(px_per_unit=5);
-        ax_tot = cmk.Axis(fig_tot[1,1], xlabel="longitude", ylabel="latitude", title="Collection Date: $(h5_date)");
+        ax_tot = cmk.Axis(fig_tot[1,1], xlabel="Longitude", ylabel="Latitude", title="Collection Date: $(h5_date)");
         bg_tot = cmk.heatmap!(ax_tot, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
         q_01 = quantile(y, 0.01)
@@ -383,7 +387,7 @@ for target ∈ targets_to_map
             map_name = split(split(h5path, "/")[end], ".")[1]
 
             fig = cmk.Figure();
-            ax = cmk.Axis(fig[1,1], xlabel="longitude", ylabel="latitude");
+            ax = cmk.Axis(fig[1,1], xlabel="Longitude", ylabel="Latitude");
             bg = cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
             X_hsi, Y, ij_water, Latitudes, Longitudes = get_data_for_pred(h5path, names(X))
