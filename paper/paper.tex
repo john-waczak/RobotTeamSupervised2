@@ -71,7 +71,7 @@
 
 %=================================================================
 % Full title of the paper (Capitalized)
-\Title{\textcolor{red}{Leveraging Machine Learning to Characterize Water Quality with an Autonomous Team of Sensing Sentinels }}
+\Title{\textcolor{red}{Leveraging Machine Learning to Characterize Water Quality with an Autonomous Team of Sensing Sentinels}}
 
 % MDPI internal command: Title for citation in the left column
 \TitleCitation{Robot Team II: Electric Boogaloo}
@@ -347,12 +347,12 @@ Having identified the model with the best out-of-fold performance, we proceed to
 The final dataset combining observations from each of the three separate collections contains more than 120,000 individual records. 
 
 \begin{figure}[H]
-\includegraphics[width=10.5 cm]{paper/figures/results/target_correlations.pdf}
+\includegraphics[width=0.75\columnwidth]{paper/figures/results/target_correlations.pdf}
 \caption{\label{fig:target-correlations}}
 \end{figure}   
 
 \begin{figure}[H]
-\includegraphics[width=10.5 cm]{paper/figures/results/downwelling-hist.pdf}
+\includegraphics[width=0.75\columnwidth]{paper/figures/results/downwelling-hist.pdf}
 \caption{Distribution of total downwelling intensity during each of the three HSI collection flights. The multi-modal nature of these distributions reflects the impact of the relative orientation of the drone to the sun as well as potential occlusion due to the presence of clouds.\label{fig:downwelling-hist}}
 \end{figure}   
 
@@ -368,7 +368,7 @@ The results of the model training procedure are presented in Table~\ref{tab:fit-
     \textbf{Target} & \textbf{$\text{R}^2$} & \textbf{RMSE} & \textbf{MAE} & \textbf{Estimated Uncertainty} & \textbf{Empirical Coverage (\%)} \\
     \midrule
     Temperature & 1.0 ± 6.04e-6 & 0.0289 ± 0.000466 & 0.0162 ± 0.00016 &  ± 0.039 & 90.3 \\
-    $Conductivity$ & 1.0 ± 1.54e-5 & 0.574 ± 0.0128 & 0.322 ± 0.00579 &  ± 0.76 & 90.6 \\
+    Conductivity & 1.0 ± 1.54e-5 & 0.574 ± 0.0128 & 0.322 ± 0.00579 &  ± 0.76 & 90.6 \\
     $\mathrm{Ca}^{2+}$ & 1.0 ± 1.06e-5 & 0.285 ± 0.00357 & 0.137 ± 0.00224 &  ± 0.33 & 89.8 \\
     $\mathrm{Cl^-}$ & 0.995 ± 0.000196 & 0.895 ± 0.0202 & 0.516 ± 0.00759 &  ± 1.2 & 90.1 \\
     Blue-Green Algae (Phycoerythrin) & 0.995 ± 0.000601 & 0.783 ± 0.0489 & 0.287 ± 0.00959 &  ± 0.73 & 89.3 \\
@@ -387,80 +387,33 @@ The results of the model training procedure are presented in Table~\ref{tab:fit-
 
 From Table~\ref{tab:fit-results},  we see that the empirical coverage achieved by the inferred confidence interval evaluated on the independent test set is within 1\% of our desired coverage for each target modelled. This indicates that the uncertainties obtained by the conformal prediction procedure are reliable, at least within the extremes of the collected dataset. 
 
-
 To further understand the differences in model performance between the target variables, we can consider the difference between the RMSE and MAE scores. Because the MAE is less sensitive to impacts from outliers than the RMSE, any large difference between the two is a good indication that model performance has been degraded by outliers. Indeed for turbidity, the worst performing model in the collection, there is an order of magnitude difference between the two. This is easily explained upon confirmation that ~3\% of data points had values greater than 100 FNU despite a median value of 1.34 FNU.
 
-The advantage of combining multiple datsets is clear, particularly for target variables like Chlorophyll which show unimodal distributions within each collection period. As there is only slight variation within a single collection, combining multiple collections with different mean values dramatically improves the capability of a model to identify variations... yada yada yada
 
-
-discuss distribution of values each day and identify variables which had mostly constant values between all three days (and so were highly impaced by the presece of outliers)...
-
-
-\subsection{Physical Parameters}
-
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=16.0cm]{paper/figures/results/fits/physical-fitres.png}
-\end{adjustwidth}
-\caption{A visualization of the fitresults for three of the physical parameters we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:physical-fit}}
-\end{figure}  
-
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=18.0cm]{paper/figures/results/fits/physical-ranking.pdf}
-\end{adjustwidth}
-\caption{Ranked feature importances for the same three physical parameter models.\label{fig:physical-fit}}
-\end{figure}  
-
-
-\subsection{Ions}
-
-Explanation for goodness of fit: index of refraction is temperature and salinity dependent
-
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=16.0cm]{paper/figures/results/fits/ions-fitres.png}
-\end{adjustwidth}
-\caption{A visualization of the fitresults for three of the ion concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:ions-fit}}
-\end{figure}  
-
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=18.0cm]{paper/figures/results/fits/ions-ranking.pdf}
-\end{adjustwidth}
-\caption{Ranked feature importances for the same three ion concentration models.\label{fig:ions-fit}}
-\end{figure}  
-
-\begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
-\centering
-\includegraphics[width=18.0cm]{paper/figures/results/maps/ions.pdf}
-\end{adjustwidth}
-\caption{ \label{fig:map-phys-chem}}
-\end{figure}  
-
-
+For each type, discuss:
+- Data Distribution (unimodal, multimodal, spatial variability within each day)
+- Fit results (parameter regions where performance is poor)
+- Feature importance rankings 
+- Maps
+- Can we explain the quality of fit? e.g. target is optically active, correlates with an optically active substance, or has some other physical explanation
 
 \subsection{Biochemical Parameters}
 
 \begin{figure}[H]
-\begin{adjustwidth}{-\extralength}{0cm}
+%\begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\includegraphics[width=16.0cm]{paper/figures/results/fits/chemical-fitres.png}
-\end{adjustwidth}
-\caption{A visualization of the fitresults for three of the chemical concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:chemicals-fit}}
+%\includegraphics[width=16.0cm]{paper/figures/results/fits/biochemical-fitres.png}
+\includegraphics[width=\columnwidth]{paper/figures/results/fits/biochemical-fitres.pdf}
+%\end{adjustwidth}
+\caption{Scatter plots (left) and quantile-quantile plots (right) for the final hyperparameter optimized models for the biochemical targets Blue-green algae (phycoerythrin), CDOM, Chlorophyll-A, and Blue-green algae (phycocyanin). \label{fig:biochem-fit}}
 \end{figure}  
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\includegraphics[width=18.0cm]{paper/figures/results/fits/chemical-ranking.pdf}
+\includegraphics[width=18.0cm]{paper/figures/results/fits/biochemical-ranking.pdf}
 \end{adjustwidth}
-\caption{Ranked feature importances for the same three chemical concentration models.\label{fig:chemicals-fit}}
+\caption{Ranked feature importances for the same three chemical concentration models.\label{fig:biochem-fi}}
 \end{figure}  
 
 
@@ -478,7 +431,7 @@ Explanation for goodness of fit: index of refraction is temperature and salinity
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\includegraphics[width=16.0cm]{paper/figures/results/fits/chemical-fitres.png}
+\includegraphics[width=16.0cm]{paper/figures/results/fits/chemical-fitres.pdf}
 \end{adjustwidth}
 \caption{A visualization of the fitresults for three of the chemical concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:chemicals-fit}}
 \end{figure}  
@@ -488,13 +441,62 @@ Explanation for goodness of fit: index of refraction is temperature and salinity
 \centering
 \includegraphics[width=18.0cm]{paper/figures/results/fits/chemical-ranking.pdf}
 \end{adjustwidth}
-\caption{Ranked feature importances for the same three chemical concentration models.\label{fig:chemicals-fit}}
+\caption{Ranked feature importances for the same three chemical concentration models.\label{fig:chemicals-fi}}
 \end{figure}  
 
 \begin{figure}[H]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
 \includegraphics[width=18.0cm]{paper/figures/results/maps/physical-chemical.pdf}
+\end{adjustwidth}
+\caption{ \label{fig:map-phys-chem}}
+\end{figure}  
+
+
+
+\subsection{Physical Parameters}
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=16.0cm]{paper/figures/results/fits/physical-fitres.pdf}
+\end{adjustwidth}
+\caption{A visualization of the fitresults for three of the physical parameters we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:physical-fit}}
+\end{figure}  
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/fits/physical-ranking.pdf}
+\end{adjustwidth}
+\caption{Ranked feature importances for the same three physical parameter models.\label{fig:physical-fi}}
+\end{figure}  
+
+
+\subsection{Ions}
+
+Explanation for goodness of fit: index of refraction is temperature and salinity dependent
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=16.0cm]{paper/figures/results/fits/ions-fitres.pdf}
+\end{adjustwidth}
+\caption{A visualization of the fitresults for three of the ion concentrations we modeled. On the left is a scatterplot and on the right is plot of the associated quantiles.\label{fig:ions-fit}}
+\end{figure}  
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/fits/ions-ranking.pdf}
+\end{adjustwidth}
+\caption{Ranked feature importances for the same three ion concentration models.\label{fig:ions-fi}}
+\end{figure}  
+
+\begin{figure}[H]
+\begin{adjustwidth}{-\extralength}{0cm}
+\centering
+\includegraphics[width=18.0cm]{paper/figures/results/maps/ions.pdf}
 \end{adjustwidth}
 \caption{ \label{fig:map-phys-chem}}
 \end{figure}  
@@ -513,8 +515,7 @@ Explanation for goodness of fit: index of refraction is temperature and salinity
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Discussion} \label{sec:discussion}
 
-
-We can probably explain the inference of salinity, ion concentrations, etc as being directly related to the observed concentrations of chlorophyll, cdom, co, bgm, etc... which are all optically active (i.e. have absorption features spectral region of our hyperspectral imager).
+The advantage of combining multiple datsets is clear, particularly for target variables like Chlorophyll which show unimodal distributions within each collection period. As there is only slight variation within a single collection, combining multiple collections with different mean values dramatically improves the capability of a model to identify variations... yada yada yada
 
 
 \subsection{Data Product Streaming}
