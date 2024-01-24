@@ -161,7 +161,7 @@
 
 \begin{document}
 \maketitle
-\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[breakable, enhanced, borderline west={3pt}{0pt}{shadecolor}, boxrule=0pt, interior hidden, sharp corners, frame hidden]}{\end{tcolorbox}}\fi
+\ifdefined\Shaded\renewenvironment{Shaded}{\begin{tcolorbox}[boxrule=0pt, sharp corners, breakable, interior hidden, borderline west={3pt}{0pt}{shadecolor}, enhanced, frame hidden]}{\end{tcolorbox}}\fi
 
 For the following hyperspectral reflectance indices, we have made the
 following identifications:
@@ -173,9 +173,9 @@ following identifications:
     R_b &= R(650 \text{ nm}) \\
     R_{nir} &= R(860 \text{ nm}).
 \end{split}
-\end{align} We also define \(R_{swir} = R(1009 \text{ nm})\) as the
-\emph{almost}-SWIR band representing the infrared edge of the
-hyperspectral imager.
+\end{align} We also define \(R_{far} = R(1009 \text{ nm})\) as the band
+representing the farthest infrared bin for our hyperspectral imager
+which we use instead of the usual SWIR band.
 
 \begin{longtable}[]{@{}
   >{\raggedright\arraybackslash}p{(\columnwidth - 4\tabcolsep) * \real{0.3913}}
@@ -296,19 +296,19 @@ Carotenoid Reflectance Index 2 & CRI2 &
 Normalized Difference Water Index 1 & NDWI1 &
 \(\dfrac{R_g - R_{nir}}{R_g + R_{nir}}\) \\
 Normalized Difference Water Index 2 & NDWI2 &
-\(\dfrac{R_{nir} - R_{swir}}{R_{nir} + R_{swir}}\) \\
+\(\dfrac{R_{nir} - R_{far}}{R_{nir} + R_{far}}\) \\
 Modified Normalized Difference Water Index & MNDWI &
-\(\dfrac{R_g - R_{swir}}{R_g + R_{swir}}\) \\
+\(\dfrac{R_g - R_{far}}{R_g + R_{far}}\) \\
 Water Band Index & WBI & \(\dfrac{970}{900}\) \\
 Anthocyanin Content Index & ACI & \(\dfrac{R_g}{R_{nir}}\) \\
 Chlorophyll Index Red Edge & CIre & \(\dfrac{R_{nir}}{R_{705}} - 1\) \\
 Modified Anthocyanin Reflectance Index & MARI &
 \(\left(\dfrac{1}{R_{550}} - \dfrac{1}{R_{700}} \right)R_{nir}\) \\
-Moisture Stress Index & MSI & \(\dfrac{R_{swir}}{R_{nir}}\) \\
+Moisture Stress Index & MSI & \(\dfrac{R_{far}}{R_{nir}}\) \\
 MERIS Terrestrial Chlorophyll Index & MTCI &
 \(\dfrac{R_{753.75} - R_{708.75}}{R_{708.75} - R_{681.25}}\) \\
 Normalzied Difference Infrared Index & NDII &
-\(\dfrac{R_{nir} - R_{swir}}{R_{nir} + R_{swir}}\) \\
+\(\dfrac{R_{nir} - R_{far}}{R_{nir} + R_{far}}\) \\
 Normalized Difference Red Edge & NDRE &
 \(\dfrac{R_{790} - R_{720}}{R_{790} + R_{720}}\) \\
 Red Green Ratio Index & RGRI & \(\dfrac{R_r}{R_g}\) \\
