@@ -30,8 +30,6 @@ function make_slurm_jobs(;script_to_run="5a__hpo_DecisionTreeRegressor.jl", base
         open(basename*String(target)*".slurm", "w") do f
             println(f, file_text)
         end
-
-
     end
 end
 
