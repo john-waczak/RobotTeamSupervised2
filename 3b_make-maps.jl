@@ -39,6 +39,14 @@ if !ispath(mapspath)
 end
 
 
+# see https://en.wikipedia.org/wiki/Geographic_coordinate_system#Latitude_and_longitude
+# for detail
+ϕ_scale = 33.70093
+m_per_deg = 111412.84*cosd(ϕ_scale) - 93.5*cosd(3*ϕ_scale) + 0.118 * cosd(5*ϕ_scale)
+λ_scale_l = -97.7166
+λ_scale_r = λ_scale_l + 30/m_per_deg
+
+
 
 w= -97.717472
 n= 33.703572
@@ -47,6 +55,15 @@ e= -97.712413
 
 
 satmap = get_background_satmap(w,e,s,n)
+
+# fig = cmk.Figure();
+# ax = cmk.Axis(fig[1,1])
+# cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
+# cmk.xlims!(ax, -97.7168, -97.7125)
+# cmk.ylims!(ax, 33.70075, 33.7035)
+
+# fig
+
 
 
 # let's add a function to sort them into numerical order
@@ -151,12 +168,12 @@ targets_to_map = [
 #    :RefFuel,
 ]
 
-#targets_to_map = [:HDO, :pH]
+# targets_to_map = [:HDO, :pH]
 
 # targets_to_map = [:CDOM]
 
 
-targets_to_map = [:pH]
+# targets_to_map = [:pH]
 
 
 # set up relevant paths
@@ -425,6 +442,10 @@ for target ∈ targets_to_map
             cmk.xlims!(ax, -97.7168, -97.7125)
             cmk.ylims!(ax, 33.70075, 33.7035)
 
+            # add 30 meter scale bar
+            cmk.lines!(ax, [λ_scale_l, λ_scale_r], [ϕ_scale, ϕ_scale], color=:white, linewidth=5)
+            cmk.text!(ax, λ_scale_l, ϕ_scale - 0.0001, text = "30 m", color=:white, fontsize=12, font=:bold)
+
             cb = cmk.Colorbar(fig[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm, lowclip = cm[1], highclip = cm[end])
 
             fig
@@ -435,6 +456,11 @@ for target ∈ targets_to_map
 
         cmk.xlims!(ax_tot, -97.7168, -97.7125)
         cmk.ylims!(ax_tot, 33.70075, 33.7035)
+
+        # add 30 meter scale bar
+        cmk.lines!(ax_tot, [λ_scale_l, λ_scale_r], [ϕ_scale, ϕ_scale], color=:white, linewidth=5)
+        cmk.text!(ax_tot, λ_scale_l, ϕ_scale - 0.0001, text = "30 m", color=:white, fontsize=12, font=:bold)
+
         cb = cmk.Colorbar(fig_tot[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm, lowclip = cm[1], highclip = cm[end])
 
         save(joinpath(outpath, ml_model * "__" * suffix * ".png"), fig_tot)
