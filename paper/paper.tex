@@ -173,15 +173,29 @@ Inland waters pose a unique challenge for water quality monitoring by remote sen
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
- 
+For decades, remote sensing imagery have been used for environmental monitoring with applications ranging from resource mapping, land type classification, and urban growth assessment to wildfire monitoring, natural disaster tracking, and many more \cite{melesse2007remote, joyce2009review}. Among these applications, the retrieval of water quality variables from remote sensing imagery remains challenging due to the difficulty of obtaining in situ reference data coincident with available satellite imagery. Traditional approaches to obtain these data have relied on serendipitous satellite passes over fixed sensing sites or sensor-equipped vessels. As a consequence, curating comprehensive datasets can require decades of observations \cite{aurin2018remote, ross2019aquasat}. This poses a significant challenge for assessing natural and anthropogenic changes to water composition in real time.
 
-For decades, remote sensing imagery has been used for environmental monitoring with applications ranging from resource mapping, land type classification, and urban growth assessment to wildfire tracking, natural disaster tracking, and many more \cite{melesse2007remote, joyce2009review}. Among these applications, the retrieval of water quality variables from remote sensing imagery remains challenging due to the difficulty of obtaining in situ reference data that coincide with available satellite imagery. Many studies have shown success modeling relevant water quality variables such as colored dissolved organic matter (CDOM), cholorophyll-a, and total suspended sediment concentrations by using combinations of spectral bands from terrestrial remote sensing satellites. However, the in situ reference data used in these studies typically require the time-consuming collection of individual samples for lab analysis or continuous monitoring at fixed sites \cite{brezonik2005landsat, paavel2011optical, gursoy2019investigating, bonansea2019using, sagan2020monitoring, remote-sensing-finland}. 
+Where datasets have been compiled, many studies have shown success extracting optically active water quality variables such as colored dissolved organic matter (CDOM), chlorophyll-a, and suspended sediment concentration by using combinations of spectral bands from from remote sensing satellites \cite{remote-sensing-finland,bonansea2015using}. These approaches can be further augmented by machine learning methods which consist of nonlinear and non-parametric models designed to learn representations of functions directly from data \cite{sagan2020monitoring}. For example Petersen et al. utilized a deep neural network to successfully estimate blue-green algae, chlorophyal-a, CDOM, as well as the optically in-active
 
-Much effort has recently been spent on the curation of comprehensive datasets combining water quality records with decades of satellite imagery to enable the development of new methods for monitoring water quality. For example, Aurin et al. curated over 30 years of oceanographic field campaign data with associated coincident satellite imagery \cite{aurin2018remote}. Similarly, Ross et al. have combined more than 600,000 records of dissolved organic carbon, chlorophyll-a and other variables of water quality together with Landsat historical reflectance data for the period 1984--2019 \cite{ross2019aquasat}. With a sufficient quantity of data, machine learning methods can augment traditional approaches using reflectance band ratios to enable estimation of water quality variables and perform water quality classification \cite{schiller1999neural, brown2008neural, lary2010artificial, feng2015urban,belgiu2016random}. However, the low spatial and spectral resolution of available multiband remote sensing satellites makes it difficult to analyze inland waters with small spatial features and complicated spectral signatures. Furthermore, the long return times of these satellites limit their use for real-time monitoring, for example, during oil spills \cite{fingas2017review}.
+which are often related indirectly to optically active variables.
 
-Advances in multispectral and hyperspectral imaging technology have considerably reduced their size, making it possible to incorporate these cameras into the payload of autonomous aerial vehicles (UAVs) such as quadcopters, hexacopters, and other drones \cite{hruska2012radiometric}. By controlling altitude during flight, UAVs can produce imagery with pixels at the centimeter scale and limit the need for complicated atmospheric corrections to account for scattering by atmospheric aerosols and gases \cite{adao2017hyperspectral,banerjee2020uav}. Already, UAVs equipped with multispectral and hyperspectral imagers are being used in a variety of domains to great effect, including biomass estimation, forest management, precision agriculture, and now water quality monitoring \cite{adao2017hyperspectral, padua2017uas,arroyo2019implementation,kurihara2020unmanned,ehmann2019monitoring, lu2021retrieval}.  
+which  \cite{sagan2020monitoring, peterson2020deep}
 
-Despite the increased spectral and spatial resolution afforded by UAV platforms, these improvements alone cannot address the limited spatial resolution of in situ reference data.  To address this gap and enable comprehensive real-time water quality \textcolor{red}{detection}, we have developed a robotic team composed of an autonomous uncrewed surface vessel (USV) equipped with a collection of reference grade instruments together with a UAV carrying a hyperspectral imager \cite{robotTeam1}. By incorporating these reference instruments on a maneuverable USV platform, we are able to rapidly collect large volumes of water quality data for a variety of physical, biochemical, and chemical variables. Critically, the USV enables the collection of reference data with significantly improved spatial resolution compared to other approaches. These in situ measurements then provide the ground-truth data used to train machine learning models which map reflectance spectra captured by the hyperspectral imager to the desired water quality variables.
+can augment traditional approaches using reflectance band ratios to enable estimation of water quality variables and perform water quality classification \cite{schiller1999neural, brown2008neural, lary2010artificial, feng2015urban,belgiu2016random}. 
+
+However, the low spatial and spectral resolution of available multiband remote sensing satellites makes it difficult to analyze inland waters with small spatial features and complicated spectral signatures. Furthermore, the long return times of these satellites limit their use for real-time monitoring, for example, during oil spills \cite{fingas2017review}.
+
+
+
+Advances in multispectral and hyperspectral imaging technology have considerably reduced their size, making it possible to incorporate these cameras into the payload of autonomous aerial vehicles (UAVs) such as quadcopters, hexacopters, and other drones \cite{hruska2012radiometric}.
+
+Bringing the imaging technology closer to the ground enables UAVs to address the spectral, spatial, and temporal shortcomings of remote sensing satellites.
+
+Controlling altitude during flight, UAVs can produce imagery with pixels at the centimeter scale and limit the need for complicated atmospheric corrections to account for scattering by atmospheric aerosols and gases \cite{adao2017hyperspectral,banerjee2020uav}. Already, UAVs equipped with multispectral and hyperspectral imagers are being used in a variety of domains to great effect, including biomass estimation, forest management, precision agriculture, and now water quality monitoring \cite{adao2017hyperspectral, padua2017uas,arroyo2019implementation,kurihara2020unmanned,ehmann2019monitoring, lu2021retrieval}. Despite the increased spectral and spatial resolution afforded by UAV platforms, these improvements alone cannot address the limited spatial resolution of in situ reference data.  
+
+
+
+To address this gap and enable comprehensive real-time water quality \textcolor{red}{detection}, we have developed a robotic team composed of an autonomous uncrewed surface vessel (USV) equipped with a collection of reference grade instruments together with a UAV carrying a hyperspectral imager \cite{robotTeam1}. By incorporating these reference instruments on a maneuverable USV platform, we are able to rapidly collect large volumes of water quality data for a variety of physical, biochemical, and chemical variables. Critically, the USV enables the collection of reference data with significantly improved spatial resolution compared to other approaches. These in situ measurements then provide the ground-truth data used to train machine learning models which map reflectance spectra captured by the hyperspectral imager to the desired water quality variables.
 
 In this study, we expand on our previous work by demonstrating the capabilities of this coordinated robot team using data collected at a pond in North Texas over three separate days in 2020. Specifically, we show the ability to accurately predict physical variables such as temperature, conductivity, pH, and turbidity, as well as biochemical constituents, including blue-green algae pigments, CDOM, and chlorophyll-a, in addition to concentrations of crude oils, optical brighteners, and a variety of ions. In addition, the considerable size of the collected data set allows us to quantify the uncertainty in the resulting machine learning models by using conformal prediction techniques. This methodology addresses the shortcomings of existing approaches by facilitating rapid, real-time data collection coupled with on-board hyperspectral image processing and machine learning model deployment with uncertainty quantification. The resulting models are small enough to be deployed on board the UAV to enable real-time streaming of data products to the ground. This approach drastically reduces the time from data collection to insight.
 
@@ -195,7 +209,7 @@ In this study, we expand on our previous work by demonstrating the capabilities 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
 
- The robotic team employed in this study consists of two key sensing sentinels: An uncrewed surface vessel (USV) used to collect in situ reference measurements, and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using open source QGroundControl software for flight control and mission planning and are equipped with high-accuracy GPS and INS such that all data points collected are uniquely geolocated and time-stamped \cite{qgroundcontrol}. Both the USV and UAV include long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network attached storage providing redundancy.
+ The robotic team presented in this study consists of two key sensing sentinels: An uncrewed surface vessel (USV) used to collect in situ reference measurements, and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using open source QGroundControl software for flight control and mission planning and are equipped with high-accuracy GPS and INS such that all data points collected are uniquely geolocated and time-stamped \cite{qgroundcontrol}. Both the USV and UAV include long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network attached storage providing redundancy.
 
 \subsection{USV: In-situ Measurements}
 
@@ -236,47 +250,49 @@ Crude Oil                           & ppb                & 0.01  & Fluorometer  
 As shown in Table~\ref{tab:sensors}, the physical measurements and ion sensors are largely based on different electrode configurations, while the chemical and biochemical measurements are all optically significant in UV and visible light, enabling their determination by fluorometry \cite{de2007ion,trees2002fluorometric,tillman2017evaluation}. The pigments phycoerythrin and phycocyanin are used to determine the blue-green algae content, which together with chlorophyll-a enable us to assess the distribution of photosynthetic life in the pond \cite{Brient2008APP, boyer2009phytoplankton}. In addition, we also measured the concentration of colored dissolved organic matter (CDOM), which impacts light penetration and serves as a primary source of bioavailable carbon. Crude oil (natural petroleum) and optical brightener concentrations are also measured with fluorometers and are relevant for identifying sources of industrial contamination, natural seepage, and sewage \cite{brown2003review,cao2009evaluation}.
 
 \textcolor{red}{Should we add something here about non-optically active substances?}
+\textcolor{blue}{Good idea if you have something}
 
 \subsection{UAV: Hyperspectral Data Cubes}
 
 A Freefly Alta-X autonomous quadcopter was used as a UAV platform for the robotic team. The Alta-X is specifically designed to carry cameras that have a payload of up to 35 lbs. We have equipped the UAV with a Resonon Pika XC2 Visible+Near-Infrared (VNIR) hyperspectral imager. For each image pixel, this camera samples 462 wavelengths ranging from 391 to 1,011 nm.  Additionally, the UAV includes an upward facing Ocean Optics UV-Vis-NIR spectrometer with a cosine corrector to capture the incident downwelling irradiance spectrum. Data collection by the hyperspectral imager is controlled by an attached Intel NUC small-form factor computer. A second processing NUC is also included for onboard georectification and generation of data products. The collected hyperspectral images (HSIs) are stored locally on a solid state drive which is simultaneously mounted by the processing computer. The configuration of the drone is shown in Figure~\ref{fig:drone-components}.
 
-\begin{figure}[b!]
+\begin{figure}[t!]
+\vspace{-0.3in}
 \includegraphics[width=\columnwidth]{paper/figures/materials-and-methods/annotated-drone.pdf}
-\vspace{-0.2in}
+\vspace{-0.3in}
 \caption{Configuration of the UAV: (\textbf{a}) the hyperspectral imager and acquisition computer. (\textbf{b}) the assembled UAV with secondary processing computer and (upward facing) downwelling irradiance spectrometer. \label{fig:drone-components}}
 \end{figure} 
 
 To effectively utilize the spectra collected by our UAV, we must account for the variability of the incident light that illuminates the water and transform the raw hyperspectral data cubes from their native \textit{imaging reference frame} to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
 
-\begin{figure}[t!]
+\begin{figure}[b!]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\vspace{-0.2in}
+\vspace{-0.4in}
 \includegraphics[width=14cm]{paper/figures/materials-and-methods/pipeline-figure-2.pdf}
 \end{adjustwidth}
-\vspace{-0.2in}
+\vspace{-0.4in}
 \caption{Hyperspectral Image Processing: Hyperspectral data cubes are collected one scan-line at a time (left). By utilizing downwelling irradiance spectra we convert each pixel from spectral radiance to reflectance. By using orientation and position data from the on-board GPS and INS, we georeference each pixel to assign it a latitude and longitude on the ground. The final data product is a georectified hyperspectral reflectance data cube visualized at the right. \label{fig:hsi-pipeline}}
 \end{figure}  
 
-The hyperspectral imager utilized in our robot team is in a so-called \textit{pushbroom} configuration, that is, each image captured by the drone is formed one scan line at a time as the UAV flies. Each scan line consists of 1600 pixels for which incoming light is diffracted into 462 wavelength bins. In the collection software, a regular cutoff of 1000 lines is chosen so that each resulting \textit{image} forms a array of size 462$\times$1600$\times$1000 called a \textit{hyperspectral data cube}. Initially, the captured spectra are in units of spectral radiance (measured in microflicks); however, this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance utilizing the skyward-facing downwelling irradiance spectrometer (see Figure~\ref{fig:drone-components}). When the camera is normal to the water surface, the reflectance is given by
+The hyperspectral imager utilized in our robot team is in a so-called \textit{pushbroom} configuration, that is, each image captured by the drone is formed one scan line at a time as the UAV flies. Each scan line consists of 1600 pixels for which incoming light is diffracted into 462 wavelength bins. In the collection software, a regular cutoff of 1000 lines is chosen so that each resulting \textit{image} forms a array of size 462$\times$1600$\times$1000 called a \textit{hyperspectral data cube}. Initially, the captured spectra are in units of spectral radiance (measured in microflicks); however, this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance utilizing the skyward-facing downwelling irradiance spectrometer. When the camera is normal to the water surface, the reflectance is given by
 \begin{equation}
     R(\lambda) = \pi L(\lambda)/E_d(\lambda)
 \end{equation}
 where $L$ is the spectral radiance, $E_d$ is the downwelling irradiance, and a factor of $\pi$ steradians results from assuming the water surface is Lambertian (diffuse) \cite{reflectance-conversion}. 
 
-Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into a geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat, so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan line is georeferenced using the known field of view (30.8 $\deg$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, the pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections, a resolution of 10 cm was utilized, however, this can be adjusted to optimize the processing time and final resolution for real-time applications. Finally, the UTM pixel coordinates obtained are transformed to latitude and longitude for easy comparison with in situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one of such data cubes, highlighting a selection of exemplar pixel spectra as well as the incident downward irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
+Having converted the hyperspectral data cube to units of reflectance, we must also georeference each pixel into a geographic coordinate system so that each image pixel can be assigned a latitude and longitude corresponding to the location on the ground from which it was sampled. During our three surveys, the UAV was flown at an altitude of ~50 m above the water. At this scale, the surface is essentially flat, so that the hyperspectral data cube can be reliably georectified without the need for an on-board digital elevation map (DEM). We adopt the approach outlined in \cite{GeorectificationMuller, GeorectificationBaumker, GeorectificationMostafa} whereby each scan line is georeferenced using the known field of view (30.8$^\circ$) together with the position and orientation of the UAV as provided by the on-board GPS/INS. After a sequence of coordinate transformations, the pixel coordinates are obtained in the relevant UTM zone (in meters). The resulting image is then re-sampled to a final output resolution. For these collections, a resolution of 10 cm was utilized, however, this can be adjusted to optimize the processing time and final resolution for real-time applications. Finally, the UTM pixel coordinates obtained are transformed to latitude and longitude for easy comparison with in situ data collected by the USV. The final result is a georectified hyperspectral reflectance data cube. In Figure~\ref{fig:hsi-infographic} we visualize one of such data cubes, highlighting a selection of exemplar pixel spectra as well as the incident downward irradiance spectrum. A pseudo-color image is generated (plotted on the top of the data cube) to illustrate the scene.
 
 \begin{figure}[t!]
 \begin{adjustwidth}{-\extralength}{0cm}
 \centering
-\vspace{-0.2in}
+\vspace{-0.3in}
 \includegraphics[width=15.5cm]{paper/figures/materials-and-methods/HyperSpectralInfoGraphic.pdf}
 \end{adjustwidth}
 \caption{A georectified reflectance data cube is visualized (center) with the $\log10$-reflectance along the z axis and a pseudo-color image on the top. In the top left we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
 \end{figure}  
 
-The above processing pipeline was implemented using the Julia programming language, a just-in-time compiled language with native multi-theading support \cite{julia-1}. By running this pipeline on the on board computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications where we need to quickly assess if an area is safe and can not afford to wait to download and post-process collected imagery after a flight.
+The above processing pipeline was implemented using the Julia programming language, a just-in-time compiled language with native multi-threading support \cite{julia-1}. By running this pipeline on the on board computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications where we need to quickly assess if an area is safe and can not afford to wait to download and post-process collected imagery after a flight.
 
 \subsection{Data Collection}
 
@@ -314,7 +330,7 @@ These trained models can then easily be deployed on the on-board processing comp
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results}
 
-The final data set that combined observations from each of the three separate collections contains more than 120,000 individual records. The collection on 11-23-2020 covered the largest spatial extent across the pond, however, due to flight time constraints resulting from the payload size, imagery from adjacent flight tracks did not overlap, resulting in slight gaps. The collections on 12-09-2020 and 12-10-2020 were adjusted to reduce this gap, resulting in a more uniform coverage over a smaller spatial extent. 
+The final data set of combined observations from each of the three separate collections contains more than 120,000 individual records. Based on the size of the UAV payload and available battery capacity, the collection on 11-23-2020 was chosen to cover the broadest possible area resulting in small horizontal gaps between flight tracks. The collections on 12-09-2020 and 12-10-2020 were designed to complement this collection by sampling a smaller spatial extent with uniform coverage.
 
 \begin{figure}[t!]
 \vspace{-0.2in}
@@ -325,9 +341,9 @@ The final data set that combined observations from each of the three separate co
 
 The variability of incident lighting conditions for each collection is visualized in Figure~\ref{fig:downwelling-hist} where the distribution of the total downwelling intensity measured by the downwelling irradiance spectrometer across all hyperspectral data cubes is visualized. Despite performing all UAV flights near solar noon, there was a difference in minimum solar zenith angle between collections due to the time of year. Additionally, there was some slight cloudiness during the 12-09 and 12-10 collections. 
 
-The results of the model training procedure are presented in Table~\ref{tab:fit-results}. The performance of the model is identified by the $R^2$, RMSE, and MAE out-of-fold estimates (mean $\pm$ standard deviation) of the final hyperparameter optimized model in the training set with the target variables ranked in descending order by the $R^2$ value and separated by sensor type (physical variables, ions, biochemical variables, and chemical variables). The small variation in values across folds confirms that the reported performance is independent of how the training set was sampled. Furthermore, we report the interval width that yields a 90\% confidence interval on the holdout validation set determined by the conformal prediction procedure. We then evaluate how the estimated uncertainty generalizes by computing the \textit{emprical coverage} on the holdout testing set, that is, we compute the percentage of predictions in the test set that \textit{actually} fall within the estimated 90\% confidence interval. 
+The results of the model training procedure are presented in Table~\ref{tab:fit-results}. The performance of the model is identified by the $R^2$, RMSE, and MAE out-of-fold estimates (mean $\pm$ standard deviation) of the final hyperparameter optimized model in the training set with the target variables ranked in descending order by the $R^2$ value and separated by sensor type (physical variables, ions, biochemical variables, and chemical variables). The final hyperparameter values for each model are listed in Table~\ref{tab:hyperparameters} in Appendix~\ref{Model Hyperparameters}. The small variation in values across folds confirms that the reported performance is independent of how the training set was sampled. Furthermore, we report the interval width that yields a 90\% confidence interval on the holdout validation set determined by the conformal prediction procedure. We then evaluate how the estimated uncertainty generalizes by computing the \textit{emprical coverage} on the holdout testing set, that is, we compute the percentage of predictions in the test set that \textit{actually} fall within the estimated 90\% confidence interval. 
 
-\begin{table}[t!]
+\begin{table}[b!]
   \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the inferred confidence interval. \label{tab:fit-results}}
   \begin{adjustwidth}{-\extralength}{0cm}
   \newcolumntype{C}{>{\centering\arraybackslash}X}
@@ -387,6 +403,7 @@ By applying the trained models to the full hyperspectral data cubes, we can prod
 
 \begin{figure}[t!]
 \centering
+\vspace{-0.3in}
 \includegraphics[width=\columnwidth]{paper/figures/results/maps/physical.pdf}
 \caption{Maps generated by applying each of the physical variable models to the hyperspectral data cubes collected on 11-23. Overlaid over the predictions are color-filled squares showing the associated in-situ reference data for the same collection period. The size of the squares has been exaggerated for the visualization. We note that there is good agreement between the model predictions and the reference data. \label{fig:map-physical}}
 \end{figure}  
@@ -447,7 +464,9 @@ The maps generated for the 11-23 collection by applying trained biochemical mode
 
 \begin{figure}
 \centering
+\vspace{-0.3in}
 \includegraphics[width=\columnwidth]{paper/figures/results/maps/biochemical.pdf}
+\vspace{-0.2in}
 \caption{Maps generated by applying the trained biochemical models to the data cubes collected on 11-23. Overlaid are the in-situ reference data for the same collection period. The size of the squares has been exaggerated for the visualization. We note there is good agreement between the predicted map and the reference data. \label{fig:map-biochem}}
 \end{figure}  
 
@@ -474,6 +493,7 @@ The maps generated by applying the CO and OB models to the 11-23 data cubes are 
 
 \begin{figure}
 \centering
+\vspace{-0.3in}
 \includegraphics[width=\columnwidth]{paper/figures/results/maps/chemical.pdf}
 \caption{Maps generated by applying the trained chemical variable models to the hyperspectral data cubes collected on 11-23. Overlaid are color-filled squares showing the in-situ reference data for the same collection period. The size of the squares is exaggerated for the visualization. We note that there is good agreement between the model predictions and reference data.\label{fig:map-chem}}
 \end{figure}  
@@ -511,6 +531,9 @@ The maps generated by applying the CO and OB models to the 11-23 data cubes are 
     - Limitation: total area surveyed is determined by battery life (suggestion --> multiple drones) 
     - Limitation: predictions of trained tree-based models are litmied by the range of available data. To extend the model to be sensitive across a broader range of values/concentrations, we need to collect more training data. However we have demonstrated that data from disparate observations can be combined despite the limitations of lighting variability. Indeed it is preciesly the fact that we are interested in the water composition and not the absolute reflectance values themselves that makes this possible because so long as we include enough descriptive variables which capture the lighting dynamics, we can account for differences in ambient lighting conditions between observations.
 }
+
+Much effort has recently been spent on the curation of comprehensive datasets combining water quality records with decades of satellite imagery to enable the development of new methods for monitoring water quality. For example, Aurin et al. curated over 30 years of oceanographic field campaign data with associated coincident satellite imagery \cite{aurin2018remote}. Similarly, Ross et al. have combined more than 600,000 records of dissolved organic carbon, chlorophyll-a and other variables of water quality together with Landsat historical reflectance data for the period 1984--2019 \cite{ross2019aquasat}. 
+
 
 In this paper, we have validated the methodology introduced in our previous work\cite{robotTeam1}. Specifically, we demonstrate that by using an autonomous team of sensing sentinels, we can
 \begin{enumerate}
@@ -626,11 +649,11 @@ RENDVI & Red-edge normalized difference vegetation index
 \section[\appendixname~\thesection]{}\label{Model Hyperparameters}
 %% \subsection[\appendixname~\thesubsection]{}
 \begin{table}[H] 
-\caption{Hyperparameter values for the final models.\label{tab5}}
+\caption{Final hyperparameter values for each target model. The number of trees and sampling ratio were optimized using a random search. The maximum tree depth was fixed to 20 to limit overfitting and control the size of the final model. The number of sub-features was set to the square root of the total number of features and the minimum samples per leaf and minimum samples per split were left to their default values. \label{tab:hyperparameters}}
 \newcolumntype{C}{>{\centering\arraybackslash}X}
 \begin{tabularx}{\textwidth}{CCCCCCC}
 \toprule
-\textbf{Target}	& \textbf{Number of Trees}	& \textbf{Sampling Ratio} & \textbf{Maximum tree depth} & \textbf{Number of Subfeatures} & \textbf{Minimum samples per leaf} & \textbf{Minimum samples per split}\\
+\textbf{Target}	& \textbf{Number of Trees}	& \textbf{Sampling Ratio} & \textbf{Maximum Tree Depth} & \textbf{Number of Sub-features} & \textbf{Minimum Samples Per Leaf} & \textbf{Minimum Samples Per Split}\\
 \midrule
 Temperature & 153 & 0.979 & 20 & 5 & 1 & 2 \\
 Conductivity & 153 & 0.979 & 20 & 5 & 1 & 2\\
@@ -639,10 +662,12 @@ Turbidity & 153 & 0.979 & 20 & 5 & 1 & 2\\
 $\mathrm{Ca}^{2+}$ & 153 & 0.979 & 20 & 5 & 1 & 2\\
 $\mathrm{Cl^-}$ & 153 & 0.979 & 20 & 5 & 1 & 2\\
 $\mathrm{Na^+}$ & 153 & 0.979 & 20 & 5 & 1 & 2\\
-Blue-Green Algae (Phycoerythrin) & 153 & 0.979 & 20 & 5 & 1 & 2\\
+%Blue-Green Algae (Phycoerythrin) & 153 & 0.979 & 20 & 5 & 1 & 2\\
+Phycoerythrin & 153 & 0.979 & 20 & 5 & 1 & 2\\
 CDOM & 153 & 0.979 & 20 & 5 & 1 & 2\\
 Chlorophyll A & 153 & 0.979 & 20 & 5 & 1 & 2\\
-Blue-Green Algae (Phycocyanin) & 153 & 0.979 & 20 & 5 & 1 & 2\\
+%Blue-Green Algae (Phycocyanin) & 153 & 0.979 & 20 & 5 & 1 & 2\\
+Phycocyanin & 153 & 0.979 & 20 & 5 & 1 & 2\\
 Crude Oil & 153 & 0.979 & 20 & 5 & 1 & 2\\
 Optical Brighteners & 153 & 0.979 & 20 & 5 & 1 & 2\\
 \bottomrule
