@@ -277,7 +277,15 @@ The above processing workflow was implemented using the Julia programming langua
 
 \subsection{Data Collection}
 
-The robot team was deployed at a private pond ($<0.1$ km$^{2}$) in Montague Texas close to the Oklahoma border for three separate collections on 11-23-2020, 12-09-2020, and 12-10-2020. For each acquisition, the UAV first completed a broad survey of the pond, capturing multiple hyperspectral data cubes. Subsequently, the USV sampled across the pond, collecting in-situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra, where the USV track overlapped with UAV pixels. To account for any time lag in the values measured by the in-situ instruments and to account for the USV size in comparison to the data cube's spatial resolution, each in-situ measurement is associated with a 3$\times$3 grid of HSI pixels, that is, a 30 cm $\times$ 30 cm square. These combined data form the tabular data set on which we train regression models; pixel spectra form input features, and each separate USV sensor forms a distinct target variable.
+The robot team was deployed at a private pond in Montague Texas close to the Oklahoma border for three separate collections on 11-23-2020, 12-09-2020, and 12-10-2020. The pond spans an area $<0.1$ km$^{2}$ with a maximum depth of 3 meters. As shown in Figure~\ref{fig:study-area}, the area includes multiple distinct regions with significant small-scale variability. For each acquisition, the UAV first completed a broad survey of the pond, capturing multiple hyperspectral data cubes. Subsequently, the USV sampled across the pond, collecting in-situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra, where the USV track overlapped with UAV pixels. To account for any time lag in the values measured by the in-situ instruments and to account for the USV size in comparison to the data cube's spatial resolution, each in-situ measurement is associated with a 3$\times$3 grid of HSI pixels, that is, a 30 cm $\times$ 30 cm square. These combined data form the tabular data set on which we train regression models; pixel spectra form input features, and each separate USV sensor forms a distinct target variable.
+
+\begin{figure}[t!]
+\centering
+\includegraphics[width=\columnwidth]{paper/figures/materials-and-methods/study-area.pdf}
+\caption{The pond in Montague Texas where the robot team was deployed. The pond includes multiple distinct regions separated by small islands and grasses. \label{fig:study-area}}
+\end{figure}  
+
+
 
 Each collection was performed near solar noon to maximize the amount of incident sunlight illuminating the water. For the site in North Texas, this corresponded to average solar zenith angles of 54.9$^{\circ}$, 56.7$^{\circ}$, and 56.75$^{\circ}$ for 11-23-202, 12-09-2020, and 12-10-2020 respectively. Given the hyperspectral imager acquires data cubes at nadir, there was little concern for effects due to sunglint. However, to account for any potential variation in lighting conditions between data cubes, we augment the training set with additional features including the drone viewing geometry (roll, pitch, heading) and solar illumination geometry (solar azimuth, solar elevation, solar zenith) as well as the total at-pixel intensity before reflectance conversion, the total downwelling intensity, and the drone altitude. Further feature engineering is performed to add additional spectral indices that utilize combinations of specific wavelength bands such as the normalized difference vegetation index (NDVI), normalized difference water index (NDWI), simple ratio (SR), photochemical reflectance index (PRI) and more, as outlined in \cite{envi_vegetation_indices, thenkabail2018hyperspectral,kaufman1992atmospherically, SpectralIndexWheat}. A comprehensive list of these added features is provided in Supplementary Table S1. The final dataset includes a total of 526 features (462 reflectance bands plus 64 additional features) with over 120,000 records. 
 
@@ -315,10 +323,8 @@ The final data set of combined observations from each of the three separate coll
 
 The variability of incident lighting conditions for each collection is visualized in Figure~\ref{fig:downwelling-hist} where the distribution of the total downwelling intensity measured by the downwelling irradiance spectrometer across all hyperspectral data cubes is visualized. Despite performing all UAV flights near solar noon, there was a difference in minimum solar zenith angle between collections due to the time of year. Additionally, there was some slight cloudiness during the 12-09 and 12-10 collections. 
 
-\begin{figure}[b!]
-\vspace{-0.2in}
+\begin{figure}[h!]
 \includegraphics[width=0.7\columnwidth]{paper/figures/results/downwelling-hist.pdf}
-\vspace{-0.2in}
 \caption{Distribution of total downwelling intensity during each of the three HSI collection flights. The multi-modal nature of these distributions reflects the impact of the relative orientation of the drone to the sun as well as potential occlusion due to the presence of clouds.\label{fig:downwelling-hist}}
 \end{figure}   
 
@@ -330,9 +336,9 @@ To further examine the differences in model performance between the target varia
 
 In the remainder of this section, we compare the models within each target category.
 
-\pagebreak
+% \pagebreak
 
-\begin{table}[hp!]
+\begin{table}[t!]
   \caption{Summary of fitting statistics for each target measurement. Models were evaluated using 6-fold cross validation on the training set. The estimated uncertainty is evaluated so that a prediction $\hat{y}\pm \Delta y$ achieves 90\% coverage on the calibration holdout set. The empirical coverage is the percentage of predictions in the testing set that fall within the inferred confidence interval. \label{tab:fit-results}}
   \begin{adjustwidth}{-\extralength}{0cm}
   \newcolumntype{C}{>{\centering\arraybackslash}X}
