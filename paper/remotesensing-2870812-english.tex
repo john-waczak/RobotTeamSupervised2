@@ -194,8 +194,7 @@ The main objective of this study is to expand on our previous work in three new 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
 
- The robotic team presented in this study consists of two key sensing sentinels: an uncrewed surface vessel (USV) used to collect in situ reference measurements and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using open source \hl{QGroundControl software} %MDPI: Please state the version number of the software.
- for flight control and mission planning and are equipped with high-accuracy GPS and INS such that all data points collected are uniquely geolocated and time-stamped~\cite{qgroundcontrol}. Both the USV and UAV include long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network-attached storage to provide redundancy.
+ The robotic team presented in this study consists of two key sensing sentinels: an uncrewed surface vessel (USV) used to collect in situ reference measurements and an unmanned aerial vehicle (UAV) for performing rapid, wide-area surveys to gather remote sensing data products. Both platforms are coordinated using open-source QGroundControl version 4.0.11 software for flight control and mission planning and are equipped with high-accuracy GPS and INS such that all data points collected are uniquely geolocated and time-stamped~\cite{qgroundcontrol}. Both the USV and UAV include long-range Ubiquiti 5 GHz LiteBeam airMAX WiFi to enable streaming of data products to a ground station with network-attached storage to provide redundancy.
 
 \subsection{USV: In Situ Measurements}
 
@@ -277,7 +276,7 @@ Having converted the hyperspectral data cube to units of reflectance, we must al
 \vspace{-0.1in}
 \includegraphics[width=15.5cm]{figures/materials-and-methods/HyperSpectralInfoGraphic.pdf}
 \end{adjustwidth}
-\caption{A georectified reflectance data cube is visualized (center) with the $\log10$-reflectance along the z-axis and a pseudo-color image on the top. In the top left, we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
+\caption{A georectified reflectance data cube is visualized (center) with the $\log_{10}$ reflectance along the z-axis and a pseudo-color image on the top. In the top left, we visualize the downwelling irradiance spectrum (the incident light). The surrounding plots showcase exemplar pixel reflectance spectra for open water, dry grass, algae, and a rhodamine dye plume used to test the system.\label{fig:hsi-infographic}}
 \end{figure}  
 
 The above processing workflow was implemented using the Julia programming language: a just-in-time compiled language with native multi-threading support \cite{julia-1}. By running this pipeline on the onboard computer, we are able to process the collected hyperspectral data cubes in near real time. This feature is critical for time-sensitive applications wherein we need to quickly assess if an area is safe and cannot afford to wait to download and post-process collected imagery after a flight.
@@ -300,9 +299,7 @@ Each collection was performed near solar noon to maximize the amount of incident
 
 \subsection{Machine Learning Methods}
 
-For each of the 13 target variables listed in Table~\ref{tab:sensors}, the data were randomly partitioned into a 90:10 training/testing split. To model the data, we chose to use the random forest regressor (RFR) as implemented in the machine learning framework for Julia package  \hl{MLJ} %MDPI: There is no ref {ben_sadeghi_2022_7359268}. Please check and revise.
-%AE unsure if MLJ is an acronym and should thus be in parentheses
- \cite{decision-tree-julia, MLJ1}.  Random forests are an ensembling technique based on bagged predictions of individual decision tree regressors trained using the classification and regression trees (CART) algorithm. Each tree in an RFR is trained on a random subset of features \textit{\hl{and}} a random subset of training records \cite{decision-trees, random-forest}. Random forests are particularly attractive due to their fast training and inference times. Furthermore, studies continue to observe that tree-based models like random forest remain superior for tabular datasets \cite{grinsztajn2022tree, shwartz2022tabular}.
+For each of the 13 target variables listed in Table~\ref{tab:sensors}, the data were randomly partitioned into a 90:10 training/testing split. To model the data, we chose to use the random forest regressor (RFR) as implemented in the Machine Learning framework for Julia (MLJ) \cite{random-forest-regression, MLJ1}.  Random forests are an ensembling technique based on bagged predictions of individual decision tree regressors trained using the classification and regression trees (CART) algorithm. Each tree in an RFR is trained on a random subset of features and a random subset of training records \cite{decision-tree, random-forest}. Random forests are particularly attractive due to their fast training and inference times. Furthermore, studies continue to observe that tree-based models like random forest remain superior for tabular datasets \cite{grinsztajn2022tree, shwartz2022tabular}.
 
 As reflectance values in adjacent wavelength bins tend to correlate with each other and, therefore, may not necessarily contribute additional information content to the final model, it is desirable to evaluate the relative importance of each feature to the trained model predictions. This is useful both for identifying the most relevant features and for performing feature selection to reduce the final model size. By default, tree-based methods such as RFR allow for impurity-based ranking as described in \cite{random-forest, rfr-importance-ranking}. However, these methods have been shown to be biased towards high cardinality and correlated features \cite{strobl2008conditional}. Therefore, we choose to use the model-agnostic permutation importance as described by \cite{parr2018beware}. To do this, we further partition the training dataset, resulting in an 80:10:10 split with 80\% of the points used for model training, 10\% of the points used for validation and determination of feature importance, and the final 10\% held out as an independent testing set. The importance of the $j^{\text{th}}$ feature is then computed as
 \begin{equation}
@@ -316,7 +313,7 @@ To assess the uncertainty of the final model's predictions, we employed inductiv
 \end{equation}
 where $f(X_i)=\hat{y}_i$ denotes the trained ML model applied to the $i^{th}$ calibration record. These n-many scores are sorted, and the interval half width, $d$, is calculated as the $\frac{\lceil(1-\alpha)(n+1) \rceil}{n}$ quantile of this set in order to achieve coverage of $1-\alpha$ on the calibration set. Prediction intervals for new data are then formed as $f(X)\pm d$. For this study, we chose $\alpha=0.1$ for coverage corresponding to a 90\% confidence interval.
 
-Using these tools, the training procedure for each model was as follows: First, each model was trained using six-fold cross-validation on the full 526-feature training set with default hyperparameter values. Feature importances for the trained model were then computed, and the top 25 features were identified. A second model was then trained using the same six-fold cross-validation scheme with \textit{\hl{only}} these 25 most important features together with hyperparameter optimization using a random search over the number of trees and sampling fraction. The number of trees was optimized, as it has a significant impact on both model performance and inference time. The sampling ratio determines the fraction of training records that each individual tree is exposed to during training. Tuning this parameter helps limit overfitting by increasing the diversity of trees in the ensemble. Additionally, we chose to fix the maximum tree depth to 20 to control the final model size such that each trained model can fit in-memory on the onboard UAV processing computer. The remaining hyperparameters were left to their default values in order to constrain the total optimization space. The performance of each model was evaluated by computing out-of-fold scores for the coefficient of determination as well as the
+Using these tools, the training procedure for each model was as follows: First, each model was trained using six-fold cross-validation on the full 526-feature training set with default hyperparameter values. Feature importances for the trained model were then computed, and the top 25 features were identified. A second model was then trained using the same six-fold cross-validation scheme with only these 25 most important features together with hyperparameter optimization using a random search over the number of trees and sampling fraction. The number of trees was optimized, as it has a significant impact on both model performance and inference time. The sampling ratio determines the fraction of training records that each individual tree is exposed to during training. Tuning this parameter helps limit overfitting by increasing the diversity of trees in the ensemble. Additionally, we chose to fix the maximum tree depth to 20 to control the final model size such that each trained model can fit in-memory on the onboard UAV processing computer. The remaining hyperparameters were left to their default values in order to constrain the total optimization space. The performance of each model was evaluated by computing out-of-fold scores for the coefficient of determination as well as the
 \begin{align}
     \text{RMSE} &= \sqrt{\frac{\sum\limits_{i=1}^N (\hat{y}_i-y_i)^2}{N}}, \\
     \text{MAE} &= \frac{\sum\limits_{i=1}^N \lvert \hat{y}_i - y_i \vert}{N},
@@ -660,6 +657,7 @@ CO & Crude Oil \\
 OB & Optical Brighteners \\
 FNU & Formazin Nephelometric Unit \\
 RFR & Random Forest Regressor \\
+MLJ & Machine Learning framework for Julia \\
 RMSE & Root Mean Square Error \\ 
 MAE & Mean Absolute Error \\
 RENDVI & Red-Edge Normalized Difference Vegetation Index
@@ -1034,6 +1032,14 @@ Blaom, A.D.; Kiraly, F.; Lienart, T.; Simillides, Y.; Arenas, D.; Vollmer, S.J.
 \newblock {MLJ}: A Julia package for composable machine learning.
 \newblock {\em J. Open Source Softw.} {\bf 2020}, {\em 5},~2704.
 \newblock {\url{https://doi.org/10.21105/joss.02704}}.
+
+
+\bibitem[Sadeghi et~al.(2022)Sadeghi, Chiarawongse, Squire, Jones, Noack, St-Jean, Huijzer, Schätzle, Butterworth, Peng, and Blaom]{random-forest-regression}
+Sadeghi, B.; Chiarowongse, P.; Squire, K.; Jones, D.C.; Noack, A.; St-Jean, C.; Huijzer, R.; Schätzle, R.; Butterworth, I.; Peng, Y.; Blaom, A.
+\newblock DecisionTree.jl - A Julia implementation of the CART Decision Tree and Random Forest algorithms.
+\newblock {\em Zenodo} {\bf 2022}.
+\newblock {\url{https://doi.org/10.5281/zenodo.7359268}}.
+
 
 \bibitem[Breiman(2017)]{decision-trees}
 Breiman, L.
