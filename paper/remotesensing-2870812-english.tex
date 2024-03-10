@@ -79,14 +79,16 @@
 \TitleCitation{Characterizing Water Composition with an Autonomous Robotic Team Employing Comprehensive In Situ Sensing, Hyperspectral Imaging, Machine Learning, and Conformal Prediction}
 
 % Author Orchid ID: enter ID or remove command
-\newcommand{\orcidauthorA}{0000-0002-5910-0183} % Add \orcidA{} behind the author's name
-\newcommand{\orcidauthorB}{0000-0003-4265-9543} % Add \orcidA{} behind the author's name
-%\newcommand{\orcidauthorB}{0000-0000-0000-000X} % Add \orcidB{} behind the author's name
+\newcommand{\orcidauthorA}{0000-0002-5910-0183} % John
+\newcommand{\orcidauthorB}{0000-0003-2688-648X} % Lakitha
+\newcommand{\orcidauthorC}{0000-0002-9841-6703} % Shawhin
+\newcommand{\orcidauthorD}{0000-0003-2657-3416} % Prabuddha
+\newcommand{\orcidauthorE}{0000-0003-4265-9543} % David
+\newcommand{\orcidauthorF}{0000-0003-0667-2345} % Ash
+\newcommand{\orcidauthorG}{0000-0002-0126-218X} % Adam
 
 % Authors, for the paper (add full first names)
-\Author{\hl{John} %MDPI: Please carefully check the accuracy of names and affiliations.
- Waczak \orcidA{}, Adam Aker, Lakitha O. H. Wijeratne, Shawhin Talebi, Bharana Fernando, \hl{Prabuddha Hathurusinghe}%MDPI: The name of this author is different from the one submitted online at susy.mdpi.com. Please confirm which one is correct.
-, Mazhar Iqbal, Matthew Lary, David Schaefer and David J. Lary *\orcidB{}}
+\Author{John Waczak \orcidA{}, Adam Aker \orcidG{}, Lakitha O. H. Wijeratne \orcidB{}, Shawhin Talebi \orcidC{}, Ashen Fernando \orcidF{}, Prabuddha M. H. Dewage \orcidD{}, Mazhar Iqbal, Matthew Lary, David Schaefer and David J. Lary *\orcidE{}}
 
 %\longauthorlist{yes}
 
@@ -99,9 +101,7 @@
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address[1]{%
-Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 75080, USA;  \hl{john.waczak@utdallas.edu} %MDPI: We changed all emails into lowercase. Please confirm.
- (J.W.); adam.aker@utdallas.edu (A.A.); lhw150030@utdallas.edu (L.O.H.W.); shawhintalebi@gmail.com (S.T.); ashen.fernando@utdallas.edu  (B.F.); prabuddhamadusanka.hathurusinghedewage@utdallas.edu (P.H.); mazhar.iqbal@utdallas.edu (M.I.); \hl{mdlary@me.com} %MDPI: This email address is different from the one submitted online at susy.mdpi.com. Please confirm which one is correct.
- (M.L.); captdaveschaefer@gmail.com (D.S.)}
+Hanson Center for Space Sciences, University of Texas at Dallas, Richardson, TX 75080, USA;  john.waczak@utdallas.edu (J.W.); adam.aker@utdallas.edu (A.A.); lhw150030@utdallas.edu (L.O.H.W.); shawhintalebi@gmail.com (S.T.); ashen.fernando@utdallas.edu  (B.F.); pxh180012@utdallas.edu (P.M.H.D.); mazhar.iqbal@utdallas.edu (M.I.); matthew.lary@utdallas.edu (M.L.); captdaveschaefer@gmail.com (D.S.)}
 
 \corres{\hangafter=1 \hangindent=1.05em \hspace{-0.82em}Correspondence: {David.Lary@utdallas.edu}}
 
@@ -250,8 +250,7 @@ A Freefly Alta-X autonomous quadcopter was used as a UAV platform for the roboti
 \caption{Configuration of the UAV: (\textbf{a}) The hyperspectral imager and acquisition computer. (\textbf{b}) The assembled UAV with secondary processing computer and (upward facing) downwelling irradiance spectrometer. \label{fig:drone-components}}
 \end{figure} 
 
-To effectively utilize the spectra collected by our UAV, we must account for the variability of the incident light that illuminates the water and transform the raw hyperspectral data cubes from their native \textit{\hl{imaging~reference~frame}} %MDPI: Please confirm if the italics is unnecessary and can be removed. The following highlights are the same.
- to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
+To effectively utilize the spectra collected by our UAV, we must account for the variability of the incident light that illuminates the water and transform the raw hyperspectral data cubes from their native imaging reference frame to a chosen coordinate system compatible with the data collected by the USV. This procedure is illustrated in Figure~\ref{fig:hsi-pipeline}.
 
 \begin{figure}[H]
 %\begin{adjustwidth}{-\extralength}{0cm}
@@ -260,11 +259,10 @@ To effectively utilize the spectra collected by our UAV, we must account for the
 \hspace{-6pt}\includegraphics[width=14cm]{figures/materials-and-methods/pipeline-figure-2.pdf}
 %\end{adjustwidth}
 \vspace{-0.4in}
-\caption{\hl{Hyperspectral} %MDPI: Please add the explanation for different color in the figure.
- image processing: Hyperspectral data cubes are collected one scan-line at a time (left). By utilizing downwelling irradiance spectra, we convert each pixel from spectral radiance to reflectance. By using orientation and position data from the on-board GPS and INS, we georeference each pixel to assign it a latitude and longitude on the ground. The final data product is the georectified hyperspectral reflectance data cube visualized on the right. \label{fig:hsi-pipeline}}
+\caption{Hyperspectral image processing: Hyperspectral data cubes are collected one scan-line at a time (left). By utilizing downwelling irradiance spectra, we convert each pixel from spectral radiance to reflectance. By using orientation and position data from the on-board GPS and INS, we georeference each pixel to assign it a latitude and longitude on the ground. The final data product is the georectified hyperspectral reflectance data cube (right) visualized as a pseudo-color image with reflectance  as a function of wavelength along the z-axis.\label{fig:hsi-pipeline}}
 \end{figure}  
 
-The hyperspectral imager utilized in our robot team is in a so-called \textit{\hl{pushbroom}} configuration: that is, each image captured by the drone is formed one scan line at a time as the UAV flies. Each scan line consists of 1600 pixels, for which incoming light is diffracted into 462 wavelength bins. In the collection software, a regular cutoff of 1000 lines is chosen so that each resulting \hl{\textit{image}} forms an array of size 462 $\times$ 1600 $\times$ 1000 called a \textit{\hl{hyperspectral data cube}}. Initially, the captured spectra are in units of spectral radiance (measured in microflicks); however, this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance by utilizing the skyward-facing downwelling irradiance spectrometer. When the camera is normal to the water surface, the reflectance is given by
+The hyperspectral imager utilized in our robot team is in a so-called pushbroom configuration: that is, each image captured by the drone is formed one scan line at a time as the UAV flies. Each scan line consists of 1600 pixels, for which incoming light is diffracted into 462 wavelength bins. In the collection software, a regular cutoff of 1000 lines is chosen so that each resulting image forms an array of size 462 $\times$ 1600 $\times$ 1000 called a hyperspectral data cube. Initially, the captured spectra are in units of spectral radiance (measured in microflicks); however, this does not account for the variability of incident light illuminating the water. To this end, we convert the hyperspectral data cubes into units of reflectance by utilizing the skyward-facing downwelling irradiance spectrometer. When the camera is normal to the water surface, the reflectance is given by
 \begin{equation}
     R(\lambda) = \pi L(\lambda)/E_d(\lambda)
 \end{equation}
@@ -286,8 +284,7 @@ The above processing workflow was implemented using the Julia programming langua
 
 \subsection{Data Collection}
 
-The robot team was deployed at a private pond in Montague, Texas, close to the Oklahoma border for three separate collections on \hl{23} %MDPI: We changed all date format in main tex. Please confirm.
- November 2020, 9 December 2020, and 10 December 2020. The pond spans an area $<$0.1 km$^{2}$ and has a maximum depth of 3 m. As shown in Figure~\ref{fig:study-area}, the area includes multiple distinct regions with significant small-scale variability. For each acquisition, the UAV first completed a broad survey of the pond, capturing multiple hyperspectral data cubes. Subsequently, the USV sampled across the pond, collecting in situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra, whereby the USV track overlapped with the UAV's pixels. To account for any time lag in the values measured by the in situ instruments and to account for the USV's size in comparison to the data cube's spatial resolution, each in situ measurement is associated with a 3 $\times$ 3 grid of HSI pixels: that is, a \mbox{30 cm $\times$ 30 cm} square. These combined data form the tabular dataset on which we train regression models; pixel spectra form input features, and each separate USV sensor forms a distinct target variable.
+The robot team was deployed at a private pond in Montague, Texas, close to the Oklahoma border for three separate collections on 23 November 2020, 9 December 2020, and 10 December 2020. The pond spans an area $<$0.1 km$^{2}$ and has a maximum depth of 3 m. As shown in Figure~\ref{fig:study-area}, the area includes multiple distinct regions with significant small-scale variability. For each acquisition, the UAV first completed a broad survey of the pond, capturing multiple hyperspectral data cubes. Subsequently, the USV sampled across the pond, collecting in situ reference measurements. Each of these reference measurements was then collocated with individual pixel spectra, whereby the USV track overlapped with the UAV's pixels. To account for any time lag in the values measured by the in situ instruments and to account for the USV's size in comparison to the data cube's spatial resolution, each in situ measurement is associated with a 3 $\times$ 3 grid of HSI pixels: that is, a \mbox{30 cm $\times$ 30 cm} square. These combined data form the tabular dataset on which we train regression models; pixel spectra form input features, and each separate USV sensor forms a distinct target variable.
 
 \begin{figure}[H]
 \centering
@@ -305,7 +302,7 @@ Each collection was performed near solar noon to maximize the amount of incident
 
 For each of the 13 target variables listed in Table~\ref{tab:sensors}, the data were randomly partitioned into a 90:10 training/testing split. To model the data, we chose to use the random forest regressor (RFR) as implemented in the machine learning framework for Julia package  \hl{MLJ} %MDPI: There is no ref {ben_sadeghi_2022_7359268}. Please check and revise.
 %AE unsure if MLJ is an acronym and should thus be in parentheses
- \cite{ben_sadeghi_2022_7359268, MLJ1}.  Random forests are an ensembling technique based on bagged predictions of individual decision tree regressors trained using the classification and regression trees (CART) algorithm. Each tree in an RFR is trained on a random subset of features \textit{\hl{and}} a random subset of training records \cite{decision-trees, random-forest}. Random forests are particularly attractive due to their fast training and inference times. Furthermore, studies continue to observe that tree-based models like random forest remain superior for tabular datasets \cite{grinsztajn2022tree, shwartz2022tabular}.
+ \cite{decision-tree-julia, MLJ1}.  Random forests are an ensembling technique based on bagged predictions of individual decision tree regressors trained using the classification and regression trees (CART) algorithm. Each tree in an RFR is trained on a random subset of features \textit{\hl{and}} a random subset of training records \cite{decision-trees, random-forest}. Random forests are particularly attractive due to their fast training and inference times. Furthermore, studies continue to observe that tree-based models like random forest remain superior for tabular datasets \cite{grinsztajn2022tree, shwartz2022tabular}.
 
 As reflectance values in adjacent wavelength bins tend to correlate with each other and, therefore, may not necessarily contribute additional information content to the final model, it is desirable to evaluate the relative importance of each feature to the trained model predictions. This is useful both for identifying the most relevant features and for performing feature selection to reduce the final model size. By default, tree-based methods such as RFR allow for impurity-based ranking as described in \cite{random-forest, rfr-importance-ranking}. However, these methods have been shown to be biased towards high cardinality and correlated features \cite{strobl2008conditional}. Therefore, we choose to use the model-agnostic permutation importance as described by \cite{parr2018beware}. To do this, we further partition the training dataset, resulting in an 80:10:10 split with 80\% of the points used for model training, 10\% of the points used for validation and determination of feature importance, and the final 10\% held out as an independent testing set. The importance of the $j^{\text{th}}$ feature is then computed as
 \begin{equation}
@@ -614,7 +611,7 @@ In this study, we address two key limitations of current remote sensing approach
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \authorcontributions{Conceptualization, D.J.L.; methodology, \hl{J.W.} %MDPI: We changed all J.L.W. into J.W. Please confirm.
- and D.J.L; software, J.W.; field deployment and preparation, J.W., A.A., L.O.H.W., S.T., B.F., P.H., M.I., M.L., D.S., and D.J.L.; validation, J.W.; formal analysis, J.W.; investigation J.W.; resources, D.J.L.; data curation, J.W., A.A., L.O.H.W., and D.J.L; writing---original draft preparation, J.W.; writing---review and editing, J.W. and D.J.L.; visualization, J.W.; supervision, D.J.L.; project administration, D.J.L.; funding acquisition, D.J.L. All authors have read and agreed to the published version of the manuscript.
+ and D.J.L; software, J.W.; field deployment and preparation, J.W., A.A., L.O.H.W., S.T., B.F., P.M.H.D., M.I., M.L., D.S., and D.J.L.; validation, J.W.; formal analysis, J.W.; investigation J.W.; resources, D.J.L.; data curation, J.W., A.A., L.O.H.W., and D.J.L; writing---original draft preparation, J.W.; writing---review and editing, J.W. and D.J.L.; visualization, J.W.; supervision, D.J.L.; project administration, D.J.L.; funding acquisition, D.J.L. All authors have read and agreed to the published version of the manuscript.
 }
 
 
