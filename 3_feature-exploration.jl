@@ -5,8 +5,11 @@ using Random
 
 using Dates
 using CairoMakie
-using MintsMakieRecipes
 
+include("./makie-defaults.jl")
+
+
+# a few changes to our defaults
 set_theme!(mints_theme)
 update_theme!(
     figure_padding=30,
@@ -16,16 +19,20 @@ update_theme!(
         xlabelsize=22,
         ylabelsize=22,
         titlesize=25,
+        labelsize=10,
     ),
     Colorbar=(
         ticklabelsize=20,
-        labelsize=22
     )
 )
 
 
+
+
+
+
 #using MLJ, Flux, ConformalPrediction
-using MLJ, Flux
+using MLJ
 using MLJBase: train_test_pairs
 
 # add in ConformalPrediction via GitHub until my fix ships
@@ -62,10 +69,10 @@ datapath = "/Users/johnwaczak/data/robot-team/supervised"
 
 ETR = @load EvoTreeRegressor pkg=EvoTrees
 RFR = @load RandomForestRegressor pkg=DecisionTree
-DTR = @load DecisionTreeRegressor pkg=DecisionTree
-XGBR = @load XGBoostRegressor pkg=XGBoost
-NNR = @load NeuralNetworkRegressor pkg=MLJFlux
-Standardizer = @load Standardizer pkg=MLJModels
+# DTR = @load DecisionTreeRegressor pkg=DecisionTree
+# XGBR = @load XGBoostRegressor pkg=XGBoost
+# NNR = @load NeuralNetworkRegressor pkg=MLJFlux
+# Standardizer = @load Standardizer pkg=MLJModels
 
 
 # 1. Construct dictionary of models
@@ -130,13 +137,13 @@ use_metrics = false
 #                  )
 
 
-MODELS[:etr] = (;
-                :longname=>"Evo Tree Regressor",
-                :savename=>"EvoTreeRegressor",
-                :packagename => "EvoTrees",
-                :suffix => "vanilla",
-                :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
-                )
+# MODELS[:etr] = (;
+#                 :longname=>"Evo Tree Regressor",
+#                 :savename=>"EvoTreeRegressor",
+#                 :packagename => "EvoTrees",
+#                 :suffix => "vanilla",
+#                 :mdl => ETR(nrounds=100, nbins=255, eta=0.3, max_depth=6, lambda=1.0, alpha=0.0),
+#                 )
 
 
 # MODELS[:dtr] = (;
@@ -188,10 +195,129 @@ targets_to_try= [
 
 
 
-# targets_to_try = [:bgm]
-# targets_to_try = [:CDOM,:CO]
-# targets_to_try = [:CDOM,]
-# targets_to_try = [:Chl]
+
+for collection ∈ collections
+    for target ∈ targets_to_try
+
+        target_name = String(target)
+        target_long = targets_dict[target][2]
+        units = targets_dict[target][1]
+
+
+        println("Working on $(target_name)")
+
+        data_path = joinpath(datapath, collection, target_name, "data")
+
+        X = CSV.read(joinpath(data_path, "X.csv"), DataFrame);
+        y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1];
+        idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1];
+        idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1];
+
+        modelpath = joinpath(datapath, collection, target_name, "models")
+
+        model_longanme = "Random Forest Regressor"
+        model_savename = "RandomForestRegressor"
+        model_suffix= "vanilla"
+
+
+        savepath = joinpath(modelpath, model_savename, "default")
+        fi_path = joinpath(savepath, "importance_ranking__$(model_suffix).csv")
+        @assert ispath(fi_path)
+
+
+        # make plots:
+
+        # load importance rankings
+        fi_df = CSV.read(fi_path, DataFrame)
+        N_final = 25
+        fi_n = @view fi_df[1:N_final, :]
+        fi_occam = Symbol.(fi_n.feature_name)
+
+        # partition data
+        X_occam = X[:, fi_occam]
+        Xtrain = X_occam[idx_train, :]
+        ytrain = y[idx_train]
+        Xtest = X_occam[idx_test, :]
+        ytest = y[idx_test]
+
+        # make fi-ranking plots
+        n_features=25
+        rel_importance = fi_df.rel_importance[1:n_features]
+        var_names = [name_replacements[s] for s ∈ String.(fi_df.feature_name[1:n_features])]
+        var_colors = cgrad([mints_colors[2], mints_colors[1]], n_features)[1:n_features]
+
+
+        fig = Figure(; size=(1000, 1000));
+        ax = Axis(
+            fig[1, 1],
+            yticks=(1:n_features, var_names[end:-1:1]),
+            xlabel="Feature Importance",
+            title="$(target_long)",
+            yminorgridvisible=false,
+            xscale=log10,
+        )
+
+        b = barplot!(ax,
+                      1:n_features,
+                      rel_importance[end:-1:1] .+ eps(1.0),
+                      direction=:x,
+                      color=var_colors
+                      )
+
+        #xlims!(ax,-0.01, 1.025)
+        ylims!(ax, 0.5, n_features + 0.5)
+        fig
+
+
+        
+
+        save(joinpath(savepath, "importance_ranking__$(model_suffix).png"), fig)
+        save(joinpath(savepath, "importance_ranking__$(model_suffix).pdf"), fig)
+
+
+        # load the machine
+        savepath = joinpath(modelpath, model_savename, "hyperparameter_optimized")
+        mach = machine(joinpath(savepath, "$(model_savename)__hpo.jls"))
+
+        # make predictions
+        yhat_train = MLJ.predict(mach, Xtrain)
+        yhat_test = MLJ.predict(mach, Xtest)
+
+        # make scatter diagrams
+        @info "\tGenerating plots"
+        fig = scatter_results(
+            ytrain,
+            yhat_train,
+            ytest,
+            yhat_test,
+            "$(target_long) ($(units))"
+        )
+
+
+        save(joinpath(savepath, "scatterplot__hpo-new.png"), fig)
+        save(joinpath(savepath, "scatterplot__hpo-new.pdf"), fig)
+
+
+        # make quantile-quantile plots
+
+        fig = quantile_results(
+            ytrain,
+            yhat_train,
+            ytest,
+            yhat_test,
+            "$(target_long) ($(units))"
+        )
+
+        save(joinpath(savepath, "qq__hpo-new.png"), fig)
+        save(joinpath(savepath, "qq__hpo-new.pdf"), fig)
+
+    end
+end
+GC.gc()
+
+
+
+
 
 for collection ∈ collections
     for target ∈ targets_to_try
@@ -209,32 +335,33 @@ for collection ∈ collections
             mkpath(outpath)
         end
 
-        X = CSV.read(joinpath(data_path, "X.csv"), DataFrame)
-        y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1]
-        idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1]
-        idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1]
+        X = CSV.read(joinpath(data_path, "X.csv"), DataFrame);
+        y = CSV.read(joinpath(data_path, "y.csv"), DataFrame)[:,1];
+        idx_train = CSV.read(joinpath(data_path, "idx_train.csv"), DataFrame)[:,1];
+        idx_test= CSV.read(joinpath(data_path, "idx_test.csv"), DataFrame)[:,1];
 
 
         for (shortname, model) ∈ MODELS
             try
-                T1 = now()
 
-                train_folds(
-                    X, y,
-                    idx_train, idx_test,
-                    model.longname, model.savename, model.mdl,
-                    target_name, units, target_long,
-                    outpath;
-                    suffix=model.suffix,
-                    nfolds=6,
-                )
+                # T1 = now()
+
+                # train_folds(
+                #     X, y,
+                #     idx_train, idx_test,
+                #     model.longname, model.savename, model.mdl,
+                #     target_name, units, target_long,
+                #     outpath;
+                #     suffix=model.suffix,
+                #     nfolds=6,
+                # )
 
 
-                T2 = now()
-                Δtrain = round((T2 - T1).value / 1000 / 60, digits=3) # min
-                @warn "Training time: $(Δtrain) minutes"
+                # T2 = now()
+                # Δtrain = round((T2 - T1).value / 1000 / 60, digits=3) # min
+                # @warn "Training time: $(Δtrain) minutes"
 
-                GC.gc()
+                # GC.gc()
 
                 # for each of these models, let's now load in
                 # the most important features and do hyperparameter

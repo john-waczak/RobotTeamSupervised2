@@ -13,8 +13,8 @@ hpo_ranges = Dict("DecisionTree" => Dict("DecisionTreeRegressor" => [(hpname=:mi
                                                                       #(hpname=:min_samples_leaf, lower=1, upper=100),
                                                                       #(hpname=:max_depth, values=[-1, 3, 5, 7]),
                                                                       #(hpname=:n_subfeatures, lower=10, upper=100,),
-                                                                      (hpname=:n_trees, lower=50, upper=200),
-                                                                      (hpname=:sampling_fraction, lower=0.8, upper=1.0)
+                                                                      (hpname=:n_trees, lower=75, upper=175),
+                                                                      (hpname=:sampling_fraction, lower=0.85, upper=1.0)
                                                                       ],
                                           ),
                  "XGBoost" => Dict("XGBoostRegressor" => [(hpname=:num_round, lower=50, upper=100),
@@ -951,7 +951,7 @@ function train_hpo(
     rng=Xoshiro(42),
     )
 
-    suffix = "hpo"
+    suffix = "hpo_2"
 
     @info "\tSetting up save paths"
 
@@ -1028,7 +1028,7 @@ function train_hpo(
 
         @info "\t...\tFinished training"
 
-        open(joinpath(path_to_use, "$(savename)__hpo.txt"), "w") do f
+        open(joinpath(path_to_use, "$(savename)__$(suffix).txt"), "w") do f
             show(f,"text/plain", fitted_params(mach).best_model)
             println(f, "\n")
             println(f,"---------------------")

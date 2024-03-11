@@ -27,9 +27,6 @@ include("./viz.jl")
 datapath = "/Users/johnwaczak/data/robot-team/supervised"
 
 
-
-
-
 df_1123 = CSV.read(joinpath(datapath, "11-23", "CDOM", "data", "X.csv"), DataFrame)
 df_1209 = CSV.read(joinpath(datapath, "12-09", "CDOM", "data", "X.csv"), DataFrame)
 df_1210 = CSV.read(joinpath(datapath, "12-10", "CDOM", "data", "X.csv"), DataFrame)

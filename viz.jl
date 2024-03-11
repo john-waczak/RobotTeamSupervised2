@@ -1,6 +1,6 @@
 using MLJ: rsq
 using StatsBase: iqr
-
+using Format
 
 
 function scatter_folds(
@@ -115,7 +115,7 @@ function scatter_results(
     varname
     )
 
-    fig = Figure();
+    fig = Figure(size=(800,600));
     ga = fig[1, 1] = GridLayout()
     axtop = Axis(ga[1, 1];
                 leftspinevisible = false,
@@ -142,13 +142,14 @@ function scatter_results(
     s2 = scatter!(axmain, ytest, ŷtest, marker=:rect, alpha=0.75)
 
     labels=[
-        "Training R²=$(round(rsq(ŷ, y), digits=3)) (n=$(length(y)))",
-        "Testing   R²=$(round(rsq(ŷtest, ytest), digits=3)) (n=$(length(ytest)))",
+        "Training R²=$(round(rsq(ŷ, y), digits=3)) (n=$(format(length(y), commas=true)))",
+        "Testing   R²=$(round(rsq(ŷtest, ytest), digits=3)) (n=$(format(length(ytest), commas=true)))",
         "1:1"
     ]
 
     # leg = Legend(ga[1, 2], [s1, s2, l1], labels)
     leg = axislegend(axmain, [s1, s2, l1], labels; position=:lt)
+    #leg = axislegend(axmain, [s1, s2, l1], labels; position=:lt)
 
     density!(axtop, y, color=(mints_colors[1], 0.5), strokecolor=mints_colors[1], strokewidth=2)
     density!(axtop, ytest, color=(mints_colors[2], 0.5), strokecolor=mints_colors[2], strokewidth=2)
@@ -257,15 +258,15 @@ function quantile_results(
     varname
     )
 
-    fig = Figure();
+    fig = Figure(size=(800,600));
     ax = Axis(fig[1,1], xlabel="True $(varname)", ylabel="Predicted $(varname)")
 
     minval, maxval = extrema([extrema(y)..., extrema(ytest)..., extrema(ŷ)..., extrema(ŷtest)...])
     δ_edge = 0.1*(maxval-minval)
 
     l1 = lines!(ax, [minval-δ_edge, maxval+δ_edge], [minval-δ_edge, maxval+δ_edge], color=:gray, linewidth=3)
-    qtrain = qqplot!(ax, y, ŷ, alpha=0.5)
-    qtest = qqplot!(ax, ytest, ŷtest, marker=:rect, alpha=0.5)
+    qtrain = qqplot!(ax, y, ŷ, alpha=0.5, markersize=12)
+    qtest = qqplot!(ax, ytest, ŷtest, marker=:rect, alpha=0.5, markersize=12)
 
     leg = axislegend(ax, [qtrain, qtest, l1], ["Training", "Testing", "1:1"]; position=:lt)
 

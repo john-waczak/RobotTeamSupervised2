@@ -33,7 +33,7 @@ targets_dict = Dict(
     :Turb3490 => ["FNU", "Turbidity"],
     :bg => ["ppb", "Blue-Green Algae\n (Phycocyanin)", 0.0],
     :bgm => ["ppb", "Blue-Green Algae\n (Phycoerythrin)", 0.0],
-    :pH => ["0-14", "pH", 0.0],
+    :pH => ["0–14", "pH", 0.0],
     :pH_mV => ["mV", "pH"],
 )
 

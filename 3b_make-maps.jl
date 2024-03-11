@@ -4,7 +4,54 @@ using Random, Statistics
 using ProgressMeter
 
 import CairoMakie as cmk
-using MintsMakieRecipes
+
+
+montserrat_path = "./font-files/montserrat"
+@assert ispath(montserrat_path)
+
+mints_colors = [
+    cmk.colorant"#3cd184", # mint green
+    cmk.colorant"#f97171", # dark coral
+    cmk.colorant"#1e81b0", # dark blue
+    cmk.colorant"#66beb2", # dark blue-green
+    cmk.colorant"#f99192", # light coral
+    cmk.colorant"#8ad6cc", # middle blue-green
+    cmk.colorant"#3d6647", # dark green
+]
+
+
+mints_font = (;
+              regular = joinpath(montserrat_path, "static", "Montserrat-Regular.ttf"),
+              italic = joinpath(montserrat_path, "static", "Montserrat-Italic.ttf"),
+              bold = joinpath(montserrat_path, "static", "Montserrat-Bold.ttf"),
+              bold_italic = joinpath(montserrat_path, "static", "Montserrat-BoldItalic.ttf"),
+              )
+
+
+mints_theme = cmk.Theme(
+    fontsize=17,
+    fonts = mints_font,
+    #colormap = :haline,
+    colormap = :viridis,
+    palette = (
+        color = mints_colors,
+        patchcolor = mints_colors,
+    ),
+    cycle = [[:linecolor, :markercolor,] => :color,],
+    Axis=(
+        xlabelsize=15,                   ylabelsize=15,
+        xticklabelsize=13,               yticklabelsize=13,
+        xticksize=3,                     yticksize=3,
+        xminorgridvisible=true,          yminorgridvisible=true,
+        xgridwidth=2,                    ygridwidth=2,
+        xminorgridwidth=1,               yminorgridwidth=1,
+        xminorticks=cmk.IntervalsBetween(5), yminorticks=cmk.IntervalsBetween(5)
+    ),
+    Colorbar=(
+        fontsize=13,
+    )
+)
+
 
 cmk.set_theme!(mints_theme)
 cmk.update_theme!(
@@ -55,6 +102,76 @@ e= -97.712413
 
 
 satmap = get_background_satmap(w,e,s,n)
+
+# create map of area
+
+fig = cmk.Figure(size=(800,600));
+ax = cmk.Axis(fig[1,1]);
+cmk.hidedecorations!(ax)
+cmk.hidespines!(ax)
+bg = cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
+# add 30 meter scale bar
+cmk.lines!(ax, [λ_scale_l, λ_scale_r], [ϕ_scale, ϕ_scale], color=:white, linewidth=5)
+cmk.text!(ax, λ_scale_l, ϕ_scale - 0.0001, text = "30 m", color=:white, fontsize=12, font=:bold)
+cmk.xlims!(ax, -97.7168, -97.7125)
+cmk.ylims!(ax, 33.70075, 33.7035)
+
+save("./scotty-satview.png", fig, px_per_unit=1)
+
+let
+    using GeoJSON
+
+    tx_counties = GeoJSON.read("./texas_counties.geojson")
+    tx_cities = GeoJSON.read("./texas_cities.geojson")
+
+    df_counties = DataFrame(tx_counties)
+    df_cities = DataFrame(tx_cities)
+
+    names(df_counties)
+    names(df_cities)
+
+    idx_montague = findfirst(lowercase.(df_counties.CNTY_NM) .== "montague")
+    idx_nacona = findfirst(lowercase.(df_cities.CITY_NM) .== "nocona")
+
+
+    fig = cmk.Figure();
+    ax = cmk.Axis(fig[1,1], backgroundcolor=:transparent)
+    cmk.hidedecorations!(ax)
+    cmk.hidespines!(ax)
+    for row in eachrow(df_counties)
+        if typeof(row.geometry) <: GeoJSON.MultiPolygon
+            for poly in row.geometry
+                cmk.poly!(ax, poly, strokecolor=mints_colors[3], color=:transparent, strokewidth=3)
+            end
+        else
+            cmk.poly!(ax, row.geometry.coordinates, strokecolor=mints_colors[3], color=:transparent, strokewidth=3)
+        end
+    end
+
+    cmk.poly!(ax, df_counties.geometry[idx_montague].coordinates, strokecolor=mints_colors[1], color=mints_colors[2], strokewidth=3)
+
+    fig
+
+    save("texas-coutnies.svg", fig)
+
+
+    fig = cmk.Figure();
+    ax = cmk.Axis(fig[1,1], backgroundcolor=:transparent)
+    cmk.hidedecorations!(ax)
+    cmk.hidespines!(ax)
+    cmk.poly!(ax, df_counties.geometry[idx_montague].coordinates, strokecolor=mints_colors[3], color=:transparent, strokewidth=3)
+    cmk.poly!(ax, df_cities.geometry[idx_nacona].coordinates, strokecolor=mints_colors[1], color=mints_colors[2], strokewidth=3)
+
+    fig
+
+    save("montague-nocona.svg", fig)
+
+end
+
+
+
+
+
 
 # fig = cmk.Figure();
 # ax = cmk.Axis(fig[1,1])
@@ -370,7 +487,8 @@ for target ∈ targets_to_map
         end
 
 
-        fig_tot = cmk.Figure(px_per_unit=5);
+        # fig_tot = cmk.Figure(px_per_unit=5);
+        fig_tot = cmk.Figure(size=(800,600));
         ax_tot = cmk.Axis(fig_tot[1,1], xlabel="Longitude", ylabel="Latitude", title="Collection Date: $(h5_date)");
         bg_tot = cmk.heatmap!(ax_tot, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
@@ -403,7 +521,7 @@ for target ∈ targets_to_map
         @showprogress for h5path in h5_files_to_use
             map_name = split(split(h5path, "/")[end], ".")[1]
 
-            fig = cmk.Figure();
+            fig = cmk.Figure(size=(800,600));
             ax = cmk.Axis(fig[1,1], xlabel="Longitude", ylabel="Latitude");
             bg = cmk.heatmap!(ax, satmap.w..satmap.e, satmap.s..satmap.n, satmap.img);
 
@@ -463,12 +581,12 @@ for target ∈ targets_to_map
 
         cb = cmk.Colorbar(fig_tot[1,2], label="$(target_long) ($(units))", colorrange=clims, colormap=cm, lowclip = cm[1], highclip = cm[end])
 
-        save(joinpath(outpath, ml_model * "__" * suffix * ".png"), fig_tot)
+        save(joinpath(outpath, ml_model * "__" * suffix * "-new.png"), fig_tot)
 
         # add boat data and save again
         sc = cmk.scatter!(ax_tot, longitudes, latitudes, color=y, colormap=cm, colorrange=clims, markersize=4, marker=:rect, strokewidth=0.2, strokecolor=:black);
 
-        save(joinpath(outpath, ml_model * "__" * suffix * "-w-boat.png"), fig_tot)
+        save(joinpath(outpath, ml_model * "__" * suffix * "-w-boat-new.png"), fig_tot)
     end
 end
 

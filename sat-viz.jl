@@ -44,4 +44,3 @@ function get_background_satmap(w::Float64, e::Float64, s::Float64, n::Float64; o
     )
 end
 
-
